@@ -1,5 +1,5 @@
 # Full requirements for developments
-
+monai
 torch>=1.7
 numpy>=1.17
 setuptools>=50.3.0,!=60.0.0,!=60.6.0
