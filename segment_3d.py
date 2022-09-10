@@ -142,12 +142,23 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
             phase = id_.split("_")[-2]
             if phase == 'Training':
                 path = os.path.join(Config.train_root_dir, id_)
+                if len(os.listdir(path)) == 5:
+                    p = os.path.join(Config.train_root_dir, id_)
+                else:
+                    pass
             else:
                 path = os.path.join(Config.test_root_dir, id_)
-            paths.append(path)  
+                if len(os.listdir(path)) == 4:
+                    p = os.path.join(Config.test_root_dir, id_)
+                else:
+                    pass
+            paths.append(p)  
         else:
             path = os.path.join(Config.Testset.val_dir_path, id_)
-            paths.append(path)
+            if len(os.listdir(path)) == 5:
+                paths.append(path)
+            else:
+                print('Not appending ID: {}'.format(path))
     df['path'] = paths
     return df
 
