@@ -170,7 +170,7 @@ class util:
         case: patient id with mri modaliteis (path)
         return
         image, label'''
-        global mask
+        # global mask
         if os.path.exists(case):
             image = []
             contents = os.listdir(case)
@@ -184,6 +184,7 @@ class util:
                     image.append(img)
                 else:
                      mask_path =  os.path.join(case, modality)
+                     global mask
                      mask = nib.load(mask_path)
                      mask = np.asanyarray(mask.dataobj)
                      mask_WT = mask.copy()
@@ -203,6 +204,7 @@ class util:
 
                      mask = np.stack([mask_WT, mask_TC, mask_ET])
                      mask = np.moveaxis(mask, (0, 1, 2, 3), (0, 3, 2, 1))
+
             global image_data       
             image_data = np.stack(image)
             image_data = np.moveaxis(image_data, (0, 1, 2, 3), (0, 3, 2, 1))
