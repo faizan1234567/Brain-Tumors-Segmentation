@@ -57,5 +57,6 @@ import configs
 util.inspect_data(configs.Config.a_test_patient)
 ```
 you will see:
-![plot]('brats-16-17 Results'/brats_data_inspection.png)
+![brats_data_inspection](https://user-images.githubusercontent.com/61932757/189496106-754d73c9-d90d-4aae-a008-ca0384b2cbfc.png)
+
 
