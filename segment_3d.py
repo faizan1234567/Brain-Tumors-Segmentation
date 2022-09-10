@@ -513,17 +513,17 @@ def main():
     print('done!!! \n')                         
     print('Loaded successfully!!! \n')
     print('-'*60)
-    print('now loading test dataset \n')
-    survival_df_test = pd.read_csv(Config.survival_info_csv_test)
-    name_mapping_df_test = pd.read_csv(Config.name_mapping_csv_test)
-    df_test = add_paths(survival_df=survival_df_test, name_mapping_df=name_mapping_df_test, t='test')
+    # print('now loading test dataset \n')
+    # survival_df_test = pd.read_csv(Config.survival_info_csv_test)
+    # name_mapping_df_test = pd.read_csv(Config.name_mapping_csv_test)
+    # df_test = add_paths(survival_df=survival_df_test, name_mapping_df=name_mapping_df_test, t='test')
     # test_dataset, test_loader = load_dataset(df_test,
     #                                          'test',
     #                                          False, 
     #                                          args.workers,
     #                                          args.batch)
     
-    print('Loaded successfully!!! \n')
+    # print('Loaded successfully!!! \n')
 
     device, model, loss_function, optimizer, lr_scheduler, dice_metric, dice_metric_batch, post_trans = model_loss_optim(args.epochs, args.lr, args.weight_decay)
     scaler = torch.cuda.amp.GradScaler()
