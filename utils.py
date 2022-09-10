@@ -176,7 +176,7 @@ class util:
             label = []
             contents = os.listdir(case)
             for modality in contents:
-                if not '.seg.nii.gz' in modality:
+                if not '_seg.nii.gz' in modality:
                     file_path = os.path.join(case, modality)
                     data = nib.load(file_path)
                     data = np.asarray(data.dataobj)
