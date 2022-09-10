@@ -202,9 +202,9 @@ class util:
 
                      mask = np.stack([mask_WT, mask_TC, mask_ET])
                      mask = np.moveaxis(mask, (0, 1, 2, 3), (0, 3, 2, 1))
-                     
-            data = np.stack(image)
-            image_data = np.moveaxis(data, (0, 1, 2, 3), (0, 3, 2, 1))
+            global image_data       
+            image_data = np.stack(image)
+            image_data = np.moveaxis(image_data, (0, 1, 2, 3), (0, 3, 2, 1))
         return (image_data, mask)
 
                     
