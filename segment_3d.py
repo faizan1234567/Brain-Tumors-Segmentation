@@ -143,25 +143,34 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
             phase = id_.split("_")[-2]
             if phase == 'Training':
                 path = os.path.join(Config.train_root_dir, id_)
-                if len(os.listdir(path)) == 5 and os.path.exists(path):
-                    p = os.path.join(Config.train_root_dir, id_)
-                else:
-                    print('Not appending ID: {}'.format(path))
+                if os.path.exists(path):
+                    if len(os.listdir(path)) == 5:
+                        p = os.path.join(Config.train_root_dir, id_)
+                    else:
+                        print('Not appending ID: {}'.format(path))
+                        temp_ids.append(id_)
+                else:  
                     temp_ids.append(id_)
             else:
                 path = os.path.join(Config.test_root_dir, id_)
-                if len(os.listdir(path)) == 4 and os.path.exists(path):
-                    p = os.path.join(Config.test_root_dir, id_)
+                if os.path.exists(path):
+                    if len(os.listdir(path)) == 4:
+                        p = os.path.join(Config.test_root_dir, id_)
+                    else:
+                        print('Not appending ID: {}'.format(path))
+                        temp_ids.append(id_)
                 else:
-                    print('Not appending ID: {}'.format(path))
                     temp_ids.append(id_)
             paths.append(p)  
         else:
             path = os.path.join(Config.Testset.val_dir_path, id_)
-            if len(os.listdir(path)) == 5 and os.path.exists(path):
-                paths.append(path)
+            if os.path.exists(path):
+                if len(os.listdir(path)) == 5:
+                    paths.append(path)
+                else:
+                    print('Not appending ID: {}'.format(path))
+                    temp_ids.append(id_)
             else:
-                print('Not appending ID: {}'.format(path))
                 temp_ids.append(id_)
     for id in temp_ids:
         df = df[df["Brats20ID"].str.contains(id) == False]
