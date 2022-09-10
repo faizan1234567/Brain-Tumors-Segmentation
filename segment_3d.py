@@ -174,6 +174,8 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
                 temp_ids.append(id_)
     for id in temp_ids:
         df = df[df["Brats20ID"].str.contains(id) == False]
+    df = df.reset_index()
+    df.drop('index', inplace= True, axis=1)
     df['path'] = paths
     return df
 
