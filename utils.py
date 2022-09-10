@@ -204,8 +204,8 @@ class util:
                      mask = np.moveaxis(mask, (0, 1, 2, 3), (0, 3, 2, 1))
                      
             data = np.stack(image)
-            data = np.moveaxis(data, (0, 1, 2, 3), (0, 3, 2, 1))
-        return (data, mask)
+            image_data = np.moveaxis(data, (0, 1, 2, 3), (0, 3, 2, 1))
+        return (image_data, mask)
 
                     
 
