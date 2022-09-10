@@ -135,6 +135,7 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
     else:
         df = survival_df
     paths = []
+    temp_ids = []
     for _, row  in df.iterrows():
         
         id_ = row['Brats20ID']
@@ -145,13 +146,15 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
                 if len(os.listdir(path)) == 5:
                     p = os.path.join(Config.train_root_dir, id_)
                 else:
-                    pass
+                    print('Not appending ID: {}'.format(path))
+                    temp_ids.append(id_)
             else:
                 path = os.path.join(Config.test_root_dir, id_)
                 if len(os.listdir(path)) == 4:
                     p = os.path.join(Config.test_root_dir, id_)
                 else:
-                    pass
+                    print('Not appending ID: {}'.format(path))
+                    temp_ids.append(id_)
             paths.append(p)  
         else:
             path = os.path.join(Config.Testset.val_dir_path, id_)
@@ -159,6 +162,9 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
                 paths.append(path)
             else:
                 print('Not appending ID: {}'.format(path))
+                temp_ids.append(id_)
+    for id in temp_ids:
+        df = df[df["Brats20ID"].str.contains(id) == False]
     df['path'] = paths
     return df
 
