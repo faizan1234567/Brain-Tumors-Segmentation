@@ -1,6 +1,7 @@
 '''utility functions'''
 
 import os
+import tensorflow
 import shutil
 from configs import Config
 import nibabel as nib
@@ -14,7 +15,8 @@ import imageio
 import cv2
 from IPython.display import Image
 import keras
-from keras.utils import to_categorical
+from tensorflow.keras.utils import to_categorical
+# from keras.utils import to_categorical
 
 
 class util:
