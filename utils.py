@@ -173,6 +173,7 @@ class util:
         # global mask
         if os.path.exists(case):
             image = []
+            label = []
             contents = os.listdir(case)
             for modality in contents:
                 if not '.seg.nii.gz' in modality:
@@ -184,7 +185,6 @@ class util:
                     image.append(img)
                 else:
                      mask_path =  os.path.join(case, modality)
-                     global mask
                      mask = nib.load(mask_path)
                      mask = np.asanyarray(mask.dataobj)
                      mask_WT = mask.copy()
@@ -201,14 +201,15 @@ class util:
                      mask_ET[mask_ET == 1] = 0
                      mask_ET[mask_ET == 2] = 0
                      mask_ET[mask_ET == 4] = 1
-
+                     
                      mask = np.stack([mask_WT, mask_TC, mask_ET])
                      mask = np.moveaxis(mask, (0, 1, 2, 3), (0, 3, 2, 1))
+                     label.append(mask)
 
             global image_data       
             image_data = np.stack(image)
             image_data = np.moveaxis(image_data, (0, 1, 2, 3), (0, 3, 2, 1))
-        return (image_data, mask)
+        return (image_data, label[0])
 
                     
 
