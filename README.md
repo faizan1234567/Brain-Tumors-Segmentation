@@ -48,3 +48,14 @@ python segment_3d.py -h
 python segment_3d.py --epochs 200 --lr 0.0001 --weight_decay 1e-5
  --batch 1 --workers 8 --data_dir path_to_configure --name dir_name_to_configure
    ```
+To visualize modalities with labels, you can use following command
+```
+from utils import util
+import configs
+
+%matplotlib inline
+util.inspect_data(configs.Config.a_test_patient)
+```
+you will see:
+![plot]('brats-16-17 Results'/brats_data_inspection.png)
+
