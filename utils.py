@@ -170,6 +170,7 @@ class util:
         case: patient id with mri modaliteis (path)
         return
         image, label'''
+        global mask
         if os.path.exists(case):
             image = []
             contents = os.listdir(case)
