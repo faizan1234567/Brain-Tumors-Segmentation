@@ -12,6 +12,7 @@ from matplotlib import cm
 import matplotlib.animation as anim
 import matplotlib.patches as mpatches
 import imageio
+from random import shuffle
 import cv2
 from IPython.display import Image
 import keras
@@ -20,9 +21,48 @@ from tensorflow.keras.utils import to_categorical
 
 
 class util:
-    def __init__(self):
-        pass
+    def __init__(self, data_dir):
+        self.data_dir = data_dir
+        self.LGG18 = Config.LGG18
+        self.HGG18 = Config.HGG18
+        self.brats19 = Config.brats19_test_data
         # self.process_mask = process_mas
+
+    def move_data(self):
+        '''move some files from HGG folder and Some files from LGG
+        folder for creating a test set
+        LGG: path
+        HGG: path'''
+        LGG_files = os.listdir(self.LGG18)
+        HGG_files = os.listdir(self.HGG18)
+        dest_dir = self.brats19
+        files_to_copy = 20
+        #merge files
+        files = HGG_files + LGG_files
+        shuffle(files)
+        for file in files[:2*files_to_copy]:
+            if "HGG" in file:
+                hgg_file = os.path.join(self.HGG18, file)
+                dest_file = os.path.join(dest_dir, file)
+                if os.path.exists(hgg_file):
+                    if len(os.listdir(hgg_file)) == 5:
+                        shutil.copy(hgg_file, dest_file)
+                    else:
+                        print(f'{file} patient data is incomplete!!!')
+                else:
+                    print('Sorry this path doesnt exists')
+            else:
+                lgg_file = os.path.join(self.LGG18, file)
+                dest_file = os.path.join(dest_dir, file)
+                if os.path.exists(lgg_file):
+                    if len(os.listdir(lgg_file)) == 5:
+                        shutil.copy(lgg_file, dest_file)
+                    else: 
+                        print(f'{file} patient data is incomplete!!!')
+                else:
+                    print('Sorry this path doesnt exists')
+        print('Copied successfully!!!')
+
     @staticmethod
     def move_directories(source, destination):
         '''move directories from soruce to desintation
@@ -144,7 +184,7 @@ class util:
         image = cv2.normalize(image[:, :, :, 0], None, alpha=0, beta=255,
                             norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
             np.uint8)
-
+        print(image.shape)
         labeled_image = np.zeros_like(label[:, :, :, 1:])
 
         # remove tumor part from image

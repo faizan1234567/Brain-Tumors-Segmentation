@@ -13,6 +13,11 @@ class Config:
     name_mapping_csv_test = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTS2020_ValidationData/MICCAI_BraTS2020_ValidationData/name_mapping_validation_data.csv"
     validation_csv = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset/test_set.csv"
     a_test_patient = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset/BraTS19_TCIA08_167_1"
+    LGG18 = "/gdrive/MyDrive/Brats18/LGG"
+    HGG18 = "/gdrive/MyDrive/Brats18/HGG"
+    data_dir = "/gdrive/MyDrive/THESIS BraTs NUST"
+    brats19_test_data = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTS19_Test/MICCAI_BraTS19_Test"
+    
     class Testset:
         Brat19_HGG_path = "/gdrive/MyDrive/Medical Dataset/MICCAI_BraTS_2019_Data_Training/HGG"
         Brats19_LGG_path = "/gdrive/MyDrive/Medical Dataset/MICCAI_BraTS_2019_Data_Training/LGG"
