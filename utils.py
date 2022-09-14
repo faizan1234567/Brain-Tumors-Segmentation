@@ -41,8 +41,8 @@ class util:
         files = HGG_files + LGG_files
         shuffle(files)
         for file in files[:2*files_to_copy]:
-            if "HGG" in file:
-                hgg_file = os.path.join(self.HGG18, file)
+            hgg_file = os.path.join(self.HGG18, file)
+            if "HGG" in hgg_file:
                 dest_file = os.path.join(dest_dir, file)
                 if os.path.exists(hgg_file):
                     if len(os.listdir(hgg_file)) == 5:
@@ -50,7 +50,7 @@ class util:
                     else:
                         print(f'{file} patient data is incomplete!!!')
                 else:
-                    print('Sorry this path doesnt exists')
+                    print(f' {hgg_file} path doesnt exists')
             else:
                 lgg_file = os.path.join(self.LGG18, file)
                 dest_file = os.path.join(dest_dir, file)
@@ -60,7 +60,7 @@ class util:
                     else: 
                         print(f'{file} patient data is incomplete!!!')
                 else:
-                    print('Sorry this path doesnt exists')
+                    print(f'{lgg_file} path doesnt exists')
         print('Copied successfully!!!')
 
     @staticmethod
