@@ -46,7 +46,7 @@ class util:
                 dest_file = os.path.join(dest_dir, file)
                 if os.path.exists(hgg_file):
                     if len(os.listdir(hgg_file)) == 5:
-                        shutil.copy(hgg_file, dest_file)
+                        shutil.copytree(hgg_file, dest_file)
                     else:
                         print(f'{file} patient data is incomplete!!!')
                 else:
@@ -56,7 +56,7 @@ class util:
                 dest_file = os.path.join(dest_dir, file)
                 if os.path.exists(lgg_file):
                     if len(os.listdir(lgg_file)) == 5:
-                        shutil.copy(lgg_file, dest_file)
+                        shutil.copytree(lgg_file, dest_file)
                     else: 
                         print(f'{file} patient data is incomplete!!!')
                 else:
