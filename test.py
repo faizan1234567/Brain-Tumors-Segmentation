@@ -19,7 +19,10 @@ def read_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weight', type = str, default = "", help = "weight \
         file path ")
-    # parser.add_argument()
+    parser.add_argument('--workers', type = int, default=2,\
+        help = "number of workers")
+    parser.add_argument('--batch', type = int, default=1, \
+        help= "batch size to load the dataset")
     opt = parser.parse_args()
     return opt
 
@@ -84,14 +87,14 @@ def add_paths(survival_df, name_mapping_df=None, t = 'test'):
 
 
 def evaluate(model, weight, test_loader, post_transforms, 
-             dice_metric, dice_metric_batch, metric_batch, metric):
+             dice_metric, dice_metric_batch, metric_batch):
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.load_state_dict(torch.load(weight))
     model.eval()
     with torch.no_grad():
         for val_data in test_loader:
             val_inputs = val_data["image"].to(device)
-            val_data["pred"] = inference(val_inputs)
+            val_data["pred"] = inference(val_inputs, model)
             val_data = [post_transforms(i) for i in decollate_batch(val_data)]
             val_outputs, val_labels = from_engine(["pred", "mask"])(val_data)
             dice_metric(y_pred=val_outputs, y=val_labels)
@@ -105,11 +108,28 @@ def evaluate(model, weight, test_loader, post_transforms,
 
     metric_tc, metric_wt, metric_et = metric_batch[0].item(), metric_batch[1].item(), metric_batch[2].item()
 
-    print("Metric on original image spacing: ", metric)
+    # print("Metric on original image spacing: ", metric)
     print(f"metric_tc: {metric_tc:.4f}")
     print(f"metric_wt: {metric_wt:.4f}")
     print(f"metric_et: {metric_et:.4f}") 
 
 def main():
     args = read_args()
-    
+    print('configuring...')
+    device, model, loss_function, optimizer, lr_scheduler, dice_metric, dice_metric_batch, post_trans = model_loss_optim(1, 1e-4, 1e-5)
+    print('done\n')
+    print('Loading test data... \n')
+    survival_df_test = pd.read_csv(Config.brats19_test_survival_csv)
+    df_test = add_paths(survival_df_test, t="test")
+    test_dataset, test_loader = load_dataset(df_test,
+                                             'val',
+                                              False,
+                                              args.workers,
+                                              args.batch)
+    print('done')
+    print('Now evaluating models performance')
+    evaluate(model, args.weight, test_loader, post_trans, dice_metric, dice_metric_batch)
+    print('done')
+
+if __name__ == '__main__':
+    main()
