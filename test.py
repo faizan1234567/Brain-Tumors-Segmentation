@@ -1,5 +1,8 @@
-## evaluation code yet to be included.
-# the repo will be update.
+## Test set evaluation on brats19 dataset
+#import neccassary packages...
+#Author: Muhammad Faizan
+#Date: 16.09.2022
+#Time: 11.14pm
 """A script to evaluate the model performance"""
 import argparse
 import os
@@ -16,6 +19,8 @@ from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
 
 def read_args():
+    '''command line arguments for setting up 
+    neccassary paths and params'''
     parser = argparse.ArgumentParser()
     parser.add_argument('--weight', type = str, default = "", help = "weight \
         file path ")
@@ -87,7 +92,17 @@ def add_paths(survival_df, name_mapping_df=None, t = 'test'):
 
 
 def evaluate(model, weight, test_loader, post_transforms, 
-             dice_metric, dice_metric_batch, metric_batch):
+             dice_metric, dice_metric_batch):
+    '''to evaluate the model performance
+    Args:
+    model: deep learning model
+    weight: learned params (path)
+    test_loader: test data loader
+    post_transforms: post transforms function
+    dice_metric: dice evaluation metric
+    dice_metric_batch: batch evaluation
+    Return:
+    None'''
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     model.load_state_dict(torch.load(weight))
     model.eval()
@@ -106,9 +121,9 @@ def evaluate(model, weight, test_loader, post_transforms,
         dice_metric.reset()
         dice_metric_batch.reset()
 
-    metric_tc, metric_wt, metric_et = metric_batch[0].item(), metric_batch[1].item(), metric_batch[2].item()
+    metric_tc, metric_wt, metric_et = metric_batch_org[0].item(), metric_batch_org[1].item(), metric_batch_org[2].item()
 
-    # print("Metric on original image spacing: ", metric)
+    print("Metric on original image spacing: ", metric_org)
     print(f"metric_tc: {metric_tc:.4f}")
     print(f"metric_wt: {metric_wt:.4f}")
     print(f"metric_et: {metric_et:.4f}") 
