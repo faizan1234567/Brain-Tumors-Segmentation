@@ -16,15 +16,9 @@ class Config:
     LGG18 = "/gdrive/MyDrive/Brats18/LGG"
     HGG18 = "/gdrive/MyDrive/Brats18/HGG"
     data_dir = "/gdrive/MyDrive/THESIS BraTs NUST"
-<<<<<<< HEAD
     brats18_val_data = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset"
     brats19_test_data = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTS19_Test/MICCAI_BraTS19_Test"
     brats19_test_survival_csv = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTS19_Test/MICCAI_BraTS19_Test/test_set.csv"
-=======
-    brats19_test_data = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset"        #used as a validation set
-    brats18_test_set = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTS19_Test/MICCAI_BraTS19_Test" #used as a test set
-
->>>>>>> origin/main
     
     class Testset:
         Brat19_HGG_path = "/gdrive/MyDrive/Medical Dataset/MICCAI_BraTS_2019_Data_Training/HGG"
