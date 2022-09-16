@@ -48,6 +48,12 @@ python segment_3d.py -h
 python segment_3d.py --epochs 200 --lr 0.0001 --weight_decay 1e-5
  --batch 1 --workers 8 --data_dir path_to_configure --name dir_name_to_configure
    ```
+To test the model:
+```
+python test.py -h
+python test.py --weights path_to_configure --workers 2 --batch 1
+   ```
+
 To visualize modalities with labels, you can use following command
 ```
 from utils import util
