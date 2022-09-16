@@ -108,10 +108,12 @@ def evaluate(model, weight, test_loader, post_transforms,
     model.eval()
     with torch.no_grad():
         for val_data in test_loader:
-            val_inputs = val_data["image"].to(device)
-            val_data["pred"] = inference(val_inputs, model)
-            val_data = [post_transforms(i) for i in decollate_batch(val_data)]
-            val_outputs, val_labels = from_engine(["pred", "mask"])(val_data)
+            val_inputs, val_labels = (
+                    val_data["image"].to(device),
+                    val_data["mask"].to(device))
+            val_outputs = inference(val_inputs, model)
+            val_outputs = [post_transforms(i) for i in decollate_batch(val_outputs)]
+            # val_outputs, val_labels = from_engine(["pred", "mask"])(val_data)
             dice_metric(y_pred=val_outputs, y=val_labels)
             dice_metric_batch(y_pred=val_outputs, y=val_labels)
 
