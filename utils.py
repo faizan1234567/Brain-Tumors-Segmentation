@@ -188,9 +188,9 @@ class util:
         labeled_image = np.zeros_like(label[:, :, :, 1:])
 
         # remove tumor part from image
-        labeled_image[:, :, :, 0] = np.matmul(image, (label[:, :, :, 0]))
-        labeled_image[:, :, :, 1] = np.matmul(image, (label[:, :, :, 0]))
-        labeled_image[:, :, :, 2] = np.matmul(image, (label[:, :, :, 0]))
+        labeled_image[:, :, :, 0] = image*(label[:, :, :, 0])
+        labeled_image[:, :, :, 1] = image*(label[:, :, :, 0])
+        labeled_image[:, :, :, 2] = image*(label[:, :, :, 0])
 
 
         # color labels
