@@ -32,9 +32,10 @@ from monai.utils import set_determinism
 set_determinism(seed=0)
 
 class BratsDataset20(Dataset):
-    def __init__(self, df: pd.DataFrame, phase: str="test", is_resize: bool=False):
+    def __init__(self, df: pd.DataFrame = None, phase: str="test", patient = None, is_resize: bool=False):
         self.df = df
         self.phase = phase
+        self.patient = patient
         self.augmentations = augmentations(phase)
         self.data_types = ['_flair.nii.gz', '_t1.nii.gz', '_t1ce.nii.gz', '_t2.nii.gz']
         self.is_resize = is_resize
@@ -44,26 +45,35 @@ class BratsDataset20(Dataset):
     def __len__(self):
         return self.df.shape[0]
     
-    def __getitem__(self, idx):
-        id_ = self.df.loc[idx, 'Brats20ID']
-        root_path = self.df.loc[self.df['Brats20ID'] == id_]['path'].values[0]
+    def __getitem__(self, idx=None):
+        if not self.df is None:
+            images = []
+            id_ = self.df.loc[idx, 'Brats20ID']
+            root_path = self.df.loc[self.df['Brats20ID'] == id_]['path'].values[0]
+        elif self.df is None and os.path.exists(self.patient):
+            root_path = self.patient
+            modalites = os.listdir(root_path)
+            self.data_types = modalites
+            id_ = ""
         # load all modalities
-        images = []
         for data_type in self.data_types:
-            img_path = os.path.join(root_path, id_ + data_type)
-            img = self.load_img(img_path)
-            
-            if self.is_resize:
-                img = self.resize(img)
-    
-            img = self.normalize(img)
-            images.append(img)
+            if not "_seg.nii.gz" in data_type:
+                img_path = os.path.join(root_path, id_ + data_type)
+                img = self.load_img(img_path)
+                
+                if self.is_resize:
+                    img = self.resize(img)
+        
+                img = self.normalize(img)
+                images.append(img)
+            else:
+                mask_file = data_type
         img = np.stack(images)
         img = np.moveaxis(img, (0, 1, 2, 3), (0, 3, 2, 1))
         
         # there is no labels in the test directory
         if self.phase != "test":
-            mask_path =  os.path.join(root_path, id_ + "_seg.nii.gz")
+            mask_path =  os.path.join(root_path, id_ + mask_file)
             mask = self.load_img(mask_path)
             
             if self.is_resize:
@@ -73,14 +83,15 @@ class BratsDataset20(Dataset):
             mask = self.preprocess_mask_labels(mask)
             data = {"image": img.astype(np.float32),
                     "mask": mask.astype(np.float32)}
-    
-            augmented = self.augmentations(data)
+            if not self.df is None:
+                augmented = self.augmentations(data)
             
-            img = augmented['image']
-            mask = augmented['mask']
-            return {
-                "image": img,
-                "mask": mask}
+                img = augmented['image']
+                mask = augmented['mask']
+                return {
+                    "image": img,
+                    "mask": mask}
+            return data
         
         return {
             "image": img}
