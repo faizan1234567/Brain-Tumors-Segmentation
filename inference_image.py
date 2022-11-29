@@ -18,7 +18,7 @@ from segment_3d import model_loss_optim
 def read_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--patient", default= Config.a_test_patient, type = str, help = "path to the case directory in the test/val/train dir")
-    parser.add_argument("weights", default= " ", type = str, help= "weight file path")
+    parser.add_argument("--weights", default= " ", type = str, help= "weight file path")
     opt = parser.parse_args()
     return opt
 
@@ -49,7 +49,7 @@ def diagnose(model, weights, patient, device,
     post_trans: post processing
     '''
    
-    model.load_state_dict(torch.load(weights))
+    model.load_state_dict(torch.load(weights,  map_location=torch.device('cpu')))
     # torch.load(os.path.join(weights, "best_metric_model.pth")))
     
     model.eval()
@@ -58,34 +58,41 @@ def diagnose(model, weights, patient, device,
         # val_input = patient[6]["image"].unsqueeze(0).to(device)
         print("loading patient file...")
         val_input, mask = load_image(patient)
+        val_input = np.einsum('ijkl->iklj', val_input)
+        mask = np.einsum('ijkl->iklj', mask)
+        val_input_tensor, mask_tensor = torch.from_numpy(val_input).unsqueeze(0), torch.from_numpy(mask)
         print("Success: the patient file loaded.")
         print("Shape of the scan: {}, and shape of mask: {}".format(val_input.shape, mask.shape))
+        
         roi_size = (128, 128, 64)
         sw_batch_size = 1
-        val_output = inference(val_input, model)
+        val_output = inference(val_input_tensor, model)
         val_output = post_trans(val_output[0])
-        plt.figure("image", (24, 6))
+
+        plt.figure("Modalities", (24, 6))
         for i in range(4):
             plt.subplot(1, 4, i + 1)
-            plt.title(f"image channel {i}")
-            plt.imshow(val_input[i, :, :, 70].detach().cpu(), cmap="gray")
-        plt.savefig('image_channels.png')
+            plt.title(f"Modality {i}")
+            plt.imshow(val_input[i, :, :, 70], cmap="gray")
+        plt.savefig('patient_modalities_image.png')
         plt.show()
+
         # visualize the 3 channels label corresponding to this image
-        plt.figure("label", (24, 6))
+        plt.figure("Mask (Ground truth)", (24, 6))
         for i in range(3):
             plt.subplot(1, 3, i + 1)
-            plt.title(f"label channel {i}")
-            plt.imshow(mask[i, :, :, 70].detach().cpu())
-        plt.savefig('labels_channel.png')
+            plt.title(f"mask {i}")
+            plt.imshow(mask[i, :, :, 70])
+        plt.savefig('mask_labels.png')
         plt.show()
+
         # visualize the 3 channels model output corresponding to this image
-        plt.figure("output", (24, 6))
+        plt.figure("Model Prediction", (24, 6))
         for i in range(3):
             plt.subplot(1, 3, i + 1)
-            plt.title(f"output channel {i}")
-            plt.imshow(val_output[i, :, :, 70].detach().cpu())
-        plt.savefig('output_channels.png')
+            plt.title(f"prediction {i}")
+            plt.imshow(val_output[i, :, :, 70])
+        plt.savefig('model_prediction_masks.png')
         plt.show()
 
 def main():

@@ -46,8 +46,8 @@ class BratsDataset20(Dataset):
         return self.df.shape[0]
     
     def __getitem__(self, idx=None):
+        images = []
         if not self.df is None:
-            images = []
             id_ = self.df.loc[idx, 'Brats20ID']
             root_path = self.df.loc[self.df['Brats20ID'] == id_]['path'].values[0]
         elif self.df is None and os.path.exists(self.patient):

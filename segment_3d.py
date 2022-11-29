@@ -242,6 +242,7 @@ def inference(input, model):
         return sliding_window_inference(
             inputs=input,
             roi_size=(240, 240, 160),
+            # roi_size = (240, 240),
             sw_batch_size=1,
             predictor=model,
             overlap=0.5,
