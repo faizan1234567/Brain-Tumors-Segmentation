@@ -37,7 +37,7 @@ def load_image(patient_path, mask_label = False):
     mask = img_data["mask"]
     return (scan, mask)
 
-def show_labled_image(patient):
+def show_labeled_image(patient):
     """get labled image for three different orientation such as 
     coronal, transversaral, and sigital for showing enhanced, non-enhaned and edema voxels labels
     This function will examine the labled image, and those with AI prediction.
@@ -125,6 +125,9 @@ def main():
     device, model, _, _, _, _, _, post_trans= model_loss_optim(1, 1e-3, 1e-5)
     diagnose(model, args.weights, args.patient, device, post_trans)
     print("--"*50)
+
+    print('Show labled image ..')
+    show_labeled_image(args.patient)
     print('done!!')
 
 if __name__ == "__main__":
