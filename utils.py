@@ -20,6 +20,53 @@ from tensorflow.keras.utils import to_categorical
 # from keras.utils import to_categorical
 
 
+def plot_image_grid(image):
+    data_all = []
+
+    data_all.append(image)
+
+    fig, ax = plt.subplots(3, 6, figsize=[16, 9])
+
+    # coronal plane
+    coronal = np.transpose(data_all, [1, 3, 2, 4, 0])
+    coronal = np.rot90(coronal, 1)
+
+    # transversal plane
+    transversal = np.transpose(data_all, [2, 1, 3, 4, 0])
+    transversal = np.rot90(transversal, 2)
+
+    # sagittal plane
+    sagittal = np.transpose(data_all, [2, 3, 1, 4, 0])
+    sagittal = np.rot90(sagittal, 1)
+
+    for i in range(6):
+        n = np.random.randint(coronal.shape[2])
+        ax[0][i].imshow(np.squeeze(coronal[:, :, n, :]))
+        ax[0][i].set_xticks([])
+        ax[0][i].set_yticks([])
+        if i == 0:
+            ax[0][i].set_ylabel('Coronal', fontsize=15)
+
+    for i in range(6):
+        n = np.random.randint(transversal.shape[2])
+        ax[1][i].imshow(np.squeeze(transversal[:, :, n, :]))
+        ax[1][i].set_xticks([])
+        ax[1][i].set_yticks([])
+        if i == 0:
+            ax[1][i].set_ylabel('Transversal', fontsize=15)
+
+    for i in range(6):
+        n = np.random.randint(sagittal.shape[2])
+        ax[2][i].imshow(np.squeeze(sagittal[:, :, n, :]))
+        ax[2][i].set_xticks([])
+        ax[2][i].set_yticks([])
+        if i == 0:
+            ax[2][i].set_ylabel('Sagittal', fontsize=15)
+
+    fig.subplots_adjust(wspace=0, hspace=0)
+
+
+
 class util:
     def __init__(self, data_dir):
         self.data_dir = data_dir

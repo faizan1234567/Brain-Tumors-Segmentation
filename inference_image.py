@@ -1,5 +1,5 @@
 '''Inference on 3D brain tumor image
-
+Author: Muhammad Faizan
 The model will take an image and the code will show the mask and true labels on the image
 '''
 
@@ -12,7 +12,9 @@ from segment_3d import inference
 import argparse
 from configs import Config
 from BratsCustom import BratsDataset20
+from utils import util
 from segment_3d import model_loss_optim
+from utils import plot_image_grid
 
 
 def read_args():
@@ -22,16 +24,36 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
-def load_image(patient_path):
+
+
+def load_image(patient_path, mask_label = False):
     """load the image from the given path
     
     Args:
     patient_path: os.path (str)"""
-    dataset = BratsDataset20(phase="val", patient=patient_path)
+    dataset = BratsDataset20(phase="val", patient=patient_path, mask_label=mask_label)
     img_data = dataset.__getitem__()
     scan = img_data["image"]
     mask = img_data["mask"]
     return (scan, mask)
+
+def show_labled_image(patient):
+    """get labled image for three different orientation such as 
+    coronal, transversaral, and sigital for showing enhanced, non-enhaned and edema voxels labels
+    This function will examine the labled image, and those with AI prediction.
+    
+    Args:
+    patient: os.path(str) -> path of patient files directory
+    """
+    scan, mask = load_image(patient)
+    scan = np.einsum('ijkl->klji', scan)
+    mask = np.einsum('ijkl->klji', mask)
+    # mask = mask[:, :, :, 0]
+    print("Shape of the scan: {}, and shape of the mask: {}".format(scan.shape, mask.shape))
+    image = util.get_labeled_image(scan, mask)
+    plot_image_grid(image)
+
+
 
 
 

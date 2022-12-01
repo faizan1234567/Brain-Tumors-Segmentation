@@ -32,10 +32,11 @@ from monai.utils import set_determinism
 set_determinism(seed=0)
 
 class BratsDataset20(Dataset):
-    def __init__(self, df: pd.DataFrame = None, phase: str="test", patient = None, is_resize: bool=False):
+    def __init__(self, df: pd.DataFrame = None, phase: str="test", patient = None, is_resize: bool=False, mask_label = False):
         self.df = df
         self.phase = phase
         self.patient = patient
+        self.mask_label = mask_label
         self.augmentations = augmentations(phase)
         self.data_types = ['_flair.nii.gz', '_t1.nii.gz', '_t1ce.nii.gz', '_t2.nii.gz']
         self.is_resize = is_resize
@@ -47,6 +48,7 @@ class BratsDataset20(Dataset):
     
     def __getitem__(self, idx=None):
         images = []
+        mask_label = self.mask_label
         if not self.df is None:
             id_ = self.df.loc[idx, 'Brats20ID']
             root_path = self.df.loc[self.df['Brats20ID'] == id_]['path'].values[0]
@@ -80,7 +82,8 @@ class BratsDataset20(Dataset):
                 mask = self.resize(mask)
                 mask = np.clip(mask.astype(np.uint8), 0, 1).astype(np.float32)
                 mask = np.clip(mask, 0, 1)
-            mask = self.preprocess_mask_labels(mask)
+            if mask_label:
+                mask = self.preprocess_mask_labels(mask)
             data = {"image": img.astype(np.float32),
                     "mask": mask.astype(np.float32)}
             if not self.df is None:
