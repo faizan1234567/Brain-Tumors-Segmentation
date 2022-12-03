@@ -67,7 +67,7 @@ def read_args():
     parser.add_argument('--data_dir', type =str, help= "data directory to put all the dataset..")
     parser.add_argument('--name', type = str, help= "name of the data dir")
     parser.add_argument('--workers', type = int, help= 'number of workers')
-    parser.add_argument('--resume', default= "", type = str, help="path to the last saved weights")
+    parser.add_argument('--resume', action="store_true", help="set to resume the training")
     parser.add_argument('--weights', default= "", type = str, help= "path to weight file in .pth extension")
     return parser.parse_args()
 
