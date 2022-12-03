@@ -70,11 +70,15 @@ class BratsDataset20(Dataset):
                 images.append(img)
             else:
                 mask_file = data_type
+
         img = np.stack(images)
-        img = np.moveaxis(img, (0, 1, 2, 3), (0, 3, 2, 1))
+        img = np.einsum('nhwc->nchw', img)
+        # img = np.moveaxis(img, (0, 1, 2, 3), (0, 2, 3, 1))
         
         # there is no labels in the test directory
+
         if self.phase != "test":
+            mask_file = "_seg.nii.gz"
             mask_path =  os.path.join(root_path, id_ + mask_file)
             mask = self.load_img(mask_path)
             
