@@ -2,3 +2,4 @@ segment/
 *.pth
 __pycache__/
 Unet/
+*.pdf

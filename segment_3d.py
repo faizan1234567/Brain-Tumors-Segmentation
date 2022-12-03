@@ -60,13 +60,15 @@ def read_args():
                                                 training a segmentation model on medical\
                                                 imaging dataset")
 
-    parser.add_argument('--epochs', type = int, help= "number of epochs to run the model for")
+    parser.add_argument('--epochs', type = int, help= "number of epochs to run the model for...")
     parser.add_argument('--lr', type = float, help = "learning rate")
     parser.add_argument('--weight_decay', type = float, help= "weight decay")
     parser.add_argument('--batch', type = int, help= "batch size")
     parser.add_argument('--data_dir', type =str, help= "data directory to put all the dataset..")
     parser.add_argument('--name', type = str, help= "name of the data dir")
     parser.add_argument('--workers', type = int, help= 'number of workers')
+    parser.add_argument('--resume', default= "", type = str, help="path to the last saved weights")
+    parser.add_argument('--weights', default= "", type = str, help= "path to weight file in .pth extension")
     return parser.parse_args()
 
 def root_directory(data, name):
@@ -363,6 +365,7 @@ def train(max_epochs, model, train_loader, device, optimizer, loss_function, tra
                         model.state_dict(),
                         os.path.join(root_dir, "best_metric_model.pth"),)
                     print("saved new best metric model")
+
                 print(
                     f"current epoch: {epoch + 1} current mean dice: {metric:.4f}"
                     f" tc: {metric_tc:.4f} wt: {metric_wt:.4f} et: {metric_et:.4f}"
@@ -371,48 +374,6 @@ def train(max_epochs, model, train_loader, device, optimizer, loss_function, tra
         print(f"time consuming of epoch {epoch + 1} is: {(time.time() - epoch_start):.4f}")
     total_time = time.time() - total_start
     return best_metric, best_metric_epoch, total_time, epoch_loss_values, metric_values, metric_values_et, metric_values_tc, metric_values_wt
-
-
-def check_samples(model, weights, val_ds, device, 
-                  post_trans):
-    '''load model weights and check model output
-    args:
-    weights: trained model paramters
-    '''
-   
-    model.load_state_dict(
-    torch.load(os.path.join(weights, "best_metric_model.pth")))
-    model.eval()
-    with torch.no_grad():
-    # select one image to evaluate and visualize the model output
-        val_input = val_ds[6]["image"].unsqueeze(0).to(device)
-        roi_size = (128, 128, 64)
-        sw_batch_size = 4
-        val_output = inference(val_input, model)
-        val_output = post_trans(val_output[0])
-        plt.figure("image", (24, 6))
-        for i in range(4):
-            plt.subplot(1, 4, i + 1)
-            plt.title(f"image channel {i}")
-            plt.imshow(val_ds[6]["image"][i, :, :, 70].detach().cpu(), cmap="gray")
-        plt.savefig('image_channels.png')
-        plt.show()
-        # visualize the 3 channels label corresponding to this image
-        plt.figure("label", (18, 6))
-        for i in range(3):
-            plt.subplot(1, 3, i + 1)
-            plt.title(f"label channel {i}")
-            plt.imshow(val_ds[6]["mask"][i, :, :, 70].detach().cpu())
-        plt.savefig('labels_channel.png')
-        plt.show()
-        # visualize the 3 channels model output corresponding to this image
-        plt.figure("output", (18, 6))
-        for i in range(3):
-            plt.subplot(1, 3, i + 1)
-            plt.title(f"output channel {i}")
-            plt.imshow(val_output[i, :, :, 70].detach().cpu())
-        plt.savefig('output_channels.png')
-        plt.show()
 
 def plot_results(epoch_loss_values, metric_values,
                  metric_values_et, metric_values_tc,
@@ -486,15 +447,31 @@ def evaluate(model, weight, root_dir, val_org_loader, device, post_transforms,
     print(f"metric_wt: {metric_wt:.4f}")
     print(f"metric_et: {metric_et:.4f}") 
 
+def pretrained(model, weights):
+    """pretrained model to be used for further training
+    
+    Args:
+    model: nn.module 
+    weights: str (path) path to pretrained weights  
+    
+    return:
+    model: nn.module --> loaded with pretrained weights"""
+    device = torch.device("cuda")
+    model.load_state_dict(torch.load(weights, map_location="cuda:0"))
+    model.to(device)
+    model.train()
+    return model
+
 def main():
     args = read_args()
     print('creating root directory... \n')
     root_dir = root_directory(args.data_dir, args.name)
     print('done!!! \n')
+
     print('-'*60)
     set_determinism(seed=0)
     print('making data loaders to load the Brats20 dataset... \n')
-    print('laoding training data ... \n')
+    print('loading training data ... \n')
     survival_df = pd.read_csv(Config.survival_info_csv_train)
     name_mapping_df = pd.read_csv(Config.name_mapping_csv_train)
     df = add_paths(survival_df, name_mapping_df, t= 'train')
@@ -504,6 +481,7 @@ def main():
                                               args.workers,
                                               args.batch)
     print('done!!! \n')
+
     print('-'*60)
     print('loading validation data... \n')
     survival_df_val = pd.read_csv(Config.validation_csv)
@@ -516,6 +494,7 @@ def main():
     print('done!!! \n')                         
     print('Loaded successfully!!! \n')
     print('-'*60)
+    #--------------------------------------------------------------------------------------
     # print('now loading test dataset \n')
     # survival_df_test = pd.read_csv(Config.survival_info_csv_test)
     # name_mapping_df_test = pd.read_csv(Config.name_mapping_csv_test)
@@ -527,11 +506,15 @@ def main():
     #                                          args.batch)
     
     # print('Loaded successfully!!! \n')
+    #----------------------------------------------------------------------------------------
 
     device, model, loss_function, optimizer, lr_scheduler, dice_metric, dice_metric_batch, post_trans = model_loss_optim(args.epochs, args.lr, args.weight_decay)
+    if args.resume:
+        model = pretrained(model, args.weights)
     scaler = torch.cuda.amp.GradScaler()
     # enable cuDNN benchmark
     torch.backends.cudnn.benchmark = True 
+
     print('Training ... \n')
     print('-'*60)
     best_metric, best_metric_epoch, total_time, epoch_loss, best_metric_values, best_metric_et, best_metric_tc, best_metric_wt = train(args.epochs, model, train_loader, device, optimizer, 
@@ -541,22 +524,9 @@ def main():
     print(f"train completed, best_metric: {best_metric:.4f} at epoch: {best_metric_epoch}, total time: {total_time}.")
     print('Training Finished!!!!')
     
-    
-    # visualize(val_ds)
-    
-
-    
     plot_results(epoch_loss,best_metric_values, best_metric_et, best_metric_tc, best_metric_wt)
-   
-    time.sleep(10) # rest for 10 secs 
-    print('now taking weights path!!')
-    weights_path = root_dir
-    if weights_path:
-        check_samples(model, weights_path, val_dataset, device, post_trans)
     
-    # if directory is None:
-    #     shutil.rmtree(root_dir)
-    
+    print('Successfully ran everything!!!')
 
 if __name__ == "__main__":
     main()
