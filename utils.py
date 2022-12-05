@@ -1,23 +1,21 @@
 '''utility functions'''
 
 import os
-import tensorflow
 import shutil
 from configs import Config
 import nibabel as nib
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.gridspec as gridspec
-from matplotlib import cm
+from   matplotlib import cm
 import matplotlib.animation as anim
 import matplotlib.patches as mpatches
 import imageio
 from random import shuffle
 import cv2
 from IPython.display import Image
-import keras
-from tensorflow.keras.utils import to_categorical
 # from keras.utils import to_categorical
+import tensorflow as tf
 
 
 def plot_image_grid(image):
@@ -64,6 +62,28 @@ def plot_image_grid(image):
             ax[2][i].set_ylabel('Sagittal', fontsize=15)
 
     fig.subplots_adjust(wspace=0, hspace=0)
+
+
+def get_labeled_image(image, label, is_categorical=False):
+
+        if not is_categorical:
+            # print(image.shape, label.shape)
+            label = tf.keras.utils.to_categorical(label, num_classes=4)#.astype(np.uint8)
+
+        image = cv2.normalize(image[:, :, :, 0], None, alpha=0, beta=255,
+                            norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
+            np.uint8)
+
+        labeled_image = np.zeros_like(label[:, :, :, 1:])
+
+        # remove tumor part from image
+        labeled_image[:, :, :, 0] = image * (label[:, :, :, 0])
+        labeled_image[:, :, :, 1] = image * (label[:, :, :, 0])
+        labeled_image[:, :, :, 2] = image * (label[:, :, :, 0])
+
+        # color labels
+        labeled_image += label[:, :, :, 1:] * 255
+        return labeled_image
 
 
 
@@ -223,26 +243,6 @@ class util:
             images.append(img)
         imageio.mimsave("/tmp/gif.gif", images, duration=0.01)
         return Image(filename="/tmp/gif.gif", format='png')
-    @staticmethod
-    def get_labeled_image(image, label, is_categorical=False):
-        if not is_categorical:
-            label = to_categorical(label, num_classes=4).astype(np.uint8)
-
-        image = cv2.normalize(image[:, :, :, 0], None, alpha=0, beta=255,
-                            norm_type=cv2.NORM_MINMAX, dtype=cv2.CV_32F).astype(
-            np.uint8)
-        print(image.shape)
-        labeled_image = np.zeros_like(label[:, :, :, 1:])
-
-        # remove tumor part from image
-        labeled_image[:, :, :, 0] = image*(label[:, :, :, 0])
-        labeled_image[:, :, :, 1] = image*(label[:, :, :, 0])
-        labeled_image[:, :, :, 2] = image*(label[:, :, :, 0])
-
-
-        # color labels
-        labeled_image += label[:, :, :, 1:] * 255
-        return labeled_image
 
     @staticmethod   
     def load_case(image_nifty_file, label_nifty_file):

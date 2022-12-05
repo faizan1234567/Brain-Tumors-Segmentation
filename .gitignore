@@ -3,3 +3,4 @@ segment/
 __pycache__/
 Unet/
 *.pdf
+test image/

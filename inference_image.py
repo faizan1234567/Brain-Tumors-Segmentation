@@ -10,12 +10,13 @@ import pandas as pd
 import os
 from segment_3d import inference
 import argparse
+import nibabel as nib
 from configs import Config
 from BratsCustom import BratsDataset20
 from utils import util
 from segment_3d import model_loss_optim
 from utils import plot_image_grid
-
+from tes import categorical
 
 def read_args():
     parser = argparse.ArgumentParser()
@@ -32,10 +33,13 @@ def load_image(patient_path, mask_label = False):
     Args:
     patient_path: os.path (str)"""
     dataset = BratsDataset20(phase="val", patient=patient_path, mask_label=mask_label)
-    img_data = dataset.__getitem__()
+    img_data = dataset.__getitem__(1)
     scan = img_data["image"]
     mask = img_data["mask"]
-    return (scan, mask)
+    mask_err_path = os.path.join(patient_path, patient_path.strip().split('/')[-1] + "_seg.nii.gz")
+    mask_err = nib.load(mask_err_path)
+    mask_err = np.array(mask_err.dataobj)
+    return (scan, mask_err)
 
 def show_labeled_image(patient):
     """get labled image for three different orientation such as 
@@ -47,11 +51,15 @@ def show_labeled_image(patient):
     """
     scan, mask = load_image(patient)
     scan = np.einsum('ijkl->klji', scan)
-    mask = np.einsum('ijkl->klji', mask)
+    # mask = np.einsum('jkl->jkl', mask)
+    print(mask)
     # mask = mask[:, :, :, 0]
     print("Shape of the scan: {}, and shape of the mask: {}".format(scan.shape, mask.shape))
-    image = util.get_labeled_image(scan, mask)
+    image_input = np.random.rand(240, 240, 155, 4)
+    true_label = np.random.rand(240, 240, 155)
+    image = categorical(scan, mask)
     plot_image_grid(image)
+    plt.show()
 
 
 
@@ -81,7 +89,7 @@ def diagnose(model, weights, patient, device,
         print("loading patient file...")
         val_input, mask = load_image(patient)
         val_input = np.einsum('ijkl->iklj', val_input)
-        mask = np.einsum('ijkl->iklj', mask)
+        mask = np.einsum('ijk->kij', mask)
         val_input_tensor, mask_tensor = torch.from_numpy(val_input).unsqueeze(0), torch.from_numpy(mask)
         print("Success: the patient file loaded.")
         print("Shape of the scan: {}, and shape of mask: {}".format(val_input.shape, mask.shape))
@@ -104,7 +112,7 @@ def diagnose(model, weights, patient, device,
         for i in range(3):
             plt.subplot(1, 3, i + 1)
             plt.title(f"mask {i}")
-            plt.imshow(mask[i, :, :, 70])
+            plt.imshow(mask[70, :, :])
         plt.savefig('mask_labels.png')
         plt.show()
 
@@ -123,7 +131,7 @@ def main():
     print("Inference on a patient MRI scan")
     print("--"* 50)
     device, model, _, _, _, _, _, post_trans= model_loss_optim(1, 1e-3, 1e-5)
-    diagnose(model, args.weights, args.patient, device, post_trans)
+    # diagnose(model, args.weights, args.patient, device, post_trans)
     print("--"*50)
 
     print('Show labled image ..')

@@ -32,7 +32,7 @@ from monai.utils import set_determinism
 set_determinism(seed=0)
 
 class BratsDataset20(Dataset):
-    def __init__(self, df: pd.DataFrame = None, phase: str="test", patient = None, is_resize: bool=False, mask_label = False):
+    def __init__(self, df: pd.DataFrame = None, phase: str="test", patient = None, is_resize: bool=False, mask_label = True):
         self.df = df
         self.phase = phase
         self.patient = patient
@@ -46,7 +46,7 @@ class BratsDataset20(Dataset):
     def __len__(self):
         return self.df.shape[0]
     
-    def __getitem__(self, idx=None):
+    def __getitem__(self, idx):
         images = []
         mask_label = self.mask_label
         if not self.df is None:
@@ -78,16 +78,20 @@ class BratsDataset20(Dataset):
         # there is no labels in the test directory
 
         if self.phase != "test":
-            mask_file = "_seg.nii.gz"
+            if not self.df is None:
+                mask_file = "_seg.nii.gz"
             mask_path =  os.path.join(root_path, id_ + mask_file)
             mask = self.load_img(mask_path)
+            # print(mask.shape)
             
             if self.is_resize:
                 mask = self.resize(mask)
                 mask = np.clip(mask.astype(np.uint8), 0, 1).astype(np.float32)
                 mask = np.clip(mask, 0, 1)
+
             if mask_label:
                 mask = self.preprocess_mask_labels(mask)
+
             data = {"image": img.astype(np.float32),
                     "mask": mask.astype(np.float32)}
             if not self.df is None:
