@@ -27,8 +27,7 @@ def categorical(image, mask, is_categorical=False):
     labeled_image += label[:, :, :, 1:] * 255
     return labeled_image
         
-    return None
-
+  
 image_input = np.random.rand(240, 240, 155, 4)
 true_label = np.random.rand(240, 240, 155)
 
