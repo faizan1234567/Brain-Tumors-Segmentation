@@ -1,4 +1,4 @@
-'''data loader classe, load Brats-20 data for training'''
+'''data loader classe, load Brats-20 data for training and evaluation.'''
 from configs import Config
 import pandas as pd
 import numpy as np
