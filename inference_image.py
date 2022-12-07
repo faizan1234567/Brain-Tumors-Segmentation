@@ -16,7 +16,7 @@ from BratsCustom import BratsDataset20
 from utils import util
 from segment_3d import model_loss_optim
 from utils import plot_image_grid
-from tes import categorical
+from scripts.tes import categorical
 
 def read_args():
     parser = argparse.ArgumentParser()
