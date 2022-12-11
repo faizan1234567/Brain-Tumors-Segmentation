@@ -139,7 +139,7 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
     paths = []
     temp_ids = []
     for _, row  in df.iterrows():
-        
+        #BraTS20_Training_020
         id_ = row['Brats20ID']
         if t != "val":
             phase = id_.split("_")[-2]
@@ -173,12 +173,22 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
                     print('Not appending ID: {}'.format(path))
                     temp_ids.append(id_)
             else:
+    
                 temp_ids.append(id_)
-    for id in temp_ids:
+    if len(temp_ids)>0:
+        for id in temp_ids:
+            df = df[df["Brats20ID"].str.contains(id) == False]
+
+    if t == 'train':
+        id = 'BraTS20_Training_325'
         df = df[df["Brats20ID"].str.contains(id) == False]
+    
     df = df.reset_index()
     df.drop('index', inplace= True, axis=1)
+    paths = list(set(paths))
     df['path'] = paths
+    df = df.drop_duplicates()
+    print("paths length: {}".format(len(paths)))
     return df
 
 
@@ -198,10 +208,10 @@ def load_dataset(df, data = 'train', resize = False, num_workers =2, batch_size=
        '''
     # here we don't cache any data in case out of memory issue
     if data =='train':
-        dataset = BratsDataset20(df, data, resize)
+        dataset = BratsDataset20(df, data, is_resize= resize, mask_label=True)
         dataset_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=True)
     else:
-        dataset = BratsDataset20(df, data, resize)
+        dataset = BratsDataset20(df, data, is_resize= resize)
         dataset_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=True)
     return dataset, dataset_loader
 

@@ -51,7 +51,10 @@ class BratsDataset20(Dataset):
         mask_label = self.mask_label
         if not self.df is None:
             id_ = self.df.loc[idx, 'Brats20ID']
+            # print(id_)
             root_path = self.df.loc[self.df['Brats20ID'] == id_]['path'].values[0]
+            root_path = os.path.join(os.path.dirname(root_path), id_)
+            # print(root_path)
         elif self.df is None and os.path.exists(self.patient):
             root_path = self.patient
             modalites = os.listdir(root_path)
@@ -61,6 +64,7 @@ class BratsDataset20(Dataset):
         for data_type in self.data_types:
             if not "_seg.nii.gz" in data_type:
                 img_path = os.path.join(root_path, id_ + data_type)
+                # print(root_path ,id_)
                 img = self.load_img(img_path)
                 
                 if self.is_resize:
@@ -72,8 +76,8 @@ class BratsDataset20(Dataset):
                 mask_file = data_type
 
         img = np.stack(images)
-        img = np.einsum('nhwc->nchw', img)
-        # img = np.moveaxis(img, (0, 1, 2, 3), (0, 2, 3, 1))
+        # img = np.einsum('nhwc->nchw', img)
+        img = np.moveaxis(img, (0, 1, 2, 3), (0, 2, 3, 1))
         
         # there is no labels in the test directory
 
