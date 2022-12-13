@@ -180,7 +180,8 @@ def add_paths(survival_df, name_mapping_df=None, t = 'train'):
             df = df[df["Brats20ID"].str.contains(id) == False]
 
     if t == 'train':
-        ids = ['BraTS20_Training_325', 'BraTS20_Training_266']
+        #error files
+        ids = ['BraTS20_Training_325', 'BraTS20_Training_266', 'BraTS20_Training_195']
         for id in ids:
             df = df[df["Brats20ID"].str.contains(id) == False]
     
