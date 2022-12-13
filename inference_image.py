@@ -1,6 +1,7 @@
 '''Inference on 3D brain tumor image
 Author: Muhammad Faizan
 The model will take an image and the code will show the mask and true labels on the image
+this repository is newly created work with 3D dataset of brain tumor.
 '''
 
 import torch
@@ -25,6 +26,9 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
+def normalize(data: np.ndarray):
+    data_min = np.min(data)
+    return (data - data_min) / (np.max(data) - data_min)
 
 
 def load_image(patient_path, mask_label = False):
@@ -51,12 +55,11 @@ def show_labeled_image(patient):
     """
     scan, mask = load_image(patient)
     scan = np.einsum('ijkl->klji', scan)
-    # mask = np.einsum('jkl->jkl', mask)
-    print(mask)
-    # mask = mask[:, :, :, 0]
+    mask = np.einsum('jkl->jkl', mask)
+    mask = normalize(mask)
     print("Shape of the scan: {}, and shape of the mask: {}".format(scan.shape, mask.shape))
-    image_input = np.random.rand(240, 240, 155, 4)
-    true_label = np.random.rand(240, 240, 155)
+    # image_input = np.random.rand(240, 240, 155, 4)
+    # true_label = np.random.rand(240, 240, 155)
     image = categorical(scan, mask)
     plot_image_grid(image)
     plt.show()
