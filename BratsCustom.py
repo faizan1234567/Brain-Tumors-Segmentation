@@ -77,11 +77,7 @@ class BratsDataset20(Dataset):
 
         img = np.stack(images)
         # img = np.einsum('nhwc->nchw', img)
-<<<<<<< Updated upstream
-        img = np.moveaxis(img, (0, 1, 2, 3), (0, 2, 3, 1))
-=======
         img = np.moveaxis(img, (0, 1, 2, 3), (0, 3, 2, 1)) #(0, 3, 2, 1)
->>>>>>> Stashed changes
         
         # there is no labels in the test directory
 
