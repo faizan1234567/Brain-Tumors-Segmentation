@@ -1,7 +1,6 @@
 '''Inference on 3D brain tumor image
 Author: Muhammad Faizan
 The model will take an image and the code will show the mask and true labels on the image
-this repository is newly created work with 3D dataset of brain tumor.
 '''
 
 import torch
@@ -17,7 +16,7 @@ from BratsCustom import BratsDataset20
 from utils import util
 from segment_3d import model_loss_optim
 from utils import plot_image_grid
-from scripts.tes import categorical
+from tes import categorical
 
 def read_args():
     parser = argparse.ArgumentParser()
@@ -26,12 +25,9 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
-def normalize(data: np.ndarray):
-    data_min = np.min(data)
-    return (data - data_min) / (np.max(data) - data_min)
 
 
-def load_image(patient_path, mask_label = False):
+def load_image(patient_path, mask_label = True):
     """load the image from the given path
     
     Args:
@@ -40,26 +36,24 @@ def load_image(patient_path, mask_label = False):
     img_data = dataset.__getitem__(1)
     scan = img_data["image"]
     mask = img_data["mask"]
-    mask_err_path = os.path.join(patient_path, patient_path.strip().split('/')[-1] + "_seg.nii.gz")
-    mask_err = nib.load(mask_err_path)
-    mask_err = np.array(mask_err.dataobj)
-    return (scan, mask_err)
+    return (scan, mask)
 
 def show_labeled_image(patient):
     """get labled image for three different orientation such as 
     coronal, transversaral, and sigital for showing enhanced, non-enhaned and edema voxels labels
-    This function will examine the labled image, and those with AI prediction.
+    This function will examine t he labled image, and those with AI prediction.
     
     Args:
     patient: os.path(str) -> path of patient files directory
     """
     scan, mask = load_image(patient)
     scan = np.einsum('ijkl->klji', scan)
-    mask = np.einsum('jkl->jkl', mask)
-    mask = normalize(mask)
+    # mask = np.einsum('jkl->jkl', mask)
+    print(mask)
+    # mask = mask[:, :, :, 0]
     print("Shape of the scan: {}, and shape of the mask: {}".format(scan.shape, mask.shape))
-    # image_input = np.random.rand(240, 240, 155, 4)
-    # true_label = np.random.rand(240, 240, 155)
+    image_input = np.random.rand(240, 240, 155, 4)
+    true_label = np.random.rand(240, 240, 155)
     image = categorical(scan, mask)
     plot_image_grid(image)
     plt.show()
@@ -92,7 +86,7 @@ def diagnose(model, weights, patient, device,
         print("loading patient file...")
         val_input, mask = load_image(patient)
         val_input = np.einsum('ijkl->iklj', val_input)
-        mask = np.einsum('ijk->kij', mask)
+        mask = np.einsum('ijkl->iklj', mask)
         val_input_tensor, mask_tensor = torch.from_numpy(val_input).unsqueeze(0), torch.from_numpy(mask)
         print("Success: the patient file loaded.")
         print("Shape of the scan: {}, and shape of mask: {}".format(val_input.shape, mask.shape))
@@ -101,12 +95,12 @@ def diagnose(model, weights, patient, device,
         sw_batch_size = 1
         val_output = inference(val_input_tensor, model)
         val_output = post_trans(val_output[0])
-
+        print("output shape: {}".format(val_output.shape))
         plt.figure("Modalities", (24, 6))
         for i in range(4):
             plt.subplot(1, 4, i + 1)
             plt.title(f"Modality {i}")
-            plt.imshow(val_input[i, :, :, 70], cmap="gray")
+            plt.imshow(val_input[i, :, :, 75], cmap="gray")
         plt.savefig('patient_modalities_image.png')
         plt.show()
 
@@ -115,7 +109,7 @@ def diagnose(model, weights, patient, device,
         for i in range(3):
             plt.subplot(1, 3, i + 1)
             plt.title(f"mask {i}")
-            plt.imshow(mask[70, :, :])
+            plt.imshow(mask[i, :, :, 70])
         plt.savefig('mask_labels.png')
         plt.show()
 
@@ -134,11 +128,11 @@ def main():
     print("Inference on a patient MRI scan")
     print("--"* 50)
     device, model, _, _, _, _, _, post_trans= model_loss_optim(1, 1e-3, 1e-5)
-    # diagnose(model, args.weights, args.patient, device, post_trans)
+    diagnose(model, args.weights, args.patient, device, post_trans)
     print("--"*50)
 
     print('Show labled image ..')
-    show_labeled_image(args.patient)
+    # show_labeled_image(args.patient)
     print('done!!')
 
 if __name__ == "__main__":
