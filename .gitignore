@@ -3,8 +3,5 @@ segment/
 __pycache__/
 Unet/
 *.pdf
-/mask_labels.png
-/model_prediction_masks.png
-/patient_modalities_image.png
 test image/
 weights/
