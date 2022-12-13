@@ -104,7 +104,7 @@ def evaluate(model, weight, test_loader, post_transforms,
     Return:
     None'''
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model.load_state_dict(torch.load(weight))
+    model.load_state_dict(torch.load(weight,  map_location=torch.device('cpu')))
     model.eval()
     with torch.no_grad():
         for val_data in test_loader:
