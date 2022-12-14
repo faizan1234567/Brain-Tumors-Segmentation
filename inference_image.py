@@ -75,8 +75,8 @@ def diagnose(model, weights, patient, device,
     device: int (if there is GPU or cpu)
     post_trans: post processing
     '''
-    device = 'cpu'
-    model.load_state_dict(torch.load(weights, map_location=torch.device('cpu')))
+    # device = 'cpu'
+    model.load_state_dict(torch.load(weights, map_location=torch.device(device)))
     # torch.load(os.path.join(weights, "best_metric_model.pth")))
     
     model.eval()
