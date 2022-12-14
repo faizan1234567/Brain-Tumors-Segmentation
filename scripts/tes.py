@@ -28,8 +28,8 @@ def categorical(image, mask, is_categorical=False):
     return labeled_image
         
   
-image_input = np.random.rand(240, 240, 155, 4)
-true_label = np.random.rand(240, 240, 155)
+# image_input = np.random.rand(240, 240, 155, 4)
+# true_label = np.random.rand(240, 240, 155)
 
-mask = categorical(image_input, true_label)
-print(mask.shape)
+# mask = categorical(image_input, true_label)
+# print(mask.shape)
