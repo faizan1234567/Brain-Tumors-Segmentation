@@ -16,7 +16,7 @@ from BratsCustom import BratsDataset20
 from utils import util
 from segment_3d import model_loss_optim
 from utils import plot_image_grid
-from tes import categorical
+from scripts.tes import categorical
 
 def read_args():
     parser = argparse.ArgumentParser()
@@ -75,8 +75,8 @@ def diagnose(model, weights, patient, device,
     device: int (if there is GPU or cpu)
     post_trans: post processing
     '''
-   
-    model.load_state_dict(torch.load(weights,  map_location=torch.device('cpu')))
+    device = 'cpu'
+    model.load_state_dict(torch.load(weights, map_location=torch.device('cpu')))
     # torch.load(os.path.join(weights, "best_metric_model.pth")))
     
     model.eval()
@@ -87,15 +87,15 @@ def diagnose(model, weights, patient, device,
         val_input, mask = load_image(patient)
         val_input = np.einsum('ijkl->iklj', val_input)
         mask = np.einsum('ijkl->iklj', mask)
-        val_input_tensor, mask_tensor = torch.from_numpy(val_input).unsqueeze(0), torch.from_numpy(mask)
+        val_input_tensor, mask_tensor = torch.from_numpy(val_input).unsqueeze(0).to(device), torch.from_numpy(mask).to(device).cpu()
         print("Success: the patient file loaded.")
         print("Shape of the scan: {}, and shape of mask: {}".format(val_input.shape, mask.shape))
         
         roi_size = (128, 128, 64)
         sw_batch_size = 1
         val_output = inference(val_input_tensor, model)
-        val_output = post_trans(val_output[0])
-        print("output shape: {}".format(val_output.shape))
+        val_output = post_trans(val_output[0]).cpu().numpy()
+        # print("output shape: {}".format(val_output.shape))
         plt.figure("Modalities", (24, 6))
         for i in range(4):
             plt.subplot(1, 4, i + 1)
@@ -109,7 +109,7 @@ def diagnose(model, weights, patient, device,
         for i in range(3):
             plt.subplot(1, 3, i + 1)
             plt.title(f"mask {i}")
-            plt.imshow(mask[i, :, :, 70])
+            plt.imshow(mask_tensor[i, :, :, 70])
         plt.savefig('mask_labels.png')
         plt.show()
 
