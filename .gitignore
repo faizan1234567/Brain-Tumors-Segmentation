@@ -1,5 +1,5 @@
 segment/
-research/
+# research/
 *.pth
 __pycache__/
 Unet/
