@@ -55,4 +55,35 @@ class SegResNet(nn.Module):
                  upsample_mode: Union[UpsampleMode, str] = UpsampleMode.NONTRAINABLE) -> None:
 
                  super().__init__()
-                 
+                 if spatial_dims not in (2, 3):
+                    raise ValueError("spatial dimension should either 2 or 3.")
+
+                 self.spatial_dims = spatial_dims
+                 self.init_filters = init_kernels
+                 self.in_channels = in_channels
+                 self.out_channels = out_channels
+                 self.dropout_prob = dropout_prob
+                 self.activation = act
+                 self.activation_mode = get_act_layer(self.activation)
+
+                 if norm_name:
+                    if norm_name.lower() != "group":
+                        raise ValueError(f"Deprecating option 'norm_name={norm_name}', please use 'norm' instead.")
+                    norm = ("group", {"num_groups": num_groups})
+
+                 self.norm = norm
+                 self.upsample_mode = UpsampleMode(upsample_mode)
+                 self.use_conv_final = use_conv_final
+                 self.initial_conv = get_conv_layer(spatial_dims, in_channels, init_kernels)
+
+                 self.down_layers = self._make_down_layers()
+                 self.up_layers, self.up_samples = self._make_up_layers()
+                 self.conv_final = self._make_final_conv(out_channels)
+
+                 if dropout_prob is not None:
+                    self.dropout = Dropout[Dropout.DROPOUT, spatial_dims](dropout_prob)
+                #Faizan: methods to the class to be added....
+
+
+
+
