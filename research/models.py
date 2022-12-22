@@ -12,6 +12,7 @@ from monai.networks.blocks.segresnet_block import get_conv_layer, get_upsample_l
 from monai.networks.layers.factories import Dropout
 from monai.networks.layers.utils import get_act_layer, get_norm_layer
 from monai.utils import UpsampleMode
+from buillding_block import ResidualBlock
 
 class SegResNet(nn.Module):
     """Auto encoder decoder structured proposed by <https://arxiv.org/pdf/1810.11654.pdf>
@@ -65,6 +66,8 @@ class SegResNet(nn.Module):
                  self.dropout_prob = dropout_prob
                  self.activation = act
                  self.activation_mode = get_act_layer(self.activation)
+                 self.blocks_down = blocks_down
+                 self.blocks_up = blocks_up
 
                  if norm_name:
                     if norm_name.lower() != "group":
@@ -77,13 +80,29 @@ class SegResNet(nn.Module):
                  self.initial_conv = get_conv_layer(spatial_dims, in_channels, init_kernels)
 
                  self.down_layers = self._make_down_layers()
-                 self.up_layers, self.up_samples = self._make_up_layers()
-                 self.conv_final = self._make_final_conv(out_channels)
+                #  self.up_layers, self.up_samples = self._make_up_layers()
+                #  self.conv_final = self._make_final_conv(out_channels)
 
                  if dropout_prob is not None:
                     self.dropout = Dropout[Dropout.DROPOUT, spatial_dims](dropout_prob)
                 #Faizan: methods to the class to be added....
 
+    def _make_down_layers(self):
+        """create down layers for the encoder part, in the module the input spatial size will reduce
+        while the feature size will increase to learn more rich features
+        """
+        down_layers = nn.ModuleList()
+        blocks_down, spatial_dims, filters, norm = (self.blocks_down, self.spatial_dims, self.init_filters, self.norm)
+        for i, item in enumerate(blocks_down):
+            layer_in_channels = filters * 2**i # filter * 1; filter * 2; filter * 4; filter * 8; filter * 16 .... filter * 2**(n)
+            pre_conv = (get_conv_layer(spatial_dims, layer_in_channels // 2, layer_in_channels, stride=2) if i > 0 else nn.Identity())
+            down_layer = nn.Sequential(pre_conv, *[ResidualBlock(spatial_dims, layer_in_channels, norm) for j in range(item)])
+            down_layers.append(down_layer)
+        return down_layers
 
-
-
+    #just down layers implementation now.. 
+    def forward(self, x):
+        # x = self._make_down_layers(x)
+        for i, l in enumerate(self._make_down_layers()):
+            x = l(x)
+        return x
