@@ -39,3 +39,20 @@ class SegResNet(nn.Module):
             - nontrainable, uses non-trainable `linear` interpolation.
             - pixelshuffle, uses :py:class:`monai.networks.blocks.SubpixelUpsample"""
     
+    def __init__(self, 
+                 spatial_dims: int = 3,
+                 init_kernels: int = 8,
+                 in_channels: int =  4,
+                 out_channels: int = 3,
+                 dropout_prob: Optional[float] = 0.3,
+                 act: Union[Tuple, str] = ("RELU", {"inplace": True}),
+                 norm: Union[Tuple, str] = ("GROUP", {"num_groups": 4}),
+                 norm_name: str = "",
+                 num_groups: int = 4,
+                 use_conv_final: bool = True,
+                 blocks_down: tuple = (1, 2, 2, 4),
+                 blocks_up: tuple = (1, 1, 1),
+                 upsample_mode: Union[UpsampleMode, str] = UpsampleMode.NONTRAINABLE) -> None:
+
+                 super().__init__()
+                 
