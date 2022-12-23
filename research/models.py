@@ -99,6 +99,41 @@ class SegResNet(nn.Module):
             down_layer = nn.Sequential(pre_conv, *[ResidualBlock(spatial_dims, layer_in_channels, norm) for j in range(item)])
             down_layers.append(down_layer)
         return down_layers
+    
+    def _make_up_layers(self):
+        """make up layers for increasing the spatial size and decreasing the feature size"""
+        up_layers, up_samples = nn.ModuleList(), nn.ModuleList()
+        upsample_mode, blocks_up, spatial_dims, filters, norm = (
+            self.upsample_mode,
+            self.blocks_up,
+            self.spatial_dims,
+            self.init_filters,
+            self.norm,
+        )
+
+        n_up = len(blocks_up)
+        for i in range(n_up):
+            #if filter size is 4 and n_up is 3 we will reduce feature size by 2 as follows:
+            #filter * 2 **(3 -0) --> filter * 8 --> 8 * 8 -->64
+            #filter * 2 **(3 -1) --> filter * 4 --> 8 * 4 -->32
+            #filter * 2 **(3 -2) --> filter * 2 --> 8 * 2 -->16
+            sample_in_channels = filters * 2 ** (n_up - i)
+            up_layers.append(
+                nn.Sequential(
+                    *[
+                        ResidualBlock(spatial_dims, sample_in_channels // 2, norm=norm, act=self.act)
+                        for _ in range(blocks_up[i])
+                    ]))
+                    
+            up_samples.append(
+                nn.Sequential(
+                    *[
+                        get_conv_layer(spatial_dims, sample_in_channels, sample_in_channels // 2, kernel_size=1),
+                        get_upsample_layer(spatial_dims, sample_in_channels // 2, upsample_mode=upsample_mode),
+                    ]
+                )
+            )
+        return up_layers, up_samples
 
     #just down layers implementation now.. 
     def forward(self, x):
