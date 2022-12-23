@@ -80,13 +80,13 @@ class SegResNet(nn.Module):
                  self.initial_conv = get_conv_layer(spatial_dims, in_channels, init_kernels)
 
                  self.down_layers = self._make_down_layers()
-                #  self.up_layers, self.up_samples = self._make_up_layers()
+                 self.up_layers, self.up_samples = self._make_up_layers()
                 #  self.conv_final = self._make_final_conv(out_channels)
 
                  if dropout_prob is not None:
                     self.dropout = Dropout[Dropout.DROPOUT, spatial_dims](dropout_prob)
-                #Faizan: methods to the class to be added....
-
+               
+   
     def _make_down_layers(self):
         """create down layers for the encoder part, in the module the input spatial size will reduce
         while the feature size will increase to learn more rich features
@@ -124,15 +124,14 @@ class SegResNet(nn.Module):
                         ResidualBlock(spatial_dims, sample_in_channels // 2, norm=norm, act=self.act)
                         for _ in range(blocks_up[i])
                     ]))
-                    
+
             up_samples.append(
                 nn.Sequential(
                     *[
                         get_conv_layer(spatial_dims, sample_in_channels, sample_in_channels // 2, kernel_size=1),
                         get_upsample_layer(spatial_dims, sample_in_channels // 2, upsample_mode=upsample_mode),
-                    ]
-                )
-            )
+                    ]))
+
         return up_layers, up_samples
 
     #just down layers implementation now.. 
