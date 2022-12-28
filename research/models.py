@@ -141,6 +141,18 @@ class SegResNet(nn.Module):
             get_norm_layer(name=self.norm, spatial_dims=self.spatial_dims, channels=self.init_filters),
             self.act_mod)
 
+    def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+        x = self.initial_conv(x)
+        if self.dropout_prob is not None:
+            x = self.dropout(x)
+
+        down_x = []
+
+        for down in self.down_layers:
+            x = down(x)
+            down_x.append(x)
+
+        return x, down_x
 
 
     #just down layers implementation now.. 
