@@ -133,6 +133,15 @@ class SegResNet(nn.Module):
                     ]))
         
         return up_layers, up_samples
+    
+    #add: final convolution layer 
+    def _make_final_conv(self, out_channels: int):
+        return nn.Sequential(
+            get_conv_layer(self.spatial_dims, self.init_filters, out_channels, kernel_size=1, bias=True),
+            get_norm_layer(name=self.norm, spatial_dims=self.spatial_dims, channels=self.init_filters),
+            self.act_mod)
+
+
 
     #just down layers implementation now.. 
     def forward(self, x):
