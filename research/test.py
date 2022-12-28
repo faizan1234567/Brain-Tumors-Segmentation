@@ -11,7 +11,9 @@ input = input[None, :, :, :, :] #adding batch dim
 #                     strides= (1, 1, 1), dropout= 0.3, conv_only= True)
 
 # model = ResidualBlock(spatial_dims=3, in_channels=4, kernel_size=3)
-model = SegResNet(3, 4, 4, 3, 0.3)
+
+model = SegResNet(spatial_dims=3, init_kernels=4, in_channels=4, out_channels=16, 
+                  dropout_prob=0.3, num_groups=4, blocks_down= (1, 2, 2, 4), blocks_up= (1, 1, 1))
 
 (output, down_out) = model.encode(input)
 print(output.shape)
