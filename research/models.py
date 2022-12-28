@@ -113,10 +113,10 @@ class SegResNet(nn.Module):
 
         n_up = len(blocks_up)
         for i in range(n_up):
-            #if filter size is 4 and n_up is 3 we will reduce feature size by 2 as follows:
+            #if filter size is 4 and n_up is 3 we will reduce feature size by 2 as follows (explanation):
             #filter * 2 **(3 -0) --> filter * 8 --> 8 * 8 -->64
             #filter * 2 **(3 -1) --> filter * 4 --> 8 * 4 -->32
-            #filter * 2 **(3 -2) --> filter * 2 --> 8 * 2 -->16
+            #filter * 2 **(3 -2) --> filter * 2 --> 8 * 2 -->16 
             sample_in_channels = filters * 2 ** (n_up - i)
             up_layers.append(
                 nn.Sequential(
