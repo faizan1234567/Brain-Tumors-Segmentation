@@ -158,15 +158,18 @@ class SegResNet(nn.Module):
         return x, down_x
 
     #decoder layers
-    def decode(self, x: torch.Tensor, down_x: List[torch.Tensor]) -> torch.Tensor:
+    def decode(self, x: torch.Tensor, down_x: List[torch.Tensor]) -> Tuple[torch.Tensor, list]:
+        shapes = []
         for i, (up, upl) in enumerate(zip(self.up_samples, self.up_layers)):
+            shapes.append(x.shape)
+            shapes.append(down_x[i + 1].shape)
             x = up(x) + down_x[i + 1]
             x = upl(x)
 
         if self.use_conv_final:
             x = self.conv_final(x)
 
-        return x
+        return x,shapes
 
 
     #features update  
@@ -174,5 +177,5 @@ class SegResNet(nn.Module):
         x, down_x = self.encode(x)
         down_x.reverse()
 
-        x = self.decode(x, down_x)
-        return x
+        x,shapes = self.decode(x, down_x)
+        return x, shapes
