@@ -109,8 +109,7 @@ class SegResNet(nn.Module):
             self.blocks_up,
             self.spatial_dims,
             self.init_filters,
-            self.norm,
-        )
+            self.norm)
 
         n_up = len(blocks_up)
         for i in range(n_up):
@@ -143,7 +142,9 @@ class SegResNet(nn.Module):
             self.act_mod)
 
     def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
+        # print("Before intial convolution: {}".format(x.shape))
         x = self.initial_conv(x)
+        # print("After intial convolution: {}".format(x.shape))
         if self.dropout_prob is not None:
             x = self.dropout(x)
 
