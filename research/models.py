@@ -82,7 +82,7 @@ class SegResNet(nn.Module):
 
                  self.down_layers = self._make_down_layers()
                  self.up_layers, self.up_samples = self._make_up_layers()
-                #  self.conv_final = self._make_final_conv(out_channels)
+                 self.conv_final = self._make_final_conv(out_channels)
 
                  if dropout_prob is not None:
                     self.dropout = Dropout[Dropout.DROPOUT, spatial_dims](dropout_prob)
@@ -139,8 +139,9 @@ class SegResNet(nn.Module):
         return nn.Sequential(
             get_conv_layer(self.spatial_dims, self.init_filters, out_channels, kernel_size=1, bias=True),
             get_norm_layer(name=self.norm, spatial_dims=self.spatial_dims, channels=self.init_filters),
-            self.act_mod)
+            self.activation_mode)
 
+    #encoder layers
     def encode(self, x: torch.Tensor) -> Tuple[torch.Tensor, List[torch.Tensor]]:
         # print("Before intial convolution: {}".format(x.shape))
         x = self.initial_conv(x)
@@ -156,10 +157,22 @@ class SegResNet(nn.Module):
 
         return x, down_x
 
+    #decoder layers
+    def decode(self, x: torch.Tensor, down_x: List[torch.Tensor]) -> torch.Tensor:
+        for i, (up, upl) in enumerate(zip(self.up_samples, self.up_layers)):
+            x = up(x) + down_x[i + 1]
+            x = upl(x)
 
-    #just down layers implementation now.. 
-    def forward(self, x):
-        # x = self._make_down_layers(x)
-        for i, l in enumerate(self._make_down_layers()):
-            x = l(x)
+        if self.use_conv_final:
+            x = self.conv_final(x)
+
+        return x
+
+
+    #features update  
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x, down_x = self.encode(x)
+        down_x.reverse()
+
+        x = self.decode(x, down_x)
         return x
