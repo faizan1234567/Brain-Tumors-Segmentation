@@ -12,6 +12,8 @@ input = input[None, :, :, :, :] #adding batch dim
 
 # model = ResidualBlock(spatial_dims=3, in_channels=4, kernel_size=3)
 model = SegResNet(3, 4, 4, 3, 0.3)
-output = model(input)
+
+(output, down_out) = model.encode(input)
 print(output.shape)
+print(len(down_out))
 # print(output.dtype)
