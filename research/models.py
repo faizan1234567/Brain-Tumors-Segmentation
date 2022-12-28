@@ -131,7 +131,7 @@ class SegResNet(nn.Module):
                         get_conv_layer(spatial_dims, sample_in_channels, sample_in_channels // 2, kernel_size=1),
                         get_upsample_layer(spatial_dims, sample_in_channels // 2, upsample_mode=upsample_mode),
                     ]))
-
+        
         return up_layers, up_samples
 
     #just down layers implementation now.. 
