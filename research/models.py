@@ -121,7 +121,7 @@ class SegResNet(nn.Module):
             up_layers.append(
                 nn.Sequential(
                     *[
-                        ResidualBlock(spatial_dims, sample_in_channels // 2, norm=norm, act=self.act)
+                        ResidualBlock(spatial_dims, sample_in_channels // 2, norm=norm, act=self.activation)
                         for _ in range(blocks_up[i])
                     ]))
 
