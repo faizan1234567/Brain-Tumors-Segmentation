@@ -77,7 +77,8 @@ class SegResNet(nn.Module):
                  self.norm = norm
                  self.upsample_mode = UpsampleMode(upsample_mode)
                  self.use_conv_final = use_conv_final
-                 self.initial_conv = get_conv_layer(spatial_dims, in_channels, init_kernels)
+                 self.initial_conv = get_conv_layer(spatial_dims, in_channels, init_kernels, 
+                                                    kernel_size = 3, stride = 1, bias = True)
 
                  self.down_layers = self._make_down_layers()
                  self.up_layers, self.up_samples = self._make_up_layers()
