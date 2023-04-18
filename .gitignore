@@ -6,3 +6,4 @@ Unet/
 *.pdf
 test image/
 weights/
+segment/
