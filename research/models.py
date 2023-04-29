@@ -176,6 +176,6 @@ class SegResNet(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x, down_x = self.encode(x)
         down_x.reverse()
-
+        print(x.shape, type(down_x))
         x,shapes = self.decode(x, down_x)
         return x, shapes

@@ -42,7 +42,27 @@ class ResidualBlock(nn.Module):
                 self.norm = get_norm_layer(name = norm, spatial_dims = spatial_dims, channels= in_channels)
                 self.activation = get_act_layer(act)
                 self.convolution = get_conv_layer(spatial_dims=spatial_dims, in_channels=in_channels, out_channels=in_channels)
+                self.bottleneck = nn.Sequential(get_conv_layer(spatial_dims=spatial_dims, in_channels=in_channels,
+                                                                  out_channels = int(in_channels/4), kernel_size = 1),
+                                                 get_act_layer(act),
 
+                                                get_conv_layer(spatial_dims = spatial_dims, in_channels = int(in_channels/4),
+                                                                 out_channels = int(in_channels/4)),
+                                                 get_act_layer(act),
+
+                                                get_conv_layer(spatial_dims = spatial_dims, in_channels = int(in_channels/4), 
+                                                                 out_channels = in_channels, kernel_size = 1))
+            
+
+    def forward_bottleneck(self, x):
+          identity = x
+
+          x = self.norm(x)
+          x = self.bottleneck(x)
+
+          x += identity
+          x = self.activation(x)
+          return x
 
     def forward(self, x):
         identity = x
@@ -55,10 +75,10 @@ class ResidualBlock(nn.Module):
         #second convolution. x_dash-->norm-->convolutoin-->activation-->x_out
         x = self.norm(x)
         x = self.convolution(x)
-        x = self.activation(x)
         
         #concatenate identitfy volume with x_out (both have the same shape)
         x += identity
+        x = self.activation(x)
 
         return x
 
