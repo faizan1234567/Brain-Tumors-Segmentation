@@ -18,10 +18,10 @@ total_params = sum(
 )
 
 tic = time.time()
-output = model.forward_bottleneck(input)
+output = model(input)
 toc = time.time()
 duration = toc  - tic
-print(total_params)
+# print(total_params)
 print(duration * 1000)
 # model = SegResNet(spatial_dims=3, init_kernels=8, in_channels=4, out_channels=16, 
 #                   dropout_prob=0.3, num_groups=4, blocks_down= (1, 2, 2, 4), blocks_up= (1, 1, 1))

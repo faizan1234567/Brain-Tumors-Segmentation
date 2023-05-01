@@ -29,3 +29,20 @@ class Config:
         LGG_files = 20
         val_dir_path = "/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset"
         # '/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset'
+    class newGlobalConfigs:
+        root_dir = "E:/Brats21 Data/training"
+        train_root_dir = root_dir + "/RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021"
+        test_root_dir = "E:/Brats21 Data/validation/RSNA_ASNR_MICCAI_BraTS2021_ValidationData"
+        path_to_csv = root_dir + "/BraTS21-17_Mapping.csv"
+        pretrained_model = ""
+        survival_info_df = ""
+        name_mapping_df = path_to_csv
+        seed = 50
+        class swinUNetCongis:
+            roi = (128, 128, 128)
+            batch_size = 2
+            fold = 1
+            max_epochs = 100
+            infer_overlap = 0.5
+            val_every = 10
+

@@ -1,5 +1,6 @@
 segment/
 segmentation/
+literature/
 # research/
 *.pth
 __pycache__/
