@@ -28,16 +28,16 @@ def insert_cases_paths_to_df(df:str, train_dir:str = None, test_dir:str = None):
     df = df[df['BraTS2021'].notna()]
     for _ , row in df.iterrows():
         id = row["BraTS2021"]
-        if id in train_dir:
+        if id in os.listdir(train_dir):
             path = os.path.join(train_dir, id)
             type = "train"
-        elif id in test_dir:
+        elif id in os.listdir(test_dir):
             path = os.path.join(test_dir, id)
             type = "val"
         paths.append(path)
         phase.append(type)
     df['path'] = paths
-    df['fold'] = phase
+    df['phase'] = phase
     return df
     
 
@@ -65,7 +65,9 @@ def data_transforms(phase: str = 'train'):
                 ),
                 transforms.RandSpatialCropd(
                     keys=["image", "label"],
-                    roi_size=[roi[0], roi[1], roi[2]],
+                    roi_size=[Config.newGlobalConfigs.swinUNetCongis.roi[0], 
+                              Config.newGlobalConfigs.swinUNetCongis.roi[1], 
+                              Config.newGlobalConfigs.swinUNetCongis.roi[2]],
                     random_size=False,
                 ),
                 transforms.RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=0),

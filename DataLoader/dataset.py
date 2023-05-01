@@ -30,7 +30,6 @@ class BraTSDataset(Dataset):
     is_resize: bool
     """
     def __init__(self, df: pd.DataFrame, phase: str = "val", is_resize: bool = False):
-        super(self, BraTSDataset).__init__()
         self.df = df
         self.phase = phase
         self.is_resize = is_resize
@@ -42,11 +41,11 @@ class BraTSDataset(Dataset):
     
     def __getitem__(self, index):
         case = self.df.loc[index, "BraTS2021"]
-        root_path = self.df.loc[self.df['Brats20ID'] == case]['path'].values
+        root_path = self.df.loc[self.df['BraTS2021'] == case]['path'].values[0]
 
         modalities = []
         for data_type in self.data_types:
-            img_path = os.path.join(root_path, case + data_type)
+            img_path = os.path.join(root_path, case,  data_type)
             img = self.load_img(img_path)
             
             if self.is_resize:
@@ -58,7 +57,7 @@ class BraTSDataset(Dataset):
         img = np.moveaxis(img, (0, 1, 2, 3), (0, 3, 2, 1))
         
         if self.phase != "val":
-            mask_path =  os.path.join(root_path, case + "_seg.nii")
+            mask_path =  os.path.join(root_path, case + "_seg.nii.gz")
             mask = self.load_img(mask_path)
             
             if self.is_resize:
@@ -132,8 +131,7 @@ def get_dataloader(
     num_workers: int = 4,):
 
     '''Returns: dataloader for the model training'''
-    df = pd.read_csv(path_to_csv)
-    df = insert_cases_paths_to_df(df, train_dir= Config.newGlobalConfigs.train_root_dir, 
+    df = insert_cases_paths_to_df(path_to_csv, train_dir= Config.newGlobalConfigs.train_root_dir, 
                                   test_dir= Config.newGlobalConfigs.test_root_dir)
     
     train_df = df.loc[df['phase'] == 'train'].reset_index(drop=True)
@@ -152,4 +150,4 @@ def get_dataloader(
 
 if __name__ == '__main__':
     data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'train', "")
-    print(iter(next(data)))
+    print(next(iter(data)))

@@ -1,5 +1,6 @@
 '''set up the config for brats dataset, train and test folders names and
 some parameters'''
+import os
 
 class Config:
     root_dir = "/gdrive/MyDrive/THESIS BraTs NUST"
@@ -31,8 +32,8 @@ class Config:
         # '/gdrive/MyDrive/THESIS BraTs NUST/MICCAI_BraTSXX_TestData/Testset'
     class newGlobalConfigs:
         root_dir = "E:/Brats21 Data/training"
-        train_root_dir = root_dir + "/RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021"
-        test_root_dir = "E:/Brats21 Data/validation/RSNA_ASNR_MICCAI_BraTS2021_ValidationData"
+        train_root_dir = root_dir + "/RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021"+ "/RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021"
+        test_root_dir = "E:/Brats21 Data/validation/RSNA_ASNR_MICCAI_BraTS2021_ValidationData/RSNA_ASNR_MICCAI_BraTS2021_ValidationData"
         path_to_csv = root_dir + "/BraTS21-17_Mapping.csv"
         pretrained_model = ""
         survival_info_df = ""
