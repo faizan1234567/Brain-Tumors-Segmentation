@@ -29,10 +29,10 @@ def insert_cases_paths_to_df(df:str, train_dir:str = None, test_dir:str = None):
     for _ , row in df.iterrows():
         id = row["BraTS2021"]
         if id in os.listdir(train_dir):
-            path = os.path.join(train_dir, id)
+            path = train_dir + "/" + id
             type = "train"
         elif id in os.listdir(test_dir):
-            path = os.path.join(test_dir, id)
+            path = test_dir + "/" + id
             type = "val"
         paths.append(path)
         phase.append(type)
@@ -53,9 +53,7 @@ def data_transforms(phase: str = 'train'):
     transform: transforms.Compose
     '''  
     train_transform = transforms.Compose(
-            [
-                transforms.LoadImaged(keys=["image", "label"]),
-                transforms.ConvertToMultiChannelBasedOnBratsClassesd(keys="label"),
+            [   transforms.EnsureTyped(keys=["image", "label"]),
                 transforms.CropForegroundd(
                     keys=["image", "label"],
                     source_key="image",
@@ -79,8 +77,7 @@ def data_transforms(phase: str = 'train'):
                 
     val_transform = transforms.Compose(
             [
-                transforms.LoadImaged(keys=["image", "label"]),
-                transforms.ConvertToMultiChannelBasedOnBratsClassesd(keys="label"),
+                transforms.EnsureTyped(keys=["image"]),
                 transforms.NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
             ])
     transform = {'train': train_transform, 'val': val_transform}

@@ -43,9 +43,9 @@ class BraTSDataset(Dataset):
         case = self.df.loc[index, "BraTS2021"]
         root_path = self.df.loc[self.df['BraTS2021'] == case]['path'].values[0]
 
-        modalities = []
+        modalities = [] 
         for data_type in self.data_types:
-            img_path = os.path.join(root_path, case,  data_type)
+            img_path = root_path + "/" + case + data_type
             img = self.load_img(img_path)
             
             if self.is_resize:
@@ -65,17 +65,18 @@ class BraTSDataset(Dataset):
                 mask = np.clip(mask.astype(np.uint8), 0, 1).astype(np.float32)
                 mask = np.clip(mask, 0, 1)
             mask = self.preprocess_mask_labels(mask)
-    
-            augmented = self.augmentations(image=img.astype(np.float32), 
-                                           mask=mask.astype(np.float32))
+            data = {"image": img.astype(np.float32),
+                    "label": mask.astype(np.float32)}
+            
+            augmented = self.augmentations(data)
             
             img = augmented['image']
-            mask = augmented['mask']
+            mask = augmented['label']
     
         
             return {
                 "image": img,
-                "mask": mask,
+                "label": mask,
             }
         
         return {
@@ -139,6 +140,7 @@ def get_dataloader(
 
     df = train_df if phase == "train" else val_df
     dataset = dataset(df, phase)
+    print(len(dataset))
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -149,5 +151,7 @@ def get_dataloader(
     return dataloader
 
 if __name__ == '__main__':
-    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'train', "")
-    print(next(iter(data)))
+    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'val', "")
+    print(len(data))
+    # image, label = data["image"], data['label']
+    # print(image.shape, label.shape)
