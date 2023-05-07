@@ -56,13 +56,14 @@ class Config:
         seed = 50
         class swinUNetCongis:
             roi = (128, 128, 128)
-            batch_size = 2
             fold = 1
             max_epochs = 100
             infer_overlap = 0.5
-            val_every = 10
+            val_every = 2
             class training_cofigs:
                 roi = (128, 128, 128)
+                num_workers = 2
+                batch_size = 1
                 sw_batch_size = 4
                 infer_overlap = 0.5
                 dice_loss = DiceLoss(to_onehot_y=False, sigmoid=True)

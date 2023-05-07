@@ -18,6 +18,7 @@ import tqdm as tqdm
 from utils.meter import AverageMeter
 from config.configs import *
 from utils.general import save_checkpoint
+from DataLoader.dataset import BraTSDataset, get_dataloader
 
 import monai
 from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batch
@@ -333,6 +334,20 @@ if __name__ == "__main__":
     optimizer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.optimizer
     scheduler = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.scheduler
     max_epochs = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.max_epochs
+    dataset_info_csv = Config.newGlobalConfigs.path_to_csv
+    batch_size = Config.newGlobalConfigs.swinUNetCongis.batch_size
+    num_workers = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.num_workers
+
+    train_loader = get_dataloader(BraTSDataset, 
+                                  dataset_info_csv, 
+                                  batch_size= batch_size, 
+                                  num_workers=num_workers)
+    
+    val_loader = get_dataloader(BraTSDataset, 
+                                dataset_info_csv, 
+                                phase= "val", 
+                                batch_size=batch_size,  
+                                num_workers=num_workers)
     print()
     print('starting training...')
     print('--'* 40)
@@ -340,8 +355,8 @@ if __name__ == "__main__":
         loss_func= loss_func,
         acc_func= acc_func,
         optimizer= optimizer,
-        train_loader=...,
-        val_loader=...
+        train_loader=train_loader,
+        val_loader=val_loader,
         scheduler=scheduler,
         model_inferer=model_inferer,
         post_sigmoid=post_sigmoid,
