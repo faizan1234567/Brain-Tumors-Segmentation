@@ -82,6 +82,7 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
         print(
             "Epoch {}/{} {}/{}".format(epoch, max_epochs, index, len(loader)),
             "loss: {:.4f}".format(run_loss.avg),
+            "Mean dice: {:.4f}".format(run_acc.avg),
             "time {:.2f}s".format(time.time() - tic))
         print()
         tic = time.time()
@@ -220,7 +221,6 @@ def trainer(model,
         print(
             "Final training  {}/{}".format(epoch + 1, max_epochs - 1),
             "loss: {:.4f}".format(training_loss),
-            "Mean dice: {:.4f}".format(training_mean_dice),
             "time {:.2f}s".format(time.time() - epoch_time),
         )
 
@@ -394,9 +394,6 @@ if __name__ == "__main__":
         start_epoch=start_epoch,
         val_every=val_every)
     print('Done!!!')
-
-
-
 
 
 
