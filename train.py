@@ -340,6 +340,7 @@ if __name__ == "__main__":
 
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
+                                  phase = "train",
                                   batch_size= batch_size, 
                                   num_workers=num_workers)
     
