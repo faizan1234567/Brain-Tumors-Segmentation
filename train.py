@@ -25,11 +25,6 @@ import torch
 import torch.nn as nn
 
 device = "cuda" if torch.cuda.is_available else "cpu"
-post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
-post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
-model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
-model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
-val_every = Config.newGlobalConfigs.swinUNetCongis.val_every
 
 def load_pretrained_model(model,
                         state_path: str):
@@ -48,16 +43,18 @@ def load_pretrained_model(model,
 
 
 def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
-    """train the model for epoch on MRI image and given ground truth labels
+    """
+    train the model for epoch on MRI image and given ground truth labels
     using set of arguments
     
     Parameters
     ----------
     model: nn.Module
     loader: torch.utils.data.Dataset
-    optimizer: 
-    loss_func: 
-    epoch: int"""
+    optimizer: torch.optim.adamw.AdamW
+    loss_func: monai.losses.dice.DiceLoss
+    epoch: int
+    """
     model.train() 
     tic = time.time()
     run_loss = AverageMeter()
@@ -90,7 +87,7 @@ def val(model, loader, acc_func,
     ----------
     model: nn.Module
     loader: torch.util.data.Dataset
-    acc_func: 
+    acc_func: monai.metrics.meandice.DiceMetric 
     num_epochs: int
     epochs: int
     model_inferer: nn.Module
@@ -172,9 +169,9 @@ def trainer(model,
     train_loader: torch.utils.data.Dataset
     val_loader: torch.utils.data.Dataset
     optimizer: torch.optim
-    loss_func:
-    acc_func:
-    schedular:
+    loss_func: monai.losses.dice.DiceLoss
+    acc_func:  monai.metrics.meandice.DiceMetric 
+    schedular: torch.optim.lr_scheduler.CosineAnnealingLR
     max_epochs: int
     model_inferer: nn.Module
     start_epoch: int
@@ -259,6 +256,103 @@ def trainer(model,
         mean_dices,
         training_loss,
         train_epochs)
+
+def run(model,
+        loss_func,
+        acc_func,
+        optimizer,
+        train_loader,
+        val_loader,
+        scheduler,
+        model_inferer = None,
+        post_sigmoid = None, 
+        post_pred = None,
+        max_epochs = 100,
+        start_epoch = 0,
+        val_every = 2
+        ):
+    '''Now train the model
+    
+    Parameters
+    ----------
+    model: nn.Module
+    acc_func:  monai.metrics.meandice.DiceMetric
+    loss_func: monai.losses.dice.DiceLoss
+    optimizer: torch.optim.adamw.AdamW
+    train_loader: torch.utils.data.Dataset
+    val_loader: torch.utils.data.Dataset
+    schedular:  torch.optim.lr_scheduler.CosineAnnealingLR
+    model_inferer: nn.Module
+    post_sigmoid: monai.transforms.post.array.Activations
+    post_pred:monai.transforms.post.array.AsDiscrete
+    max_epochs: int
+    start_epoch: int
+    val_every: int
+    '''
+    (
+    val_mean_dice_max,
+    dices_tc,
+    dices_wt,
+    dices_et,
+    dices_mean,
+    train_losses,
+    train_epochs,
+    ) = trainer(
+        model=model,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        optimizer=optimizer,
+        loss_func=loss_func,
+        acc_func=acc_func,
+        scheduler=scheduler,
+        model_inferer=model_inferer,
+        start_epoch=start_epoch,
+        post_sigmoid=post_sigmoid,
+        post_pred=post_pred,
+    )
+    print()
+    print(f"train completed, best average dice: {val_mean_dice_max:.4f} ")
+    return (val_mean_dice_max, 
+            dices_tc,
+            dices_wt,
+            dices_et,
+            dices_mean,
+            train_losses,
+            train_epochs)
+
+
+if __name__ == "__main__":
+    start_epoch = 0
+    post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
+    post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
+    model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
+    model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
+    val_every = Config.newGlobalConfigs.swinUNetCongis.val_every
+    loss_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_loss
+    acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
+    optimizer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.optimizer
+    scheduler = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.scheduler
+    max_epochs = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.max_epochs
+    print()
+    print('starting training...')
+    print('--'* 40)
+    run(model=model,
+        loss_func= loss_func,
+        acc_func= acc_func,
+        optimizer= optimizer,
+        train_loader=...,
+        val_loader=...
+        scheduler=scheduler,
+        model_inferer=model_inferer,
+        post_sigmoid=post_sigmoid,
+        post_pred=post_pred,
+        max_epochs=max_epochs,
+        start_epoch=start_epoch,
+        val_every=val_every)
+    print('Done!!!')
+
+
+
 
 
 

@@ -4,8 +4,10 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 import pandas as pd
 import nibabel as nib
-import cv2
+import json
+import csv
 import os
+from skimage.transform import resize
 from pathlib import Path
 import sys
 
@@ -15,7 +17,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-from configs import Config
+from config.configs import Config
 from utils.preprocess import data_transforms
 from utils.preprocess import insert_cases_paths_to_df
 
@@ -97,7 +99,7 @@ class BraTSDataset(Dataset):
         return (data - data_min) / (np.max(data) - data_min)
     
     def resize(self, data: np.ndarray):
-        data = cv2.resize(data, (78, 120, 120), preserve_range=True)
+        data = resize(data, (78, 120, 120), preserve_range=True)
         return data
     
     def preprocess_mask_labels(self, mask: np.ndarray):
@@ -127,7 +129,6 @@ def get_dataloader(
     dataset: torch.utils.data.Dataset,
     path_to_csv: str,
     phase: str,
-    fold: str = 'val',
     batch_size: int = 1,
     num_workers: int = 4,):
 
@@ -140,7 +141,6 @@ def get_dataloader(
 
     df = train_df if phase == "train" else val_df
     dataset = dataset(df, phase)
-    print(len(dataset))
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -151,7 +151,8 @@ def get_dataloader(
     return dataloader
 
 if __name__ == '__main__':
-    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'val', "")
+    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'train', "")
     print(len(data))
-    # image, label = data["image"], data['label']
-    # print(image.shape, label.shape)
+    batch = next(iter(data))
+    image, label = batch["image"], batch['label']
+    print(image.shape, label.shape)

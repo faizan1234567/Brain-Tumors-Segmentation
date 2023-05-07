@@ -5,7 +5,7 @@ import numpy as np
 import os
 import random
 import matplotlib.pyplot as plt
-from configs import Config
+from config.configs import Config
 
 import monai
 from monai import transforms

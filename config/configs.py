@@ -88,5 +88,11 @@ class Config:
                                         sw_batch_size=sw_batch_size,
                                         predictor=model,
                                         overlap=infer_overlap)
+                learning_rate = 1e-4
+                weight_decay = 1e-5
+                max_epochs = 100
+                optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, 
+                                              weight_decay=weight_decay)
+                scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
 
 
