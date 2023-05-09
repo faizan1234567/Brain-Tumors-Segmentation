@@ -35,11 +35,12 @@ def read_args():
     parser.add_argument('--fold', default= 0, type = int, help="folder name")
     parser.add_argument('--json', default= "", type = str, help ="path to json file")
     parser.add_argument('--batch', default=1, type= int, help= "batch size")
-    parser.add_argument('--imgsz', default=128, type = int, help = 'image roi size')
+    parser.add_argument('--img-roi', default=128, type = int, help = 'image roi size')
+    parser.add_argument('--val-every', default= 2, type = int, help= "validate every 2 epochs")
+    parser.add_argument('--max-epochs', default= 100, type= int, help= "maximum number of epoch to train")
+    parser.add_argument('--workers', default=2, type = int, help= "Number of data loading workers")
     opt = parser.parse_args()
     return opt
-
-
 
 def load_pretrained_model(model,
                         state_path: str):
