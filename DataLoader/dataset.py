@@ -58,7 +58,7 @@ class BraTSDataset(Dataset):
         img = np.stack(modalities)
         img = np.moveaxis(img, (0, 1, 2, 3), (0, 3, 2, 1))
         
-        if self.phase != "val":
+        if self.phase != "test":
             mask_path =  os.path.join(root_path, case + "_seg.nii.gz")
             mask = self.load_img(mask_path)
             
@@ -130,17 +130,20 @@ def get_dataloader(
     path_to_csv: str,
     phase: str,
     batch_size: int = 1,
-    num_workers: int = 4,):
+    num_workers: int = 2,
+    json_file: str = None,
+    fold: int = 0):
 
     '''Returns: dataloader for the model training'''
     df = insert_cases_paths_to_df(path_to_csv, train_dir= Config.newGlobalConfigs.train_root_dir, 
-                                  test_dir= Config.newGlobalConfigs.test_root_dir)
+                                  test_dir= Config.newGlobalConfigs.test_root_dir, json_file=json_file, fold=fold)
     
     train_df = df.loc[df['phase'] == 'train'].reset_index(drop=True)
     val_df = df.loc[df['phase'] == 'val'].reset_index(drop=True)
 
     df = train_df if phase == "train" else val_df
     dataset = dataset(df, phase)
+    print(f'Total examples in the dataset: {len(df)}')
     dataloader = DataLoader(
         dataset,
         batch_size=batch_size,
@@ -151,8 +154,8 @@ def get_dataloader(
     return dataloader
 
 if __name__ == '__main__':
-    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'train', "")
-    print(len(data))
+    json_file = Config.newGlobalConfigs.json_file
+    data = get_dataloader(BraTSDataset, Config.newGlobalConfigs.path_to_csv, 'train', 2, 2, json_file=json_file)
     batch = next(iter(data))
     image, label = batch["image"], batch['label']
     print(image.shape, label.shape)

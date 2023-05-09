@@ -54,6 +54,7 @@ class Config:
         full_patient_path = train_root_dir +"/" + a_test_patient
         name_mapping_df = path_to_csv
         seed = 50
+        json_file = root_dir + "/brats21_folds.json"
         class swinUNetCongis:
             roi = (128, 128, 128)
             fold = 1

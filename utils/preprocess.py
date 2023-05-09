@@ -30,9 +30,9 @@ def separate_train_val_ids(json_file: str = None,
         if example['fold'] == fold:
             patient_id = example['label'].split('/')[-2]
             validation.append(patient_id)
-    else:
-        patient_id = example['label'].split('/')[-2]
-        training.append(patient_id)
+        else:
+            patient_id = example['label'].split('/')[-2]
+            training.append(patient_id)
 
     return (training, validation)
         
@@ -109,12 +109,15 @@ def data_transforms(phase: str = 'train'):
                 transforms.RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=2),
                 transforms.NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
                 transforms.RandScaleIntensityd(keys="image", factors=0.1, prob=1.0),
-                transforms.RandShiftIntensityd(keys="image", offsets=0.1, prob=1.0)])
+                transforms.RandShiftIntensityd(keys="image", offsets=0.1, prob=1.0),
+                transforms.ToTensord(keys=["image", "label"])])
                 
     val_transform = transforms.Compose(
             [
-                transforms.EnsureTyped(keys=["image"]),
+                transforms.EnsureTyped(keys=["image", "label"]),
                 transforms.NormalizeIntensityd(keys="image", nonzero=True, channel_wise=True),
+                transforms.ToTensord(keys=["image", "label"])
             ])
+    test_transform = val_transform
     transform = {'train': train_transform, 'val': val_transform}
     return transform[phase]

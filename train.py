@@ -18,7 +18,7 @@ import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
 from config.configs import *
-from utils.general import save_checkpoint
+from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from DataLoader.dataset import BraTSDataset, get_dataloader
 
 import monai
@@ -33,30 +33,18 @@ def read_args():
     parser = argparse.ArgumentParser(description="command line args")
     parser.add_argument('--data', default= "", type= str, help= "dataset root directory path")
     parser.add_argument('--fold', default= 0, type = int, help="folder name")
-    parser.add_argument('--json', default= "", type = str, help ="path to json file")
+    parser.add_argument('--json_file', default= "", type = str, help ="path to json file")
     parser.add_argument('--batch', default=1, type= int, help= "batch size")
-    parser.add_argument('--img-roi', default=128, type = int, help = 'image roi size')
-    parser.add_argument('--val-every', default= 2, type = int, help= "validate every 2 epochs")
-    parser.add_argument('--max-epochs', default= 100, type= int, help= "maximum number of epoch to train")
+    parser.add_argument('--img_roi', default=128, type = int, help = 'image roi size')
+    parser.add_argument('--val_every', default= 2, type = int, help= "validate every 2 epochs")
+    parser.add_argument('--max_epochs', default= 100, type= int, help= "maximum number of epoch to train")
     parser.add_argument('--workers', default=2, type = int, help= "Number of data loading workers")
+    parser.add_argument('--pretrained_model', default= "", type = str, help = "path to pretraiend model")
+    parser.add_argument('--pretrained', action= 'store_true', help= "use pretrained weights.")
+    parser.add_argument('--resume', action= 'store_true', help="starting training from the saved ckpt.")
+
     opt = parser.parse_args()
     return opt
-
-def load_pretrained_model(model,
-                        state_path: str):
-    '''
-    Load a pretraiend model, it is sometimes important to leverage the knowlege 
-    from the pretrained model when the dataset is limited
-
-    Parameters
-    ----------
-    model: nn.Module
-    state_path: str
-    '''
-    model.load_state_dict(torch.load(state_path))
-    print("Predtrain model loaded")
-    return model
-
 
 def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
     """
@@ -301,7 +289,7 @@ def trainer(model,
         training_loss,
         train_epochs)
 
-def run(model,
+def run(args, model,
         loss_func,
         acc_func,
         optimizer,
@@ -333,6 +321,18 @@ def run(model,
     start_epoch: int
     val_every: int
     '''
+    if args.pretrained:
+        print('Loading a pretrained model')
+        model = load_pretrained_model(model, args.pretrained_model)
+    if args.resume:
+        print('Resuming training...')
+        model = resume_training(model, args.pretrained_model)
+    else:
+        print('Trainig from scrath!')
+
+    total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print("Total parameters count", total_params)
+
     (
     val_mean_dice_max,
     dices_tc,
@@ -367,35 +367,39 @@ def run(model,
 
 if __name__ == "__main__":
     start_epoch = 0
+    args = read_args()
     post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
     post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
     model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
     model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
-    val_every = Config.newGlobalConfigs.swinUNetCongis.val_every
+    val_every = args.val_every
     loss_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_loss
     acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
     optimizer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.optimizer
     scheduler = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.scheduler
-    max_epochs = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.max_epochs
+    max_epochs = args.max_epochs()
     dataset_info_csv = Config.newGlobalConfigs.path_to_csv
-    batch_size = Config.newGlobalConfigs.swinUNetCongis.batch_size
-    num_workers = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.num_workers
-
+    batch_size = args.batch
+    num_workers = args.workers
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
                                   batch_size= batch_size, 
-                                  num_workers=num_workers)
+                                  num_workers=num_workers,
+                                  json_file=args.json_file,
+                                  fold=args.fold)
     
     val_loader = get_dataloader(BraTSDataset, 
                                 dataset_info_csv, 
                                 phase= "val", 
                                 batch_size=batch_size,  
-                                num_workers=num_workers)
+                                num_workers=num_workers,
+                                json_file=args.json_file,
+                                fold=args.fold)
     print()
     print('starting training...')
     print('--'* 40)
-    run(model=model,
+    run(args, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
         optimizer= optimizer,

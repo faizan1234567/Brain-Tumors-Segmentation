@@ -34,6 +34,45 @@ def save_checkpoint(model, epoch, filename="model.pt", best_acc=0, save_dir=os.g
     torch.save(save_dict, filename)
     print("Saving checkpoint", filename)
 
+def load_pretrained_model(model,
+                        state_path):
+    '''
+    Load a pretraiend model, it is sometimes important to leverage the knowlege 
+    from the pretrained model when the dataset is limited
+
+    Parameters
+    ----------
+    model: nn.Module
+    state_path: str
+    '''
+    model.load_state_dict(torch.load(state_path)["state_dict"])
+    print("Predtrain model loaded")
+    return model
+
+def resume_training(model, state_path):
+    '''
+    Option for resuming training where it stopped.
+
+    Parameters
+    ----------
+    model: nn.Module
+    state_path: str
+    '''
+    checkpoint = torch.load(state_path, map_location="cpu")
+    from collections import OrderedDict
+
+    new_state_dict = OrderedDict()
+    for k, v in checkpoint["state_dict"].items():
+        new_state_dict[k.replace("backbone.", "")] = v
+    model.load_state_dict(new_state_dict, strict=False)
+    if "epoch" in checkpoint:
+        start_epoch = checkpoint["epoch"]
+    if "best_acc" in checkpoint:
+        best_acc = checkpoint["best_acc"]
+    print("=> loaded checkpoint '{}' (epoch {}) (bestacc {})".format(state_path, start_epoch, best_acc))
+    return model
+
+
 def visualize_data_sample(case, id,  slice=78, modality= "flair"):
     """visualize a modality along with the segmentation label in a subplot
     
@@ -89,7 +128,16 @@ def plot_train_histroy(data):
     for name in NAMES:
         data_list = data[name]
         data_lists.append(data_list)
-    
+    with plt.style.context("seaborn-dark-palette"):
+            fig, axes = plt.subplots(3, 1, figsize=(8, 10))
+            for i, ax in enumerate(axes):
+                ax.plot(data[i]['val'], c=colors[0], label="val")
+                ax.plot(data[i]['train'], c=colors[-1], label="train")
+                ax.set_title(labels[i])
+                ax.legend(loc="upper right")
+                
+            plt.tight_layout()
+            plt.show()
     
 
 
