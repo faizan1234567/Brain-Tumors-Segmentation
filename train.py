@@ -13,6 +13,7 @@ import pandas as pd
 import random
 import sys
 import time
+import argparse
 import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
@@ -26,6 +27,19 @@ import torch
 import torch.nn as nn
 
 device = "cuda" if torch.cuda.is_available else "cpu"
+
+def read_args():
+    """read commmand line arguments"""
+    parser = argparse.ArgumentParser(description="command line args")
+    parser.add_argument('--data', default= "", type= str, help= "dataset root directory path")
+    parser.add_argument('--fold', default= 0, type = int, help="folder name")
+    parser.add_argument('--json', default= "", type = str, help ="path to json file")
+    parser.add_argument('--batch', default=1, type= int, help= "batch size")
+    parser.add_argument('--imgsz', default=128, type = int, help = 'image roi size')
+    opt = parser.parse_args()
+    return opt
+
+
 
 def load_pretrained_model(model,
                         state_path: str):
