@@ -9,3 +9,5 @@ Unet/
 test image/
 weights/
 segment/
+*.pth
+*.csv
