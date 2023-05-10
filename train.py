@@ -26,7 +26,8 @@ from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batc
 import torch
 import torch.nn as nn
 
-device = "cuda" if torch.cuda.is_available else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
+print(f'Available device: {device}')
 
 def read_args():
     """read commmand line arguments"""
@@ -93,7 +94,7 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
 
 
 def val(model, loader, acc_func,
-        max_epochs, epoch, model_inferer = None,
+        max_epochs = None, epoch = None, model_inferer = None,
         post_sigmoid = None, post_pred = None):
     """
     Validation phase

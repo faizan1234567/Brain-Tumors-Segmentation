@@ -24,7 +24,7 @@ def read_args():
     '''command line arguments for setting up 
     neccassary paths and params'''
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weight', type = str, default = "", help = "weight \
+    parser.add_argument('--weights', type = str, default = "", help = "weight \
         file path ")
     parser.add_argument('--fold', default= 0, type= int, 
                         help= "fold number for evaluation")
@@ -32,7 +32,7 @@ def read_args():
         help = "number of workers")
     parser.add_argument('--batch', type = int, default=1, \
         help= "batch size to load the dataset")
-    parser.add_argument('json_file', type = str, default= "", \
+    parser.add_argument('--json_file', type = str, default= "", \
                         help= "path to the data json file")
     opt = parser.parse_args()
     return opt
@@ -62,7 +62,8 @@ def evaluate(model,
                                acc_func=acc_func,
                                model_inferer=model_inferer,
                                post_pred= post_pred,
-                               post_sigmoid= post_sigmoid)
+                               post_sigmoid= post_sigmoid,
+                               )
     
 
     print("Mean dice on the test set: ", mean_dice)

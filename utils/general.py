@@ -45,8 +45,8 @@ def load_pretrained_model(model,
     model: nn.Module
     state_path: str
     '''
-    model.load_state_dict(torch.load(state_path)["state_dict"])
-    print("Predtrain model loaded")
+    model.load_state_dict(torch.load(state_path, map_location=torch.device('cpu'))["state_dict"])
+    print("Pretrained model loaded")
     return model
 
 def resume_training(model, state_path):
