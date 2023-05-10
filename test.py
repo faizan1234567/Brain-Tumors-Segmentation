@@ -10,13 +10,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
-from configs import Config
-from segment_3d import load_dataset
-from segment_3d import inference
-from segment_3d import model_loss_optim
+from config.configs import Config
+from DataLoader.dataset import BraTSDataset, get_dataloader
 from monai.data import DataLoader, decollate_batch
 from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
+from utils.general import load_pretrained_model
+from train import val
+
+
 
 def read_args():
     '''command line arguments for setting up 
@@ -24,129 +26,87 @@ def read_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weight', type = str, default = "", help = "weight \
         file path ")
+    parser.add_argument('--fold', default= 0, type= int, 
+                        help= "fold number for evaluation")
     parser.add_argument('--workers', type = int, default=2,\
         help = "number of workers")
     parser.add_argument('--batch', type = int, default=1, \
         help= "batch size to load the dataset")
+    parser.add_argument('json_file', type = str, default= "", \
+                        help= "path to the data json file")
     opt = parser.parse_args()
     return opt
 
 
-def add_paths(survival_df, name_mapping_df=None, t = 'test'):
-    '''add paths to the csv file
-    args:
-    survival_df: dataframe
-    name_mapping_df: dataframe
-    t = str
-    return 
-    paths: list'''
-    
-    # rename dataframe on columns 
-    if t!= "val" and t!= "test":
-        name_mapping_df.rename({'BraTS_2020_subject_ID': 'Brats20ID'}, axis=1, inplace=True) 
-        df = survival_df.merge(name_mapping_df, on="Brats20ID", how="right")
-    else:
-        df = survival_df
-    paths = []
-    temp_ids = []
-    for _, row  in df.iterrows():
-        id_ = row['Brats20ID']
-        if t != "val" and t!= "test":
-            phase = id_.split("_")[-2]
-            if phase == 'Training':
-                path = os.path.join(Config.train_root_dir, id_)
-                if os.path.exists(path):
-                    if len(os.listdir(path)) == 5:
-                        p = os.path.join(Config.train_root_dir, id_)
-                    else:
-                        print('Not appending ID: {}'.format(path))
-                        temp_ids.append(id_)
-                else:  
-                    temp_ids.append(id_)
-        elif t == "val":
-            path = os.path.join(Config.Testset.val_dir_path, id_)
-            if os.path.exists(path):
-                if len(os.listdir(path)) == 5:
-                    paths.append(path)
-                else:
-                    print('Not appending ID: {}'.format(path))
-                    temp_ids.append(id_)
-            else:
-                temp_ids.append(id_)
-        else:
-            path = os.path.join(Config.brats19_test_data, id_)
-            if os.path.exists(path):
-                if len(os.listdir(path)) == 5:
-                    paths.append(path)
-                else:
-                    print('Not appending ID: {}'.format(path))
-                    temp_ids.append(id_)
-            else:
-                temp_ids.append(id_)
-    for id in temp_ids:
-        df = df[df["Brats20ID"].str.contains(id) == False]
-    df = df.reset_index()
-    df.drop('index', inplace= True, axis=1)
-    df['path'] = paths
-    return df
-
-
-def evaluate(model, weight, test_loader, post_transforms, 
-             dice_metric, dice_metric_batch):
+def evaluate(model,
+              weights, 
+              loader, 
+              post_pred = None, 
+              post_sigmoid = None,
+              acc_func = None,
+              model_inferer = None):
     '''to evaluate the model performance
-    Args:
-    model: deep learning model
-    weight: learned params (path)
-    test_loader: test data loader
-    post_transforms: post transforms function
-    dice_metric: dice evaluation metric
-    dice_metric_batch: batch evaluation
-    Return:
-    None'''
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-    model.load_state_dict(torch.load(weight,  map_location=torch.device('cpu')))
-    model.eval()
-    with torch.no_grad():
-        for val_data in test_loader:
-            val_inputs, val_labels = (
-                    val_data["image"].to(device),
-                    val_data["mask"].to(device))
-            val_outputs = inference(val_inputs, model)
-            val_outputs = [post_transforms(i) for i in decollate_batch(val_outputs)]
-            # val_outputs, val_labels = from_engine(["pred", "mask"])(val_data)
-            dice_metric(y_pred=val_outputs, y=val_labels)
-            dice_metric_batch(y_pred=val_outputs, y=val_labels)
+    Parameters
+    ----------:
+    model: nn.Module
+    weight: str
+    loader: torch.utils.data.Dataset
+    post_pred: monai.transforms.post.array.AsDiscrete
+    post_sigmoid: monai.transforms.post.array.Activations
+    acc_func: monai.metrics.meandice.DiceMetric 
+    model_inferer: nn.Module
+    '''
+    model = load_pretrained_model(model, state_path=weights)
+    mean_dice, test_loss = val(model=model,
+                               loader= loader,
+                               acc_func=acc_func,
+                               model_inferer=model_inferer,
+                               post_pred= post_pred,
+                               post_sigmoid= post_sigmoid)
+    
 
-        metric_org = dice_metric.aggregate().item()
-        metric_batch_org = dice_metric_batch.aggregate()
-
-        dice_metric.reset()
-        dice_metric_batch.reset()
-
-    metric_tc, metric_wt, metric_et = metric_batch_org[0].item(), metric_batch_org[1].item(), metric_batch_org[2].item()
-
-    print("Metric on original image spacing: ", metric_org)
-    print(f"metric_tc: {metric_tc:.4f}")
-    print(f"metric_wt: {metric_wt:.4f}")
-    print(f"metric_et: {metric_et:.4f}") 
+    print("Mean dice on the test set: ", mean_dice)
+    print('Loss on the test set: {}'.format(test_loss))
 
 def main():
+    """
+    Function that handles everything..
+    """
     args = read_args()
-    print('configuring...')
-    device, model, loss_function, optimizer, lr_scheduler, dice_metric, dice_metric_batch, post_trans = model_loss_optim(1, 1e-4, 1e-5)
-    print('done\n')
-    print('Loading test data... \n')
-    survival_df_test = pd.read_csv(Config.brats19_test_survival_csv)
-    df_test = add_paths(survival_df_test, t="test")
-    test_dataset, test_loader = load_dataset(df_test,
-                                             'val',
-                                              False,
-                                              args.workers,
-                                              args.batch)
-    print('done')
-    print('Now evaluating models performance')
-    evaluate(model, args.weight, test_loader, post_trans, dice_metric, dice_metric_batch)
-    print('done')
-
+    print('Configuring...')
+    model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
+    weights = args.weights
+    data_csv_file_path = Config.newGlobalConfigs.path_to_csv
+    batch_size = args.batch
+    wokers = args.workers
+    data_json_file = Config.newGlobalConfigs.json_file
+    fold = args.fold
+    post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
+    post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
+    acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
+    model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
+    if args.json_file:
+        data_json_file = args.json_file
+    print('Configured. Now Loading dataset...')
+    test_loader = get_dataloader(BraTSDataset,
+                                 path_to_csv= data_csv_file_path,
+                                 phase = 'val',
+                                 batch_size= batch_size,
+                                 num_workers= wokers,
+                                 json_file=data_json_file,
+                                 fold = fold)
+    print('The dataset loaded. \n')
+    print(f'Dataset size: {len(test_loader)}')
+    print('Now starting evaluation on the test set.')
+    evaluate(model= model,
+             weights=weights,
+             loader= test_loader,
+             post_pred= post_pred,
+             post_sigmoid= post_sigmoid,
+             acc_func= acc_func,
+             model_inferer= model_inferer)
+    
+    print('Completed sucessfully!!')
+    
 if __name__ == '__main__':
     main()
