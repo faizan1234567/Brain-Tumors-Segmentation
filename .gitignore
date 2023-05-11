@@ -11,3 +11,5 @@ weights/
 segment/
 *.pth
 *.csv 
+data/
+
