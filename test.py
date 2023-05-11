@@ -77,15 +77,16 @@ def main():
     print('Configuring...')
     model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
     weights = args.weights
-    data_csv_file_path = Config.newGlobalConfigs.path_to_csv
+    data_csv_file_path = Config.newGlobalConfigs.OtherPC.path_to_csv
     batch_size = args.batch
     wokers = args.workers
-    data_json_file = Config.newGlobalConfigs.json_file
+    data_json_file = Config.newGlobalConfigs.OtherPC.json_file
     fold = args.fold
     post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
     post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
     acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
     model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
+    data_dir = Config.newGlobalConfigs.OtherPC.train_root_dir
     if args.json_file:
         data_json_file = args.json_file
     print('Configured. Now Loading dataset...')
@@ -95,7 +96,9 @@ def main():
                                  batch_size= batch_size,
                                  num_workers= wokers,
                                  json_file=data_json_file,
-                                 fold = fold)
+                                 fold = fold,
+                                 train_dir= data_dir)
+    
     print('The dataset loaded. \n')
     print(f'Dataset size: {len(test_loader)}')
     print('Now starting evaluation on the test set.')

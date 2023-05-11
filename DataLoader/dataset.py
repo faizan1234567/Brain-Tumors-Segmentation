@@ -132,11 +132,13 @@ def get_dataloader(
     batch_size: int = 1,
     num_workers: int = 2,
     json_file: str = None,
-    fold: int = 0):
+    fold: int = 0,
+    train_dir = Config.newGlobalConfigs.train_root_dir,
+    test_dir = Config.newGlobalConfigs.test_root_dir):
 
     '''Returns: dataloader for the model training'''
-    df = insert_cases_paths_to_df(path_to_csv, train_dir= Config.newGlobalConfigs.train_root_dir, 
-                                  test_dir= Config.newGlobalConfigs.test_root_dir, json_file=json_file, fold=fold)
+    df = insert_cases_paths_to_df(path_to_csv, train_dir = train_dir, 
+                                  test_dir= test_dir, json_file=json_file, fold=fold)
     
     train_df = df.loc[df['phase'] == 'train'].reset_index(drop=True)
     val_df = df.loc[df['phase'] == 'val'].reset_index(drop=True)
