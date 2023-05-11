@@ -123,7 +123,7 @@ def val(model, loader, acc_func,
             val_loss = loss_func(val_logits, mask)
             run_val_loss.update(val_loss.item(), n = batch_data.shape[0])
             logits = model_inferer(image_data)
-            masks = decollate_batch(mask)
+            masks = decollate_batch(mask) 
             prediction_lists = decollate_batch(logits)
             predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
             acc_func.reset()
@@ -368,6 +368,7 @@ def run(args, model,
 
 if __name__ == "__main__":
     start_epoch = 0
+    torch.backends.cudnn.benchmark = True
     args = read_args()
     post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
     post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
