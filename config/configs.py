@@ -77,7 +77,7 @@ class Config:
                 num_workers = 2
                 batch_size = 1
                 sw_batch_size = 1
-                infer_overlap = 0.5
+                infer_overlap = 0.6
                 dice_loss = DiceLoss(to_onehot_y=False, sigmoid=True)
                 post_simgoid = Activations(sigmoid= True)
                 post_pred = AsDiscrete(argmax= False, threshold= 0.5)
@@ -85,7 +85,7 @@ class Config:
                                       get_not_nans=True)
                 device = "cuda" if torch.cuda.is_available() else "cpu"
                 model = SwinUNETR(
-                                    img_size=roi[0],
+                                    img_size=roi,
                                     in_channels=4,
                                     out_channels=3,
                                     feature_size=48,
@@ -93,7 +93,7 @@ class Config:
                                     attn_drop_rate=0.0,
                                     dropout_path_rate=0.0,
                                     use_checkpoint=True,
-                                )
+                                ).to(device)
                 
                 model_inferer = partial(
                                         sliding_window_inference,

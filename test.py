@@ -62,6 +62,7 @@ def evaluate(model,
     '''
     model = load_pretrained_model(model, state_path=weights)
     model.eval()
+    model.to(device)
     tic = time.time()
     run_acc = AverageMeter()
     with torch.no_grad():
