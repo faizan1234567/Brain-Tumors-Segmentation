@@ -26,9 +26,6 @@ from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batc
 import torch
 import torch.nn as nn
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-print(f'Available device: {device}')
-
 def read_args():
     """read commmand line arguments"""
     parser = argparse.ArgumentParser(description="command line args")
@@ -60,37 +57,24 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
     loss_func: monai.losses.dice.DiceLoss
     epoch: int
     """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.train() 
     tic = time.time()
     run_loss = AverageMeter()
-    run_acc = AverageMeter()
     for index, batch_data in enumerate(loader):
-        image_data, mask = batch_data["image"].to(device), batch_data["labels"].to(device)
-        logits = model(image_data)
-        loss = loss_func(logits, mask)
+        logits = model(batch_data["image"].to(device))
+        loss = loss_func(logits, batch_data["label"].to(device))
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
         run_loss.update(loss.item(), n = batch_data.shape[0])
-        model.eval()
-        with torch.no_grad():
-            logits = model_inferer(image_data)
-            masks = decollate_batch(mask)
-            prediction_lists = decollate_batch(logits)
-            predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
-            acc_func.reset()
-            acc_func(y_pred = predictions, y = masks)
-            acc, not_nans = acc_func.aggregate()
-            run_acc.update(acc.cpu().numpy(), n = not_nans.cpu().numpy())
-
         print(
             "Epoch {}/{} {}/{}".format(epoch, max_epochs, index, len(loader)),
             "loss: {:.4f}".format(run_loss.avg),
-            "Mean dice: {:.4f}".format(run_acc.avg),
             "time {:.2f}s".format(time.time() - tic))
         print()
         tic = time.time()
-    return (run_loss.avg, run_acc.avg)
+    return run_loss.avg
 
 
 def val(model, loader, acc_func,
@@ -112,18 +96,14 @@ def val(model, loader, acc_func,
     post_sigmoid: monai.transforms.post.array.Activations
     post_pred:monai.transforms.post.array.AsDiscrete
     """
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
     tic = time.time()
     run_acc = AverageMeter()
-    run_val_loss = AverageMeter()
     with torch.no_grad():
         for index, batch_data in enumerate(loader):
-            image_data, mask = batch_data["image"].to(device), batch_data["label"].to(device)
-            val_logits = model(image_data)
-            val_loss = loss_func(val_logits, mask)
-            run_val_loss.update(val_loss.item(), n = batch_data.shape[0])
-            logits = model_inferer(image_data)
-            masks = decollate_batch(mask) 
+            logits = model_inferer(batch_data["image"].to(device))
+            masks = decollate_batch(batch_data["label"].to(device)) 
             prediction_lists = decollate_batch(logits)
             predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
             acc_func.reset()
@@ -144,7 +124,7 @@ def val(model, loader, acc_func,
                 ", time {:.2f}s".format(time.time() - tic),
             )
             tic = time.time()
-    return (run_acc.avg, run_val_loss.avg)
+    return run_acc.avg
 
 def save_data(training_loss,
               et, wt, tc,
@@ -166,8 +146,8 @@ def save_data(training_loss,
     epochs: list
     """
     data = {}
-    NAMES = ["training_loss", "WT", "ET", "TC", "mean_dice","validation_loss", "training_acc" "epochs"]
-    data_lists = [training_loss, wt, et, tc, val_mean_acc,val_losses, training_dices, epochs]
+    NAMES = ["training_loss", "WT", "ET", "TC", "mean_dice", "epochs"]
+    data_lists = [training_loss, wt, et, tc, val_mean_acc, epochs]
     for i in range(len(NAMES)):
         data[f"{NAMES[i]}"] = data_lists[i]
     data_df = pd.DataFrame(data)
@@ -180,7 +160,7 @@ def trainer(model,
             optimizer,
             loss_func,
             acc_func,
-            schedular,
+            scheduler,
             max_epochs = 100,
             model_inferer = None,
             start_epoch = 0,
@@ -209,19 +189,17 @@ def trainer(model,
     dices_et = []
     mean_dices = []
     epoch_losses = [] # training loss
-    val_losses = []
     train_epochs = []
-    training_mean_dices = []
     for epoch in range(start_epoch, max_epochs):
         print()
         print(time.ctime(), "Epoch: ", epoch)
         epoch_time = time.time()
-        training_loss, training_mean_dice = train_epoch(model=model,
-                                                        loader= train_loader,
-                                                        optimizer=optimizer,
-                                                        loss_func= loss_func,
-                                                        epoch= epoch,
-                                                        max_epochs=max_epochs)
+        training_loss = train_epoch(model=model,
+                                    loader= train_loader,
+                                    optimizer=optimizer,
+                                    loss_func= loss_func,
+                                    epoch= epoch,
+                                    max_epochs=max_epochs)
         print(
             "Final training  {}/{}".format(epoch + 1, max_epochs - 1),
             "loss: {:.4f}".format(training_loss),
@@ -230,10 +208,9 @@ def trainer(model,
 
         if epoch % val_every == 0 or epoch == 0:
             epoch_losses.append(training_loss)
-            training_mean_dices.append(training_mean_dice)
             train_epochs.append(int(epoch))
             val_epoch_time = time.time()
-            val_acc, val_loss = val(model= model,
+            val_acc =  val(model= model,
                           loader= val_loader,
                           acc_func= acc_func,
                           max_epochs= max_epochs,
@@ -255,30 +232,25 @@ def trainer(model,
                 dice_et,
                 ", Dice_Avg:",
                 val_mean_acc,
-                ", loss:",
-                val_loss,
                 ", time {:.2f}s".format(time.time() - epoch_time),
             )
             dices_tc.append(dice_tc)
             dices_et.append(dice_et)
             dices_wt.append(dices_wt)
             mean_dices.append(val_mean_acc)
-            val_losses.append(val_loss)
             if val_mean_acc > val_acc_max:
                 print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_mean_acc))
                 val_acc_max = val_mean_acc
                 save_checkpoint(model=model,
                                 epoch= epoch,
                                 best_acc=val_acc_max)
-            schedular.step()
+            scheduler.step()
     print("Training Finished !, Best Accuracy: ", val_acc_max)
     save_data(training_loss=training_loss,
               et= dices_et,
               wt= dices_wt,
               tc=dices_tc,
               val_mean_acc=mean_dices,
-              val_losses =val_losses,
-              training_dices = training_mean_dices,
               epochs=train_epochs)
     
     return (
@@ -308,6 +280,7 @@ def run(args, model,
     
     Parameters
     ----------
+    args: argparse.parser
     model: nn.Module
     acc_func:  monai.metrics.meandice.DiceMetric
     loss_func: monai.losses.dice.DiceLoss
@@ -324,14 +297,18 @@ def run(args, model,
     '''
     if args.pretrained:
         print('Loading a pretrained model')
+        print()
         model = load_pretrained_model(model, args.pretrained_model)
     if args.resume:
         print('Resuming training...')
         model = resume_training(model, args.pretrained_model)
+    elif args.pretrained:
+        print("Using a pretrained model...")
     else:
         print('Trainig from scrath!')
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    print()
     print("Total parameters count", total_params)
 
     (
@@ -367,6 +344,8 @@ def run(args, model,
 
 
 if __name__ == "__main__":
+    print("Configuring Variables..")
+    print()
     start_epoch = 0
     torch.backends.cudnn.benchmark = True
     args = read_args()
@@ -379,10 +358,11 @@ if __name__ == "__main__":
     acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
     optimizer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.optimizer
     scheduler = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.scheduler
-    max_epochs = args.max_epochs()
+    max_epochs = args.max_epochs
     dataset_info_csv = Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
     num_workers = args.workers
+    print("Configured. Now Loading the dataset...\n")
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
@@ -398,7 +378,6 @@ if __name__ == "__main__":
                                 num_workers=num_workers,
                                 json_file=args.json_file,
                                 fold=args.fold)
-    print()
     print('starting training...')
     print('--'* 40)
     run(args, model=model,
@@ -415,7 +394,3 @@ if __name__ == "__main__":
         start_epoch=start_epoch,
         val_every=val_every)
     print('Done!!!')
-
-
-
-
