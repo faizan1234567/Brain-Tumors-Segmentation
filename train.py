@@ -40,7 +40,7 @@ def read_args():
     parser.add_argument('--pretrained_model', default= "", type = str, help = "path to pretraiend model")
     parser.add_argument('--pretrained', action= 'store_true', help= "use pretrained weights.")
     parser.add_argument('--resume', action= 'store_true', help="starting training from the saved ckpt.")
-
+    parser.add_argument('--platform_changed', action='store_true', help="pc changed, so that dataset dir has been set accordingly")
     opt = parser.parse_args()
     return opt
 
@@ -362,14 +362,24 @@ if __name__ == "__main__":
     dataset_info_csv = Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
     num_workers = args.workers
+    if args.platform_changed:
+        train_dir = Config.newGlobalConfigs.OtherPC.train_root_dir
+        dataset_info_csv = Config.newGlobalConfigs.OtherPC.path_to_csv
+        json_file = Config.newGlobalConfigs.OtherPC.json_file
+    else:
+        train_dir = Config.newGlobalConfigs.train_root_dir
+        dataset_info_csv = Config.newGlobalConfigs.path_to_csv
+        json_file = Config.newGlobalConfigs.json_file
+
     print("Configured. Now Loading the dataset...\n")
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
                                   batch_size= batch_size, 
                                   num_workers=num_workers,
-                                  json_file=args.json_file,
-                                  fold=args.fold)
+                                  json_file=json_file,
+                                  fold=args.fold,
+                                  train_dir = train_dir)
     
     val_loader = get_dataloader(BraTSDataset, 
                                 dataset_info_csv, 
@@ -377,7 +387,8 @@ if __name__ == "__main__":
                                 batch_size=batch_size,  
                                 num_workers=num_workers,
                                 json_file=args.json_file,
-                                fold=args.fold)
+                                fold=args.fold, 
+                                train_dir= train_dir)
     print('starting training...')
     print('--'* 40)
     run(args, model=model,

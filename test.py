@@ -19,10 +19,6 @@ from monai.metrics import DiceMetric
 from utils.general import load_pretrained_model
 from utils.meter import AverageMeter
 
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f'device: {device}')
-
 def read_args():
     '''command line arguments for setting up 
     neccassary paths and params'''
@@ -60,6 +56,7 @@ def evaluate(model,
     acc_func: monai.metrics.meandice.DiceMetric 
     model_inferer: nn.Module
     '''
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = load_pretrained_model(model, state_path=weights)
     model.eval()
     model.to(device)
