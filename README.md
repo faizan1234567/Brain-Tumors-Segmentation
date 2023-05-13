@@ -39,28 +39,16 @@ image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 ```
 git clone https://github.com/faizan1234567/Brats-20-Tumors-segmentation.git
 cd Brats-20-Tumors-segmentation
-   ```
-Create a virtual environment on linux or Windows to install neccessary packages
-```
-python3 -m venv segmentation
+
+python3 -m venv segmentation #linux
 source segmentation/bin/activate
-   ```
-And for Windows.
-```
-python3 -m venv segmentation
+  
+python3 -m venv segmentation #windows
  .\segmentation\Scripts\activate
 
-   ```
-Now install the required packages by running the following command
-```
 pip install --upgrade pip
 pip install -r requirements.txt
-   ```
-and check everything has installed?
 ```
-pip list
-```
-You will see all the packages have been installed.
 
 
 
