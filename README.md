@@ -1,12 +1,9 @@
 
-## Brain tumors segmentation
-The advancement in healthcare and biotechnology have led to the growing use and need of AI in medical imaging analysis.
-AI technique deep learning has led to massive development in the field of image recognition.
-There is a lot of research and development going on in the field of medical imaging analysis using deep learning.
-It is neccessary to develop an automnomous technique which could label disease in images, therfore, it can 
-help physicians in diagnosing disease, for instance brain tumors. In this repository, I used SegResNet model to recognize 
-brain tumors. The model has been traind on Brats-2020 dataset, which contains 3D brain images of different modalities such as T1, T2, T1ce and Flair. 
-The dataset also contains labels for each MRI image.
+# Brain Tumors Segmentation on BraTS21 Dataset
+Brain tumor is one of the dealist kind of disease around the global. Among these, gliomas are the most common type. Radiologists use MRI images to diagnose the disease. Radiologists can sometimes make errors, and it's highly time consuming process. To assit radioligits, deep learning is being used. Therefore, to train a deep learning model for diagnosing the disease, a large dataset is being used.
+![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif)
+
+## Dataset Description
 
 ## Installation
 
