@@ -118,7 +118,7 @@ def visualize_data_gif(data_):
         z = data_[:, :, min(i, data_.shape[2] - 1)]
         img = np.concatenate((x, y, z), axis=1)
         images.append(img)
-    imageio.mimsave(f"{ROOT}/runs/gif.gif", images, duration=0.01)
+    imageio.mimsave(f"{ROOT}/runs/gif.gif", images, duration=0.5, format='GIF')
     return Image(filename=f"{ROOT}/runs/gif.gif", format='png')
     
 
