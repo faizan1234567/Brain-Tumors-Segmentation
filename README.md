@@ -112,9 +112,15 @@ python show.py --json_file <path> --fold 0 --phase <"val"> --save <path>
 
 ## References
 [1]. http://braintumorsegmentation.org/
+
 [2]. https://monai.io/
+
 [3]. https://github.com/Project-MONAI/research-contributions/tree/main/SwinUNETR/BRATS21
+
 [4]. https://github.com/amanchadha/coursera-ai-for-medicine-specialization
+
 [5]. https://arxiv.org/pdf/1906.01796v2.pdf
+
 [6]. https://arxiv.org/abs/2103.14030
+
 [7]. https://arxiv.org/abs/1512.03385
