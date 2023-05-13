@@ -67,7 +67,7 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        run_loss.update(loss.item(), n = batch_data.shape[0])
+        run_loss.update(loss.item(), n = batch_data["image"].shape[0])
         print(
             "Epoch {}/{} {}/{}".format(epoch, max_epochs, index, len(loader)),
             "loss: {:.4f}".format(run_loss.avg),
@@ -386,7 +386,7 @@ if __name__ == "__main__":
                                 phase= "val", 
                                 batch_size=batch_size,  
                                 num_workers=num_workers,
-                                json_file=args.json_file,
+                                json_file=json_file,
                                 fold=args.fold, 
                                 train_dir= train_dir)
     print('starting training...')

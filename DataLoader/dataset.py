@@ -31,12 +31,13 @@ class BraTSDataset(Dataset):
     phase: str
     is_resize: bool
     """
-    def __init__(self, df: pd.DataFrame, phase: str = "val", is_resize: bool = False):
+    def __init__(self, df: pd.DataFrame, phase: str = "val", is_resize: bool = False, is_process_mask = True):
         self.df = df
         self.phase = phase
         self.is_resize = is_resize
         self.augmentations = data_transforms(phase= phase)
         self.data_types = ['_flair.nii.gz', '_t1.nii.gz', '_t1ce.nii.gz', '_t2.nii.gz']
+        self.is_process_mask = is_process_mask
 
     def __len__(self):
         return self.df.shape[0]
@@ -66,7 +67,9 @@ class BraTSDataset(Dataset):
                 mask = self.resize(mask)
                 mask = np.clip(mask.astype(np.uint8), 0, 1).astype(np.float32)
                 mask = np.clip(mask, 0, 1)
-            mask = self.preprocess_mask_labels(mask)
+            if self.is_process_mask:
+                mask = self.preprocess_mask_labels(mask)
+
             data = {"image": img.astype(np.float32),
                     "label": mask.astype(np.float32)}
             
@@ -134,7 +137,8 @@ def get_dataloader(
     json_file: str = None,
     fold: int = 0,
     train_dir = Config.newGlobalConfigs.train_root_dir,
-    test_dir = Config.newGlobalConfigs.test_root_dir):
+    test_dir = Config.newGlobalConfigs.test_root_dir,
+    is_process_mask = False):
 
     '''Returns: dataloader for the model training'''
     df = insert_cases_paths_to_df(path_to_csv, train_dir = train_dir, 
@@ -144,7 +148,7 @@ def get_dataloader(
     val_df = df.loc[df['phase'] == 'val'].reset_index(drop=True)
 
     df = train_df if phase == "train" else val_df
-    dataset = dataset(df, phase)
+    dataset = dataset(df, phase, is_process_mask = is_process_mask)
     print(f'Total examples in the dataset: {len(df)}')
     dataloader = DataLoader(
         dataset,

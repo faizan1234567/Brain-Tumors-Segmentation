@@ -12,4 +12,4 @@ segment/
 *.pth
 *.csv 
 data/
-
+runs/
