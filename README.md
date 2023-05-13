@@ -50,33 +50,62 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-
-
 ## Usage
-To train on Brats2020, run the training command
-First configure some paths in configs.py, these are some necessary paths about the dataset directory 
-and data loading.
-
+To train on Brats21, run the training command
+First configure some paths in configs.py, these are some necessary paths about the dataset directory, data loading, and other important parameters.
 ```
-python segment_3d.py -h
-python segment_3d.py --epochs 200 --lr 0.0001 --weight_decay 1e-5
- --batch 1 --workers 8 --data_dir path_to_configure --name dir_name_to_configure
+python train.py -h
+optional arguments:
+  -h, --help            show this help message and exit
+  --data DATA           dataset root directory path
+  --fold FOLD           folder name
+  --json_file JSON_FILE
+                        path to json file
+  --batch BATCH         batch size
+  --img_roi IMG_ROI     image roi size
+  --val_every VAL_EVERY
+                        validate every 2 epochs
+  --max_epochs MAX_EPOCHS
+                        maximum number of epoch to train
+  --workers WORKERS     Number of data loading workers
+  --pretrained_model PRETRAINED_MODEL
+                        path to pretraiend model
+  --pretrained          use pretrained weights.
+  --resume              starting training from the saved ckpt.
+  --platform_changed    pc changed, so that dataset dir has been set accordingly
+
+python train.py --data <dataset-dir> --fold 0 --json_file <dataset-split-file-path>
+ --batch 1 --workers 8 --val_every 2 --max_epochs 100 --pretrained_model <pretrained-model-path> 
    ```
 To test the model:
 ```
 python test.py -h
-python test.py --weights path_to_configure --workers 2 --batch 1
+optional arguments:
+  -h, --help            show this help message and exit
+  --weights WEIGHTS     weight file path
+  --fold FOLD           fold number for evaluation
+  --workers WORKERS     number of workers
+  --batch BATCH         batch size to load the dataset
+  --json_file JSON_FILE
+                        path to the data json file
+  --platform_changed    running on other platfrom
+
+python test.py --weights <path-to-weights>  --fold 0 --workers 2 --batch 1 --json_file <dataset-split-file-path>
    ```
-
-To visualize modalities with labels, you can use following command
+To visualize, use:
 ```
-from utils import util
-import configs
+python show.py -h
+optional arguments:
+  -h, --help            show this help message and exit
+  --json_file JSON_FILE
+                        dataset split file
+  --fold FOLD           folder number
+  --phase PHASE         validation or training.
+  --save SAVE           results save directory
+  --get_abnormal_area   get full abnormal are
+  --visualize_data_gif  visulize data gif, and create a gif file
+  --visualize_data_sample
+                        visualize one sample
 
-%matplotlib inline
-util.inspect_data(configs.Config.a_test_patient)
+python show.py --json_file <path> --fold 0 --phase <"val"> --save <path> 
 ```
-you will see:
-![brats_data_inspection](https://user-images.githubusercontent.com/61932757/189496106-754d73c9-d90d-4aae-a008-ca0384b2cbfc.png)
-
-
