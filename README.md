@@ -9,7 +9,7 @@ All [BraTS21](http://braintumorsegmentation.org/) mpMRI scans are available as [
 Annotations consistsof  GD-enhancing tumor (ET — label 4), the peritumoral edematous/invaded tissue (ED — label 2), and the necrotic tumor core (NCR — label 1), more detail here.
 
 The dataset is represented in a directory in the following sturcture, please make necessary changes if required in your case.
-
+```
 BraTS21/
 ├── train/
 │   ├── RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021/
@@ -30,6 +30,7 @@ BraTS21/
         │   ├── BraTS2021_00001_t1ce.nii.gz
         │   └── BraTS2021_00001_t2.nii.gz
         └── ...
+```
 
 ![alt text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/fig_brats21.png)
 image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
