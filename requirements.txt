@@ -54,3 +54,7 @@ fire
 jsonschema
 pynrrd
 pre-commit
+opencv-python
+ipython
+seaborn
+openpyxl

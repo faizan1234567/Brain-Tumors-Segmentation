@@ -4,12 +4,15 @@ literature/
 # research/
 *.pth
 __pycache__/
+brats23/
+.vscode/
 Unet/
 *.pdf
 test image/
 weights/
 segment/
 *.pth
+*.log
 *.csv 
 data/
 runs/
