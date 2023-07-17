@@ -1,37 +1,38 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS21_setup.ipynb)
-# Brain Tumors Segmentation on BraTS21 Dataset
-Brain tumor is one of the deadlist kind of disease around the global. Among these, gliomas are the most common type. Radiologists use MRI images to diagnose the disease. Radiologists can sometimes make errors, and it's highly time consuming process. To assit radioligits, deep learning is being used. Therefore, to train a deep learning model for diagnosing the disease, a large dataset is being used to train the AI model for accurate predictions.
+# Brain Tumors Segmentation on BraTS23 Dataset (New)
+Brain tumor is one of the deadlist kind of disease around the globe. Among these, gliomas are ubiquitous. Physcians and Radiologists use MRI scans and CT scans to diagnose the disease. In addition, it could be highly pruned to human errors, and it's highly time consuming process when timely diagnosis is required. To assit radioligits, deep learning is being used. Deep Learning has shown remarkable performance in medical imaging over the years. Therefore, to train a deep learning model, a large dataset is being used to train the AI model for accurate diagnosis for early treamtment of the disease.
 ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif)
 
 ## Dataset Description
-All [BraTS21](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and described as  T2 Fluid Attenuated Inversion Recovery(Flair), native(T1), T2-weighted(T2), and post-contrast T1-weighted (T1Gd). They were acquired with differnt clinical protocals and various scanners from different institutions.
+All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and described as  T2 Fluid Attenuated Inversion Recovery(Flair), native(T1), T2-weighted(T2), and post-contrast T1-weighted (T1Gd). They were acquired with differnt clinical protocals and various scanners from different institutions.
 
-Annotations consistsof  GD-enhancing tumor (ET — label 4), the peritumoral edematous/invaded tissue (ED — label 2), and the necrotic tumor core (NCR — label 1), more detail here.
+Annotations consistsof  GD-enhancing tumor (ET — label 3), the peritumoral edematous/invaded tissue (ED — label 2), and the necrotic tumor core (NCR — label 1), more detail [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351).
 
-The dataset contains 1251 patient cases that are labelled. However, cases in validation set are not labelled. Therefore, I splitted the original training dataset into 5 folder of equal size. Four of them are used for training and one is used for evaluation.
+The dataset contains 1251 patient cases that are labelled by expert radiologists. However, cases in validation set are not labelled. Therefore,the dataset has been divided into five folders. Four of them are used for training and one is used for evaluation.
 
-The dataset is represented in a directory in the following sturcture, please make necessary changes if required in your case.
+The dataset is represented in a directory in the following sturcture, please make necessary changes if required in your case. And make sure to add other helping files in the dataset directory.
+
 ```
-BraTS21/
-├── train/
-│   ├── RSNA_ASNR_MICCAI_BraTS2021_TrainingData_16July2021/
-│   │   ├── BraTS2021_00000/
-│   │   │   ├── BraTS2021_00000_flair.nii.gz
-│   │   │   ├── BraTS2021_00000_seg.nii.gz
-│   │   │   ├── BraTS2021_00000_t1.nii.gz
-│   │   │   ├── BraTS2021_00000_t2.nii.gz
-│   │   │   └── BraTS2021_00000_t1ce.nii.gz
-│   │   └── ...
-│   ├── brats21_folds.json
-│   └── BraTS21-17_Mapping.csv
+Dataset/
+├── training/
+│   ├── ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData/
+│       ├── BraTS-GLI-00000-000/
+│       │   ├── BraTS-GLI-00000-000-t2f.nii.gz
+│       │   ├── BraTS-GLI-00000-000-seg.nii.gz
+│       │   ├── BraTS-GLI-00000-000-t1n.nii.gz
+│       │   ├── BraTS-GLI-00000-000-t2w.nii.gz
+│       │   └── BraTS-GLI-00000-000-t1c.nii.gz
+│       └── ...
+│   
 └── validation/
-    └── RSNA_ASNR_MICCAI_BraTS2021_ValidationData/
-        ├── BraTS2021_00001/
-        │   ├── BraTS2021_00001_flair.nii.gz
-        │   ├── BraTS2021_00001_t1.nii.gz
-        │   ├── BraTS2021_00001_t1ce.nii.gz
-        │   └── BraTS2021_00001_t2.nii.gz
+    └── ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData/
+        ├── BraTS-GLI-00001-000/
+        │   ├── BraTS-GLI-00001-000-t1c.nii.gz
+        │   ├── BraTS-GLI-00001-000-t2f.nii.gz
+        │   ├── BraTS-GLI-00001-000-t1n.nii.gz
+        │   └── BraTS-GLI-00001-000-t2w.nii.gz
         └── ...
+
 ```
 
 ![alt text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/fig_brats21.png)
@@ -53,7 +54,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-To train on Brats21, run the training command
+To train on Brats23, run the training command
 First configure some paths in configs.py, these are some necessary paths about the dataset directory, data loading, and other important parameters.
 ```
 python train.py -h
@@ -111,6 +112,15 @@ optional arguments:
 
 python show.py --json_file <path> --fold 0 --phase <"val"> --save <path> 
 ```
+
+## New Features (to be added)
+- MLOps tools integration such as MLflow
+- Experiment tracking & Monitoring.
+- Multi-GPU training 
+- Novel architecture design (private)
+- New Data augmentation options (private)
+- automatic hyperparameters optimization (private)
+
 
 ## References
 [1]. http://braintumorsegmentation.org/

@@ -1,20 +1,17 @@
 """
 script to show the image and label, or image with labeled mask
-
+-------------------------------------------------------------
 
 Author: Muhammad Faizan
 Date: 13 May 2023
-
-
+Copywrite (c) Muhammad Faizan
+---------------------------------------------------------------
 """
 
 import matplotlib.pyplot as plt
 import logging
 import numpy as np
 import imageio
-import os
-import sys
-import random
 import argparse
 
 
@@ -30,7 +27,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 formatter = logging.Formatter("%(asctime)s: %(name)s: %(message)s")
-file_handler = logging.FileHandler(filename= "show.log")
+file_handler = logging.FileHandler(filename= "logs/show.log")
 stream_handler = logging.StreamHandler()
 file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
@@ -38,8 +35,8 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
+# get command line arguments i.e. from a user
 def read_args():
-    """read command line arguments"""
     parser = argparse.ArgumentParser()
     parser.add_argument('--json_file', type = str, default= Config.newGlobalConfigs.json_file, help= "dataset split file")
     parser.add_argument('--fold', type= int, default= 0, help= "folder number")
@@ -52,26 +49,37 @@ def read_args():
     return opt
 
 
-def show_result(args):
+def show_result(args: argparse.Namespace):
     """
-    show result as per the requirments
+    Visualize labelled brain scan on a patient case, three options are available
+    1 - create brain scan slices and label them
+    2 - create a .gif format file to visualize part of brain (labelled)
+    3 - visualize a scan with it's label in a subplot format
+
     Parameters
     ----------
-    args: argparse.parser
+    args: argparse.Namespace()
     """
-    if args.json_file:
+    try:
         json_file = args.json_file
-    else:
+    except AttributeError:
+        logger.info(f"{args.json_file} not passed, setting file from the configs")
         json_file = Config.newGlobalConfigs.json_file
     phase = args.phase
-    data = get_dataloader(BraTSDataset, 
-                          Config.newGlobalConfigs.path_to_csv, 
-                          phase, 1, 2, 
+   
+    # load the dataset, a sample for visualization
+    data = get_dataloader(dataset = BraTSDataset, 
+                          path_to_csv = Config.newGlobalConfigs.path_to_xlsx, 
+                          phase= phase, batch_size= 1, num_workers= 2, 
                           json_file=json_file,
                           is_process_mask= False)
+    
+    # iterate over a batch to get a batch of examples
     batch = next(iter(data))
     image, label = batch["image"], batch['label']
-    print('visualizing an image with label')
+    logger.info('visualizing an image with label')
+
+    # visualize selected option
     if args.get_abnormal_area:
         visualize_abnormal_area(image, label)
     elif args.visualize_data_gif:
@@ -81,10 +89,11 @@ def show_result(args):
         visualize_data_sample(Config.newGlobalConfigs.full_patient_path, 
                               Config.newGlobalConfigs.a_test_patient)
     else:
-        print('No option selected')
+        logger.info('No option selected')
 
 
 if __name__ == "__main__":
+    # run everything here..
     args = read_args()
     show_result(args)
     print('Done!!!')
