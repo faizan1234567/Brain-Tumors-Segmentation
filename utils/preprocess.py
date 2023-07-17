@@ -6,7 +6,17 @@ import os
 import json
 import random
 import matplotlib.pyplot as plt
-from config.configs import Config
+import sys
+from pathlib import Path
+# add to path if not in path
+try:
+    from config.configs import Config
+except ModuleNotFoundError:
+    ROOT = Path(__file__).resolve().parents[1]
+    if ROOT not in sys.path:
+        sys.path.append(str(ROOT))
+    from config.configs import Config
+
 
 import monai
 from monai import transforms
@@ -14,12 +24,16 @@ from monai import transforms
 def separate_train_val_ids(json_file: str = None,
                            fold: int = 0, 
                            phase: str = 'training'):
-    """separte out training ids and validation based on the folder name
+    """
+    separte out training ids and 
+    validation based on the folder index, i.e In training, there should be 
+    about 4 folds and 1 folds should be in validation as there are 5 folds.
     
     Parameters
     ----------
     json_file: str
     fold: int"""
+
     with open(json_file, 'r') as file:
         data = file.read()
     dataset = json.loads(data)
@@ -41,8 +55,9 @@ def insert_cases_paths_to_df(df:str,
                              test_dir:str = None, 
                              json_file:str = None, 
                              fold: int = 0):
-    """insert full cases paths to name mapping dataframe for data loading and data
-    preparation
+    """
+    insert full cases paths to name mapping dataframe 
+    for data loading and data preparation
     
     Parameters
     ----------
@@ -52,13 +67,13 @@ def insert_cases_paths_to_df(df:str,
     
     Return:
     df: pd.DataFrame processed"""
-    df = pd.read_csv(df)
+    df = pd.read_excel(df)
     paths = []
     phase = []
     train, val = separate_train_val_ids(json_file= json_file, fold= fold)
-    df = df[df['BraTS2021'].notna()]
+    df = df[df['BraTS2023'].notna()]
     for _ , row in df.iterrows():
-        id = row["BraTS2021"]
+        id = row["BraTS2023"]
         if id in os.listdir(train_dir):
             path = train_dir + "/" + id
             if id in train:

@@ -27,7 +27,7 @@ class Config:
         full_patient_path = train_root_dir +"/" + a_test_patient
         name_mapping_df = path_to_xlsx
         seed = 50
-        json_file = root_dir + "/brats23_folds.json"
+        json_file = root_dir + "/dataset.json"
         
         class OtherPC:
             root_dir = "/content"
