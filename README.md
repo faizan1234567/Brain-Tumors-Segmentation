@@ -133,7 +133,7 @@ If you find this project useful in your research, please consider cite:
     howpublished = {\url{https://github.com/faizan1234567/Brats-20-Tumors-segmentation}},
     year={2023}
 }
-
+```
 
 ## Acknowledgements
 [1]. http://braintumorsegmentation.org/
