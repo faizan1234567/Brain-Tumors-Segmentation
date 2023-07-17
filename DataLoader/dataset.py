@@ -3,6 +3,7 @@ BraTS 2023 Data loading
 -----------------------
 Load the dataset from the disk in batches for training and inference
 Author: Muhammad Faizan
+Copyright (c) 2022 Muhammad Faizan
 '''
 import numpy as np
 import torch
@@ -135,10 +136,6 @@ class BraTSDataset(Dataset):
         return {
             "image": img,
         }
-
-
-
-
     
     def load_img(self, file_path: str):
         """
