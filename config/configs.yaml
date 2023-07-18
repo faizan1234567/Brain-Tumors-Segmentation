@@ -1,0 +1,35 @@
+config:
+  # dataset important paths
+  dataset:
+    a_test_patient: /BraTS-GLI-00016-000
+    dataset_xlsx: /BraTS2023_2017_GLI_Mapping.xlsx
+    json_file: /dataset.json
+    root_dir: E:/Brats21 Data/Dataset
+    train_sub_dir: /training/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData
+    validation_sub_dir: /validation/ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData
+  
+  # full paths to each of teh directory
+  full_paths:
+    dataset_file: E:/Brats21 Data/Dataset/BraTS2023_2017_GLI_Mapping.xlsx
+    json_file: E:/Brats21 Data/Dataset/dataset.json
+    test_patient: /training/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData/BraTS-GLI-00016-000
+    train_path: E:/Brats21 Data/Dataset/training/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData
+    validation_path: E:/Brats21 Data/Dataset/validation/ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData
+
+  # model specfic configs
+  swinUNet:
+    roi: [128, 128, 128]
+  
+  # training configs
+  training:
+    batch_size: 1
+    fold: 0
+    infer_overlap: 0.6
+    learning_rate: 0.0001
+    max_epochs: 10
+    num_workers: 2
+    pretrained_model: ''
+    seed: 50
+    sw_batch_size: 1
+    val_every: 2
+    weight_decay: 0.00001
