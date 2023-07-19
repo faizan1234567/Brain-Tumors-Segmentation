@@ -19,6 +19,7 @@ import torch
 import monai
 from DataLoader.dataset import BraTSDataset, get_dataloader
 from config.configs import Config
+import yaml
 from utils.visualizer import visualize_abnormal_area, get_labelled_image, visualize_data_gif
 from utils.general import visualize_data_sample
 
@@ -38,13 +39,14 @@ logger.addHandler(stream_handler)
 # get command line arguments i.e. from a user
 def read_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--json_file', type = str, default= Config.newGlobalConfigs.json_file, help= "dataset split file")
+    parser.add_argument('--json_file', type = str, help= "dataset split file")
     parser.add_argument('--fold', type= int, default= 0, help= "folder number")
     parser.add_argument('--phase', type = str, default= 'val', help= "validation or training.")
     parser.add_argument('--save', type = str, default= "runs/", help= "results save directory")
     parser.add_argument('--get_abnormal_area', action= 'store_true', help = 'get full abnormal are')
     parser.add_argument('--visualize_data_gif', action= 'store_true', help= "visulize data gif, and create a gif file")
     parser.add_argument('--visualize_data_sample', action = 'store_true', help= "visualize one sample")
+    parser.add_argument("--config", type = str, default="config/configs.yaml", help = "path to configs file")
     opt = parser.parse_args()
     return opt
 
@@ -60,16 +62,23 @@ def show_result(args: argparse.Namespace):
     ----------
     args: argparse.Namespace()
     """
+    # load a config file for loading configuration settings
+    with open(args.config, 'r') as file:
+        configs = yaml.safe_load(file)
+
+    full_paths = configs["config"]['full_paths']
+
     try:
         json_file = args.json_file
     except AttributeError:
         logger.info(f"{args.json_file} not passed, setting file from the configs")
-        json_file = Config.newGlobalConfigs.json_file
+        json_file = full_paths["json_file"]
+    json_file = full_paths["json_file"]
     phase = args.phase
    
     # load the dataset, a sample for visualization
     data = get_dataloader(dataset = BraTSDataset, 
-                          path_to_csv = Config.newGlobalConfigs.path_to_xlsx, 
+                          path_to_csv = full_paths["dataset_file"], 
                           phase= phase, batch_size= 1, num_workers= 2, 
                           json_file=json_file,
                           is_process_mask= False)
@@ -86,8 +95,8 @@ def show_result(args: argparse.Namespace):
         labelled_img = get_labelled_image(image, label)
         visualize_data_gif(labelled_img)
     elif args.visualize_data_sample:
-        visualize_data_sample(Config.newGlobalConfigs.full_patient_path, 
-                              Config.newGlobalConfigs.a_test_patient)
+        visualize_data_sample(full_paths['test_patient'], 
+                              configs["config"]['dataset']['a_test_patient'])
     else:
         logger.info('No option selected')
 

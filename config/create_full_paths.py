@@ -28,6 +28,7 @@ if __name__ == "__main__":
         configs["config"]['dataset']['root_dir'] = args.root_dir
     else:
         pass
+    
     # set full paths if needed
     try:
         full_paths = configs["full_paths"]
