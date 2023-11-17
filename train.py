@@ -362,8 +362,6 @@ def run(args, model,
 
 
 if __name__ == "__main__":
-    print("Configuring Variables..")
-    print()
     start_epoch = 0
     torch.backends.cudnn.benchmark = True
     args = read_args()
@@ -389,7 +387,7 @@ if __name__ == "__main__":
         dataset_info_csv = Config.newGlobalConfigs.path_to_csv
         json_file = Config.newGlobalConfigs.json_file
 
-    print("Configured. Now Loading the dataset...\n")
+    logger.info("Configured. Now Loading the dataset...\n")
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
@@ -407,8 +405,8 @@ if __name__ == "__main__":
                                 json_file=json_file,
                                 fold=args.fold, 
                                 train_dir= train_dir)
-    print('starting training...')
-    print('--'* 40)
+    logger.info('starting training...')
+    logger.info('--'* 40)
     run(args, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
@@ -422,4 +420,4 @@ if __name__ == "__main__":
         max_epochs=max_epochs,
         start_epoch=start_epoch,
         val_every=val_every)
-    print('Done!!!')
+    logger.info('Done!!!')
