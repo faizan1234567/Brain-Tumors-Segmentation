@@ -29,6 +29,21 @@ from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batc
 import torch
 import torch.nn as nn
 
+# configure logger
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler(filename= "logger.log")
+stream_handler = logging.StreamHandler()
+formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
 def read_args():
     """read commmand line arguments"""
     parser = argparse.ArgumentParser(description="command line args")
@@ -347,8 +362,6 @@ def run(args, model,
 
 
 if __name__ == "__main__":
-    print("Configuring Variables..")
-    print()
     start_epoch = 0
     torch.backends.cudnn.benchmark = True
     args = read_args()
@@ -374,7 +387,7 @@ if __name__ == "__main__":
         dataset_info_csv = Config.newGlobalConfigs.path_to_csv
         json_file = Config.newGlobalConfigs.json_file
 
-    print("Configured. Now Loading the dataset...\n")
+    logger.info("Configured. Now Loading the dataset...\n")
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
@@ -392,8 +405,8 @@ if __name__ == "__main__":
                                 json_file=json_file,
                                 fold=args.fold, 
                                 train_dir= train_dir)
-    print('starting training...')
-    print('--'* 40)
+    logger.info('starting training...')
+    logger.info('--'* 40)
     run(args, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
@@ -407,4 +420,4 @@ if __name__ == "__main__":
         max_epochs=max_epochs,
         start_epoch=start_epoch,
         val_every=val_every)
-    print('Done!!!')
+    logger.info('Done!!!')
