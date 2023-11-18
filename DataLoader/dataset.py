@@ -20,19 +20,14 @@ import logging
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler("logs/dataset.log")
 stream_handler = logging.StreamHandler()
 
 formatter = logging.Formatter(" %(asctime)s: %(name)s: %(message)s", datefmt='%Y-%m-%d %H:%M:%S')
-file_handler.setFormatter(formatter)
-stream_handler.setFormatter(formatter)
-
-logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 # logger.info("The logger configured.")
 
 try:
-    from config.configs import Config
+    # from config.configs import Config
     from utils.preprocess import data_transforms
     from utils.preprocess import insert_cases_paths_to_df
 except ModuleNotFoundError:
@@ -42,7 +37,7 @@ except ModuleNotFoundError:
         sys.path.append(str(ROOT))  # add ROOT to PATH
     ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-    from config.configs import Config
+    # from config.configs import Config
     from utils.preprocess import data_transforms
     from utils.preprocess import insert_cases_paths_to_df
 

@@ -1,1 +1,2 @@
-roi: [128, 128, 128]
+roi: 128
+infer_overlap: 0.5

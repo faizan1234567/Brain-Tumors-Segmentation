@@ -14,7 +14,7 @@ ROOT = FILE.parents[0].parents[0]
 if ROOT not in sys.path:
     sys.path.append(str(ROOT))
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-from config.configs import*
+# from config.configs import*
 
 def save_checkpoint(model, epoch, filename="model.pt", best_acc=0, save_dir=os.getcwd()):
     """save model information and checkpoints in the save dir

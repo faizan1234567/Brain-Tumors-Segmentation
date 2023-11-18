@@ -20,7 +20,7 @@ import argparse
 import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
-from config.configs import *
+# from config.configs import *
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from DataLoader.dataset import BraTSDataset, get_dataloader
 
@@ -29,8 +29,22 @@ from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batc
 import torch
 import torch.nn as nn
 
+from monai.metrics import DiceMetric
+from monai.utils.enums import MetricReduction
+from monai.networks.nets import SwinUNETR
+from monai.losses import DiceLoss
+from monai.inferers import sliding_window_inference
+from monai import transforms
+from monai.transforms import (
+    AsDiscrete,
+    Activations,
+)
+from functools import partial
+
 # configure logger
 import logging
+import hydra
+from omegaconf import OmegaConf, DictConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -357,23 +371,47 @@ def run(args, model,
             dices_wt,
             dices_et,
             dices_mean,
-            train_losses,
+            train_l osses,
             train_epochs)
 
-
-if __name__ == "__main__":
-    start_epoch = 0
-    torch.backends.cudnn.benchmark = True
+@hydra.main(config_name='configs', config_path= 'conf', version_base=None)
+def main(cfg: DictConfig):
+    logging.info('Running train.py')
+    logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
     args = read_args()
-    post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
-    post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
-    model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
-    model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
+    start_epoch = 0
+    device = 'cuda' if torch.cuda.is_available else 'cpu'
+    torch.backends.cudnn.benchmark = True
+    post_pred = AsDiscrete(argmax= False, threshold= 0.5)
+    post_sigmoid = Activations(sigmoid= True)
+    roi = cfg.model.roi
+    model = SwinUNETR(
+                    img_size=roi,
+                    in_channels=4,
+                    out_channels=3,
+                    feature_size=48,
+                    drop_rate=0.0,
+                    attn_drop_rate=0.0,
+                    dropout_path_rate=0.0,
+                    use_checkpoint=True,
+                            ).to(device)
+    
+    model_inferer = partial(
+                        sliding_window_inference,
+                        roi_size=[roi, roi, roi],
+                        sw_batch_size=cfg.training.sw_batch_size,
+                        predictor=model,
+                        overlap=cfg.model.infer_overlap)
+    
     val_every = args.val_every
-    loss_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_loss
-    acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
-    optimizer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.optimizer
-    scheduler = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.scheduler
+    loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
+    acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
+                                      get_not_nans=True)
+    optimizer = torch.optim.AdamW(model.parameters(), lr= cfg.training.learning_rate, 
+                                              weight_decay=cfg.training.weight_decay)
+    
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
+
     max_epochs = args.max_epochs
     dataset_info_csv = Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
@@ -421,3 +459,6 @@ if __name__ == "__main__":
         start_epoch=start_epoch,
         val_every=val_every)
     logger.info('Done!!!')
+
+if __name__ == "__main__":
+    main()
