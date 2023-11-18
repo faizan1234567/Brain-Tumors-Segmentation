@@ -1,0 +1,6 @@
+a_test_patient: /BraTS-GLI-00016-000
+dataset_xlsx: /BraTS2023_2017_GLI_Mapping.xlsx
+json_file: /dataset.json
+root_dir: E:/Brats21 Data/Dataset
+train_sub_dir: /training/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData
+validation_sub_dir: /validation/ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData

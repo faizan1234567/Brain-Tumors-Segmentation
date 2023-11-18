@@ -1,0 +1,11 @@
+batch_size: 1
+fold: 0
+infer_overlap: 0.6
+learning_rate: 0.0001
+max_epochs: 10
+num_workers: 2
+pretrained_model: ''
+seed: 50
+sw_batch_size: 1
+val_every: 2
+weight_decay: 0.00001
