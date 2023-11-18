@@ -16,3 +16,4 @@ segment/
 *.csv 
 data/
 runs/
+configs/
