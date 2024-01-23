@@ -374,16 +374,25 @@ def run(args, model,
             train_l osses,
             train_epochs)
 
+#  training
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
     logging.info('Running train.py')
     logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
+
+    # read command line args
     args = read_args()
+    
+    # set cuda if available and use CuDNN for efficient NN training
     start_epoch = 0
     device = 'cuda' if torch.cuda.is_available else 'cpu'
     torch.backends.cudnn.benchmark = True
+
+    # post processing 
     post_pred = AsDiscrete(argmax= False, threshold= 0.5)
     post_sigmoid = Activations(sigmoid= True)
+    
+    # define model 
     roi = cfg.model.roi
     model = SwinUNETR(
                     img_size=roi,
@@ -404,15 +413,25 @@ def main(cfg: DictConfig):
                         overlap=cfg.model.infer_overlap)
     
     val_every = args.val_every
+
+    # loss function (dice loss for semantic segmentation)
     loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
+
+    # Dice metric for performance evaluation
     acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
                                       get_not_nans=True)
+    
+    # default optimizer (experiment with other ones)
     optimizer = torch.optim.AdamW(model.parameters(), lr= cfg.training.learning_rate, 
                                               weight_decay=cfg.training.weight_decay)
     
+    # Cosine Annearling learning rate schedular 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
-
+    
+    # set maximum training epochs
     max_epochs = args.max_epochs
+    
+    # TODO: to replace config with teh cfg option
     dataset_info_csv = Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
     num_workers = args.workers
