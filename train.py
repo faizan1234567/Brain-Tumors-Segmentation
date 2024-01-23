@@ -385,7 +385,7 @@ def main(cfg: DictConfig):
     
     # set cuda if available and use CuDNN for efficient NN training
     start_epoch = 0
-    device = 'cuda' if torch.cuda.is_available else 'cpu'
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     torch.backends.cudnn.benchmark = True
 
     # post processing 
@@ -407,7 +407,7 @@ def main(cfg: DictConfig):
     
     model_inferer = partial(
                         sliding_window_inference,
-                        roi_size=[roi, roi, roi],
+                        roi_size=[roi] * 3,
                         sw_batch_size=cfg.training.sw_batch_size,
                         predictor=model,
                         overlap=cfg.model.infer_overlap)
@@ -425,16 +425,17 @@ def main(cfg: DictConfig):
     optimizer = torch.optim.AdamW(model.parameters(), lr= cfg.training.learning_rate, 
                                               weight_decay=cfg.training.weight_decay)
     
+     # set maximum training epochs
+    max_epochs = args.max_epochs if args.max_epochs else cfg.training.max_epochs
+
     # Cosine Annearling learning rate schedular 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max= max_epochs)
     
-    # set maximum training epochs
-    max_epochs = args.max_epochs
     
-    # TODO: to replace config with teh cfg option
+    # TODO: to replace config with teh cfg option and test passes
     dataset_info_csv = cfg.paths.dataset_file #Config.newGlobalConfigs.path_to_csv
-    batch_size = args.batch
-    num_workers = args.workers
+    batch_size = args.batch if args.batch else cfg.training.batch_size
+    num_workers = args.workers if args.workers else cfg.training.num_workers
     
     # if using Google colab to access drive or other platform please configure 
     # paths belows
