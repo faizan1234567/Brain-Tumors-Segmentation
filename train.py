@@ -432,36 +432,40 @@ def main(cfg: DictConfig):
     max_epochs = args.max_epochs
     
     # TODO: to replace config with teh cfg option
-    dataset_info_csv = Config.newGlobalConfigs.path_to_csv
+    dataset_info_csv = cfg.paths.dataset_xlx #Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
     num_workers = args.workers
+    
+    # if using Google colab to access drive or other platform please configure 
+    # paths belows
     if args.platform_changed:
-        train_dir = Config.newGlobalConfigs.OtherPC.train_root_dir
-        dataset_info_csv = Config.newGlobalConfigs.OtherPC.path_to_csv
-        json_file = Config.newGlobalConfigs.OtherPC.json_file
+        train_dir = "" 
+        dataset_info_csv = ""
+        json_file = ""
     else:
-        train_dir = Config.newGlobalConfigs.train_root_dir
-        dataset_info_csv = Config.newGlobalConfigs.path_to_csv
-        json_file = Config.newGlobalConfigs.json_file
+        train_dir = cfg.paths.train_path
+        dataset_info_csv = cfg.paths.dataset_file
+        json_file = cfg.paths.json_file
 
     logger.info("Configured. Now Loading the dataset...\n")
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
-                                  batch_size= batch_size, 
-                                  num_workers=num_workers,
-                                  json_file=json_file,
-                                  fold=args.fold,
+                                  batch_size = batch_size, 
+                                  num_workers = num_workers,
+                                  json_file = json_file,
+                                  fold = args.fold,
                                   train_dir = train_dir)
     
     val_loader = get_dataloader(BraTSDataset, 
                                 dataset_info_csv, 
                                 phase= "val", 
-                                batch_size=batch_size,  
-                                num_workers=num_workers,
-                                json_file=json_file,
-                                fold=args.fold, 
-                                train_dir= train_dir)
+                                batch_size = batch_size,  
+                                num_workers = num_workers,
+                                json_file = json_file,
+                                fold = args.fold, 
+                                train_dir = train_dir)
+    
     logger.info('starting training...')
     logger.info('--'* 40)
     run(args, model=model,
