@@ -1,6 +1,0 @@
-this weekend tasks
-- implementation of logger in training and testing files (in progress)
-- implementation of Weight & baises Mlops and experiment tracking and reproducibitly (todo)
-- implementation of smart hydra configs (in progress)
-- implementation of multip-gpu training support (todo)
-- needs to be updated.
