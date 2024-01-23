@@ -448,6 +448,8 @@ def main(cfg: DictConfig):
         json_file = cfg.paths.json_file
 
     logger.info("Configured. Now Loading the dataset...\n")
+
+    # load training and validation datasets
     train_loader = get_dataloader(BraTSDataset, 
                                   dataset_info_csv, 
                                   phase = "train",
@@ -468,6 +470,8 @@ def main(cfg: DictConfig):
     
     logger.info('starting training...')
     logger.info('--'* 40)
+
+    # run training
     run(args, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
@@ -481,7 +485,8 @@ def main(cfg: DictConfig):
         max_epochs=max_epochs,
         start_epoch=start_epoch,
         val_every=val_every)
-    logger.info('Done!!!')
+    
+    logger.info('Training complete!!!')
 
 if __name__ == "__main__":
     main()
