@@ -432,7 +432,7 @@ def main(cfg: DictConfig):
     max_epochs = args.max_epochs
     
     # TODO: to replace config with teh cfg option
-    dataset_info_csv = cfg.paths.dataset_xlx #Config.newGlobalConfigs.path_to_csv
+    dataset_info_csv = cfg.paths.dataset_file #Config.newGlobalConfigs.path_to_csv
     batch_size = args.batch
     num_workers = args.workers
     

@@ -32,7 +32,7 @@ try:
     from utils.preprocess import insert_cases_paths_to_df
 except ModuleNotFoundError:
     FILE = Path(__file__).resolve()
-    ROOT = FILE.parents[1]  #project root directory
+    ROOT = FILE.parents[1]  # project root directory
     if str(ROOT) not in sys.path:
         sys.path.append(str(ROOT))  # add ROOT to PATH
     ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
@@ -42,7 +42,7 @@ except ModuleNotFoundError:
     from utils.preprocess import insert_cases_paths_to_df
 
 class BraTSDataset(Dataset):
-    """Load BraTS 2021 dataset from the disk for training and 
+    """Load BraTS 2023 dataset from the disk for training and 
     validation and testing as per the requirment
     
     Parameters
@@ -219,8 +219,8 @@ def get_dataloader(
     num_workers: int = 2,
     json_file: str = None,
     fold: int = 0,
-    train_dir: str = Config.newGlobalConfigs.train_root_dir,
-    test_dir: str = Config.newGlobalConfigs.test_root_dir,
+    train_dir: str = "",
+    test_dir: str = "",
     is_process_mask: bool = True):
 
     '''

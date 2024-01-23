@@ -8,15 +8,6 @@ import random
 import matplotlib.pyplot as plt
 import sys
 from pathlib import Path
-# add to path if not in path
-try:
-    from config.configs import Config
-except ModuleNotFoundError:
-    ROOT = Path(__file__).resolve().parents[1]
-    if ROOT not in sys.path:
-        sys.path.append(str(ROOT))
-    from config.configs import Config
-
 
 import monai
 from monai import transforms
@@ -92,7 +83,7 @@ def insert_cases_paths_to_df(df:str,
     return df
     
 
-def data_transforms(phase: str = 'train'):
+def data_transforms(phase: str = 'train', roi: int = 128):
     '''apply data transforms to an 3D image
     
     Parameters
@@ -108,15 +99,11 @@ def data_transforms(phase: str = 'train'):
                 transforms.CropForegroundd(
                     keys=["image", "label"],
                     source_key="image",
-                    k_divisible=[Config.newGlobalConfigs.swinUNetCongis.roi[0], 
-                                 Config.newGlobalConfigs.swinUNetCongis.roi[1], 
-                                 Config.newGlobalConfigs.swinUNetCongis.roi[2]],
+                    k_divisible=[roi, roi, roi],
                 ),
                 transforms.RandSpatialCropd(
                     keys=["image", "label"],
-                    roi_size=[Config.newGlobalConfigs.swinUNetCongis.roi[0], 
-                              Config.newGlobalConfigs.swinUNetCongis.roi[1], 
-                              Config.newGlobalConfigs.swinUNetCongis.roi[2]],
+                    roi_size=[roi, roi, roi],
                     random_size=False,
                 ),
                 transforms.RandFlipd(keys=["image", "label"], prob=0.5, spatial_axis=0),
