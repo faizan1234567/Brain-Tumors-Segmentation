@@ -17,5 +17,6 @@ segment/
 data/
 runs/
 configs/
-outputs/
 test_scripts/
+outputs/
+
