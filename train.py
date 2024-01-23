@@ -371,7 +371,7 @@ def run(args, model,
             dices_wt,
             dices_et,
             dices_mean,
-            train_l osses,
+            train_losses,
             train_epochs)
 
 #  training
