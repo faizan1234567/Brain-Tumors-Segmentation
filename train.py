@@ -433,7 +433,7 @@ def main(cfg: DictConfig):
     
     
     # TODO: to replace config with teh cfg option and test passes
-    dataset_info_csv = cfg.paths.dataset_file #Config.newGlobalConfigs.path_to_csv
+    dataset_info_csv = cfg.paths.dataset_file 
     batch_size = args.batch if args.batch else cfg.training.batch_size
     num_workers = args.workers if args.workers else cfg.training.num_workers
     
@@ -470,7 +470,7 @@ def main(cfg: DictConfig):
                                 train_dir = train_dir)
     
     logger.info('starting training...')
-    logger.info('--'* 40)
+    logger.info('--'* 20)
 
     # run training
     run(args, model=model,
