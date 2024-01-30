@@ -389,7 +389,7 @@ def main(cfg: DictConfig):
     torch.backends.cudnn.benchmark = True
 
     # post processing 
-    post_pred = AsDiscrete(argmax= False, threshold= 0.5)
+    post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
     
     # define model 
