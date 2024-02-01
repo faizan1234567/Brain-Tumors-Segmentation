@@ -1,5 +1,6 @@
-"""A script to evaluate the model performance
-
+"""
+A script to evaluate the model performance
+==========================================
 Test set evaluation on brats19 dataset
 import neccassary packages...
 Author: Muhammad Faizan
@@ -18,8 +19,20 @@ from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
 from utils.general import load_pretrained_model
 from utils.meter import AverageMeter
+
+from monai.metrics import DiceMetric
+from monai.utils.enums import MetricReduction
+from monai.inferers import sliding_window_inference
+from monai.networks.nets import SwinUNETR
+from monai.transforms import (
+    AsDiscrete,
+    Activations,
+)
+from functools import partial
+
 import hydra
 from omegaconf import OmegaConf, DictConfig
+import logging
 
 def read_args():
     '''command line arguments for setting up 
@@ -96,26 +109,40 @@ def main(cfg: DictConfig):
     """
     args = read_args()
     print('Configuring...')
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
     if args.platform_changed:
-        data_csv_file_path = Config.newGlobalConfigs.OtherPC.path_to_csv
-        data_json_file = Config.newGlobalConfigs.OtherPC.json_file
-        data_dir = Config.newGlobalConfigs.OtherPC.train_root_dir
-        data_json_file = Config.newGlobalConfigs.OtherPC.json_file
+        data_csv_file_path = cfg.paths.dataset_file
+        data_json_file = cfg.paths.json_file
+        data_dir = cfg.paths.train_dir
     else:
-        data_csv_file_path = Config.newGlobalConfigs.path_to_csv
-        data_json_file = Config.newGlobalConfigs.json_file
-        data_dir = Config.newGlobalConfigs.train_root_dir
-        data_json_file = Config.newGlobalConfigs.json_file
-
-    model = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model
+        data_csv_file_path = cfg.paths.dataset_file
+        data_json_file = cfg.paths.json_file
+        data_dir = cfg.paths.train_dir
+    roi = cfg.training.roi
+    model =   SwinUNETR(
+                    img_size=roi,
+                    in_channels=4,
+                    out_channels=3,
+                    feature_size=48,
+                    drop_rate=0.0,
+                    attn_drop_rate=0.0,
+                    dropout_path_rate=0.0,
+                    use_checkpoint=True,
+                            ).to(device)
     weights = args.weights
     batch_size = args.batch
     wokers = args.workers
     fold = args.fold
-    post_pred = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_pred
-    post_sigmoid = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.post_simgoid
-    acc_func = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.dice_acc
-    model_inferer = Config.newGlobalConfigs.swinUNetCongis.training_cofigs.model_inferer
+    post_pred = AsDiscrete(argmax= False, threshold = 0.5)
+    post_sigmoid = Activations(sigmoid= True)
+    acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
+                                      get_not_nans=True)
+    model_inferer = partial(
+                        sliding_window_inference,
+                        roi_size=[roi] * 3,
+                        sw_batch_size=cfg.training.sw_batch_size,
+                        predictor=model,
+                        overlap=cfg.model.infer_overlap)
     if args.json_file:
         data_json_file = args.json_file
     print('Configured. Now Loading dataset...')
