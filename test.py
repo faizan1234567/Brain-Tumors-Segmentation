@@ -1,9 +1,10 @@
-## Test set evaluation on brats19 dataset
-#import neccassary packages...
-#Author: Muhammad Faizan
-#Date: 16.09.2022
-#Time: 11.14pm
-"""A script to evaluate the model performance"""
+"""A script to evaluate the model performance
+
+Test set evaluation on brats19 dataset
+import neccassary packages...
+Author: Muhammad Faizan
+Date: 16.09.2022
+"""
 import argparse
 import os
 import pandas as pd
@@ -11,13 +12,14 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 import torch
-from config.configs import Config
 from DataLoader.dataset import BraTSDataset, get_dataloader
 from monai.data import DataLoader, decollate_batch
 from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
 from utils.general import load_pretrained_model
 from utils.meter import AverageMeter
+import hydra
+from omegaconf import OmegaConf, DictConfig
 
 def read_args():
     '''command line arguments for setting up 
@@ -87,8 +89,8 @@ def evaluate(model,
             tic = time.time()
     return run_acc.avg
 
-
-def main():
+@hydra.main(config_name='configs', config_path= 'conf', version_base=None)
+def main(cfg: DictConfig):
     """
     Function that handles everything..
     """
