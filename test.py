@@ -34,6 +34,21 @@ import hydra
 from omegaconf import OmegaConf, DictConfig
 import logging
 
+# configure logger as INFO
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+file_handler = logging.FileHandler(filename= "logger.log")
+stream_handler = logging.StreamHandler()
+formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')
+file_handler.setFormatter(formatter)
+stream_handler.setFormatter(formatter)
+
+# set as file handler and stream handler
+logger.addHandler(file_handler)
+logger.addHandler(stream_handler)
+
+# read command line args
 def read_args():
     '''command line arguments for setting up 
     neccassary paths and params'''
@@ -60,7 +75,10 @@ def evaluate(model,
               post_sigmoid = None,
               acc_func = None,
               model_inferer = None):
-    '''to evaluate the model performance
+    '''
+    To evaluate the model performance
+
+
     Parameters
     ----------:
     model: nn.Module
@@ -71,12 +89,16 @@ def evaluate(model,
     acc_func: monai.metrics.meandice.DiceMetric 
     model_inferer: nn.Module
     '''
+    # set cuda
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    # load the model and set the model on evaluation mode
     model = load_pretrained_model(model, state_path=weights)
     model.eval()
     model.to(device)
     tic = time.time()
     run_acc = AverageMeter()
+    # run evaluation
     with torch.no_grad():
         for index, batch_data in enumerate(loader):
             prediction_lists = decollate_batch(model_inferer(batch_data["image"].to(device)))
@@ -107,9 +129,13 @@ def main(cfg: DictConfig):
     """
     Function that handles everything..
     """
+    # command line args
     args = read_args()
-    print('Configuring...')
+
+    # choose cuda if available
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+    # if training on colab or other platform, set paths accordingly
     if args.platform_changed:
         data_csv_file_path = cfg.paths.dataset_file
         data_json_file = cfg.paths.json_file
@@ -118,6 +144,8 @@ def main(cfg: DictConfig):
         data_csv_file_path = cfg.paths.dataset_file
         data_json_file = cfg.paths.json_file
         data_dir = cfg.paths.train_dir
+
+    # configure model
     roi = cfg.training.roi
     model =   SwinUNETR(
                     img_size=roi,
@@ -129,10 +157,12 @@ def main(cfg: DictConfig):
                     dropout_path_rate=0.0,
                     use_checkpoint=True,
                             ).to(device)
+    
     weights = args.weights
     batch_size = args.batch
     wokers = args.workers
     fold = args.fold
+
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
     acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
@@ -145,7 +175,9 @@ def main(cfg: DictConfig):
                         overlap=cfg.model.infer_overlap)
     if args.json_file:
         data_json_file = args.json_file
-    print('Configured. Now Loading dataset...')
+    print('Loading dataset')
+
+    # load test dataset
     test_loader = get_dataloader(BraTSDataset,
                                  path_to_csv= data_csv_file_path,
                                  phase = 'val',
@@ -155,9 +187,12 @@ def main(cfg: DictConfig):
                                  fold = fold,
                                  train_dir= data_dir)
     
-    print('The dataset loaded. \n')
-    print(f'Dataset size: {len(test_loader)}')
-    print('Now starting evaluation on the test set.')
+    logger.info('Successfully loaded. \n')
+    logger.info(f'Dataset size: {len(test_loader)}')
+    
+    logger.info('Evaluate on the test set')
+
+    # evaluate the test set on a trained model
     mean_dice =evaluate(model= model,
              weights=weights,
              loader= test_loader,
@@ -166,9 +201,8 @@ def main(cfg: DictConfig):
              acc_func= acc_func,
              model_inferer= model_inferer)
     
-    print("Mean dice on the test set: ", mean_dice)
-    
-    print('Completed sucessfully!!')
-    
+    logger.info(f"Mean dice on the test set: {mean_dice}")
+
+
 if __name__ == '__main__':
     main()
