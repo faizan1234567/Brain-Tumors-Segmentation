@@ -143,10 +143,10 @@ def main(cfg: DictConfig):
     else:
         data_csv_file_path = cfg.paths.dataset_file
         data_json_file = cfg.paths.json_file
-        data_dir = cfg.paths.train_dir
+        data_dir = cfg.paths.train_path
 
     # configure model
-    roi = cfg.training.roi
+    roi = cfg.model.roi
     model =   SwinUNETR(
                     img_size=roi,
                     in_channels=4,
