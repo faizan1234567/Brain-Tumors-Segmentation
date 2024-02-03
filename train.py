@@ -1,12 +1,14 @@
 """
+========================================================
 Train Multi-Modal BraTS dataset Tumor segmentation model
 on the BraTS dataset
---------------------------------------------------------
-
+========================================================
 
 Author: Muhammad Faizan
 Date: 5 May 2023
-National University of Sciences and Technology Islamabad, Pakistan
+National University of Sciences and Technology Islamabad, 
+Pakistan
+=========================================================
 """
 import os
 import copy
@@ -374,12 +376,11 @@ def run(args, model,
             train_losses,
             train_epochs)
 
-#  training
+# training
+# TODO: Faizan, to add multi-GPU support for parrellel compute
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
-    logging.info('Running train.py')
     logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
-
     # read command line args
     args = read_args()
     
