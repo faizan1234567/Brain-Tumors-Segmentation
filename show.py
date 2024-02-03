@@ -1,11 +1,12 @@
 """
+==============================================================
 script to show the image and label, or image with labeled mask
--------------------------------------------------------------
+==============================================================
 
 Author: Muhammad Faizan
 Date: 13 May 2023
 Copywrite (c) Muhammad Faizan
----------------------------------------------------------------
+==============================================================
 """
 
 import matplotlib.pyplot as plt
@@ -13,12 +14,12 @@ import logging
 import numpy as np
 import imageio
 import argparse
-
+import hydra
+from omegaconf import OmegaConf, DictConfig
 
 import torch
 import monai
 from DataLoader.dataset import BraTSDataset, get_dataloader
-from config.configs import Config
 import yaml
 from utils.visualizer import visualize_abnormal_area, get_labelled_image, visualize_data_gif
 from utils.general import visualize_data_sample
@@ -50,8 +51,8 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
-
-def show_result(args: argparse.Namespace):
+@hydra.main(config_name='configs', config_path= 'conf', version_base=None)
+def show_result(cfg: DictConfig, args: argparse.Namespace):
     """
     Visualize labelled brain scan on a patient case, three options are available
     1 - create brain scan slices and label them
@@ -66,7 +67,7 @@ def show_result(args: argparse.Namespace):
     with open(args.config, 'r') as file:
         configs = yaml.safe_load(file)
 
-    full_paths = configs["config"]['full_paths']
+    full_paths = cfg.paths.test_patient
 
     try:
         json_file = args.json_file
