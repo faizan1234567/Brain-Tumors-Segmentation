@@ -16,6 +16,7 @@ import imageio
 import argparse
 import hydra
 from omegaconf import OmegaConf, DictConfig
+import os
 
 import torch
 import monai
@@ -64,8 +65,9 @@ def show_result(cfg: DictConfig, args: argparse.Namespace):
     args: argparse.Namespace()
     """
     # load a config file for loading configuration settings
-    with open(args.config, 'r') as file:
-        configs = yaml.safe_load(file)
+    if os.path.exists(args.config):
+        with open(args.config, 'r') as file:
+            configs = yaml.safe_load(file)
 
     full_paths = cfg.paths.test_patient
 
@@ -73,16 +75,16 @@ def show_result(cfg: DictConfig, args: argparse.Namespace):
         json_file = args.json_file
     except AttributeError:
         logger.info(f"{args.json_file} not passed, setting file from the configs")
-        json_file = full_paths["json_file"]
-    json_file = full_paths["json_file"]
+        json_file = cfg.paths.json_file
+    json_file = cfg.paths.json_file
     phase = args.phase
    
     # load the dataset, a sample for visualization
     data = get_dataloader(dataset = BraTSDataset, 
-                          path_to_csv = full_paths["dataset_file"], 
+                          path_to_csv = cfg.paths.dataset_file, 
                           phase= phase, batch_size= 1, num_workers= 2, 
                           json_file=json_file,
-                          is_process_mask= False)
+                          is_process_mask = False)
     
     # iterate over a batch to get a batch of examples
     batch = next(iter(data))
@@ -96,8 +98,9 @@ def show_result(cfg: DictConfig, args: argparse.Namespace):
         labelled_img = get_labelled_image(image, label)
         visualize_data_gif(labelled_img)
     elif args.visualize_data_sample:
+        # TODO: to configure the correct path later.
         visualize_data_sample(full_paths['test_patient'], 
-                              configs["config"]['dataset']['a_test_patient'])
+                              cfg.paths.test_patient)
     else:
         logger.info('No option selected')
 
