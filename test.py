@@ -1,11 +1,15 @@
 """
-A script to evaluate the model performance
 ==========================================
-Test set evaluation on brats19 dataset
+A script to evaluate the model performance
+test set evaluation on BraTS23 dataset.
+==========================================
+
 import neccassary packages...
 Author: Muhammad Faizan
 Date: 16.09.2022
+==========================================
 """
+
 import argparse
 import os
 import pandas as pd
@@ -67,7 +71,7 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
-
+# run evaluation on the test set
 def evaluate(model,
               weights, 
               loader, 
@@ -175,7 +179,7 @@ def main(cfg: DictConfig):
                         overlap=cfg.model.infer_overlap)
     if args.json_file:
         data_json_file = args.json_file
-    print('Loading dataset')
+    logging.info('Loading dataset')
 
     # load test dataset
     test_loader = get_dataloader(BraTSDataset,
@@ -193,7 +197,7 @@ def main(cfg: DictConfig):
     logger.info('Evaluate on the test set')
 
     # evaluate the test set on a trained model
-    mean_dice =evaluate(model= model,
+    mean_dice = evaluate(model= model,
              weights=weights,
              loader= test_loader,
              post_pred= post_pred,
