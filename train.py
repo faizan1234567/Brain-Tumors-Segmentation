@@ -22,7 +22,6 @@ import argparse
 import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
-# from config.configs import *
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from DataLoader.dataset import BraTSDataset, get_dataloader
 
@@ -78,6 +77,7 @@ def read_args():
     opt = parser.parse_args()
     return opt
 
+# train for an epoch
 def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
     """
     train the model for epoch on MRI image and given ground truth labels
@@ -110,7 +110,7 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
         tic = time.time()
     return run_loss.avg
 
-
+# validate the model
 def val(model, loader, acc_func,
         max_epochs = None, epoch = None, model_inferer = None,
         post_sigmoid = None, post_pred = None):
@@ -160,13 +160,15 @@ def val(model, loader, acc_func,
             tic = time.time()
     return run_acc.avg
 
+# save trained results
 def save_data(training_loss,
               et, wt, tc,
               val_mean_acc,
               val_losses,
               training_dices,
               epochs):
-    """save the training data for later use
+    """
+    save the training data for later use
     
     Parameters
     ----------
@@ -367,7 +369,7 @@ def run(args, model,
         post_pred=post_pred,
     )
     print()
-    print(f"train completed, best average dice: {val_mean_dice_max:.4f} ")
+    logger.info(f"train completed, best average dice: {val_mean_dice_max:.4f} ")
     return (val_mean_dice_max, 
             dices_tc,
             dices_wt,
@@ -432,8 +434,7 @@ def main(cfg: DictConfig):
     # Cosine Annearling learning rate schedular 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max= max_epochs)
     
-    
-    # TODO: to replace config with teh cfg option and test passes
+    # configure batch size and workers
     dataset_info_csv = cfg.paths.dataset_file 
     batch_size = args.batch if args.batch else cfg.training.batch_size
     num_workers = args.workers if args.workers else cfg.training.num_workers
@@ -460,7 +461,7 @@ def main(cfg: DictConfig):
                                   json_file = json_file,
                                   fold = args.fold,
                                   train_dir = train_dir)
-    
+    # validation data loader
     val_loader = get_dataloader(BraTSDataset, 
                                 dataset_info_csv, 
                                 phase= "val", 
