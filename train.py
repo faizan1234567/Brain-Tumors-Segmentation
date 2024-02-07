@@ -63,8 +63,8 @@ def read_args():
     """read commmand line arguments"""
     parser = argparse.ArgumentParser(description="command line args")
     parser.add_argument('--data', default= "", type= str, help= "dataset root directory path")
-    parser.add_argument('--fold', default= 0, type = int, help="folder name")
-    parser.add_argument('--json_file', default= "", type = str, help ="path to json file")
+    parser.add_argument('--fold', default= 0, type = int, help="folder name or number")
+    parser.add_argument('--json_file', default= "", type = str, help ="path to json file for splitting train and val folds")
     parser.add_argument('--batch', default=1, type= int, help= "batch size")
     parser.add_argument('--img_roi', default=128, type = int, help = 'image roi size')
     parser.add_argument('--val_every', default= 2, type = int, help= "validate every 2 epochs")
@@ -73,7 +73,7 @@ def read_args():
     parser.add_argument('--pretrained_model', default= "", type = str, help = "path to pretraiend model")
     parser.add_argument('--pretrained', action= 'store_true', help= "use pretrained weights.")
     parser.add_argument('--resume', action= 'store_true', help="starting training from the saved ckpt.")
-    parser.add_argument('--platform_changed', action='store_true', help="pc changed, so that dataset dir has been set accordingly")
+    parser.add_argument('--colab', action='store_true', help="colab, configure paths on drive")
     opt = parser.parse_args()
     return opt
 
@@ -441,10 +441,10 @@ def main(cfg: DictConfig):
     
     # if using Google colab to access drive or other platform please configure 
     # paths belows
-    if args.platform_changed:
-        train_dir = "" 
-        dataset_info_csv = ""
-        json_file = ""
+    if args.colab:
+        train_dir = cfg.colab.train_path
+        dataset_info_csv = cfg.colab.dataset_file
+        json_file =cfg.colab.json_file
     else:
         train_dir = cfg.paths.train_path
         dataset_info_csv = cfg.paths.dataset_file
