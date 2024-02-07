@@ -74,7 +74,17 @@ pip list
 installation complete!
 
 ## Google Colab Usage
-Upload the dataset on your drive. to be continued..
+Upload the dataset on your drive. Update the train, json file, and dataset csv file paths in the colab config in the conf directory. Then mount drive with colab:
+```python
+from google.colab import drive
+drive.mount('/gdrive')
+```
+clone the repo in colab notebook, and then install all the dependencies:
+```
+!pip install -r requirments.txt
+```
+and make sure to set colab with command line argument, so the system can corresponding
+paths for colab and start loading the data for training.
 
 ## Usage
 To train on Brats23, run the training command
