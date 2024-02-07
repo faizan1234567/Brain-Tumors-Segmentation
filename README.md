@@ -83,8 +83,7 @@ clone the repo in colab notebook, and then install all the dependencies:
 ```
 !pip install -r requirments.txt
 ```
-and make sure to set colab with command line argument, so the system can corresponding
-paths for colab and start loading the data for training.
+and make sure to set colab with command line argument, so the system can load corresponding paths for colab and start loading the data for training.
 
 ## Usage
 To train on Brats23, run the training command
