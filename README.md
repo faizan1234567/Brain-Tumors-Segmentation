@@ -73,6 +73,9 @@ pip list
 ```
 installation complete!
 
+## Google Colab Usage
+Upload the dataset on your drive. to be continued..
+
 ## Usage
 To train on Brats23, run the training command
 First configure some paths in configs.py, these are some necessary paths about the dataset directory, data loading, and other important parameters.
