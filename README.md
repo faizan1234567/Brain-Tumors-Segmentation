@@ -40,19 +40,38 @@ Dataset/
 image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 
 ## Installation
+
 ```
-git clone https://github.com/faizan1234567/Brats-20-Tumors-segmentation.git
-cd Brats-20-Tumors-segmentation
+git clone https://github.com/faizan1234567/BraTS23-Tumors-Segmentation
+cd BraTS23-Tumors-Segmentation
+```
 
-python3 -m venv segmentation #linux
-source segmentation/bin/activate
-  
-python3 -m venv segmentation #windows
- .\segmentation\Scripts\activate
+create a virtual environment in Anaconda and activate it.
+```
+conda create -n brats_segmentation python=3.9.0 -y 
+conda activate brats_segmentation
+```
 
+if you forgot the created enviroment name, you can get it with:
+```
+conda env list
+```
+
+if you mistakenly created an environment with wrong name or it has some issues, you can
+remove it and create another one again with a unique name:
+```
+conda env remove --name your_venv
+```
+
+Now install all the dependencies
+```
 pip install --upgrade pip
 pip install -r requirements.txt
+
+# to check packages
+pip list
 ```
+installation complete!
 
 ## Usage
 To train on Brats23, run the training command
