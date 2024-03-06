@@ -252,8 +252,8 @@ def get_dataloader(
     train_df = df.loc[df['phase'] == 'train'].reset_index(drop=True)
     val_df = df.loc[df['phase'] == 'val'].reset_index(drop=True)
     df = train_df if phase == "train" else val_df
-    logger.info(" {} phase selected.".format(phase.capitalize()))
-    logger.info(" First row in the data frame: {}".format(df.iloc[0, :].tolist()))
+    # logger.info(" {} phase selected.".format(phase.capitalize()))
+    # logger.info(" First row in the data frame: {}".format(df.iloc[0, :].tolist()))
     
     # Load the dataset for the phase specified
     dataset = dataset(df, phase, is_process_mask = is_process_mask)

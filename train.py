@@ -472,7 +472,6 @@ def main(cfg: DictConfig):
                                 train_dir = train_dir)
     
     logger.info('starting training...')
-    logger.info('--'* 20)
 
     # run training
     run(args, model=model,
