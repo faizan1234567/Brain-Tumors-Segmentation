@@ -378,6 +378,7 @@ def run(args, model,
             train_losses,
             train_epochs)
 
+
 # training
 # TODO: Faizan, to add multi-GPU support for parrellel compute
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
