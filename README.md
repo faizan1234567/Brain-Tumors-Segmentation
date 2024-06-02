@@ -153,7 +153,6 @@ python show.py --json_file <path> --fold 0 --phase <"val"> --save <path>
 - New Data augmentation options (private)
 - automatic hyperparameters optimization (private)
 - CKD-TransBTS and other SOTA semantic segmentation models to be added
-- semantic segmentation model to be evaluated.
 
 ## Cite
 
