@@ -1,22 +1,24 @@
+# avoid pushing some directories like virtual enviroments and other dirs
+# and some private dirs
 segment/
 segmentation/
 literature/
-# research/
-*.pth
-__pycache__/
-brats23/
-.vscode/
-Unet/
-*.pdf
-test image/
+research/
 weights/
-segment/
-*.pth
-*.log
-*.csv 
+test image/
+Unet/
+__pycache__/
+.vscode/
+brats23/
 data/
 runs/
 configs/
 test_scripts/
 outputs/
+
+# avoid pushing some common extensions mentioned below
+*.pth
+*.pdf
 *.log
+*.csv 
+
