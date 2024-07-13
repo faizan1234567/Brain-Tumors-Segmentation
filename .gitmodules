@@ -1,0 +1,3 @@
+[submodule "CKD-TransBTS"]
+	path = CKD-TransBTS
+	url = https://github.com/faizan1234567/CKD-TransBTS
