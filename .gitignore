@@ -3,10 +3,8 @@
 segment/
 segmentation/
 literature/
-# research/
 weights/
 test image/
-Unet/
 __pycache__/
 .vscode/
 brats23/
@@ -21,4 +19,4 @@ outputs/
 *.pdf
 *.log
 *.csv 
-
+*.pt
