@@ -1,6 +1,6 @@
-from convolutions import convolution
-from buillding_block import ResidualBlock
-from models import SegResNet
+from models.SegResNet.convolutions import convolution
+from models.SegResNet.buillding_block import ResidualBlock
+from models.SegResNet.models import SegResNet
 import torch
 import time
 
