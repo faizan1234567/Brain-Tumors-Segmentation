@@ -14,7 +14,7 @@ configs/
 test_scripts/
 outputs/
 
-# avoid pushing some common extensions mentioned below
+# avoid pushing some common extensions mentioned here
 *.pth
 *.pdf
 *.log
