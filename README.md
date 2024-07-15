@@ -1,6 +1,6 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS21_setup.ipynb)
 # Brain Tumors Segmentation on BraTS23 Dataset (New)
-Brain tumor is one of the deadlist kind of disease around the globe. Among these, gliomas are ubiquitous. Physcians and Radiologists use MRI scans and CT scans to diagnose the disease. In addition, it could be highly prone to human errors, and it's time consuming process when timely diagnosis is required. To assit radioligits, deep learning is being used. Deep Learning has shown remarkable performance in medical imaging over the years. Therefore, to train a deep learning model, a large dataset is being used to train the AI model for accurate diagnosis for early treamtment of the disease.
+Brain tumor is one of the deadlist kind of disease around the world. Among these, gliomas are ubiquitous. Physcians and Radiologists use MRI scans and CT scans to diagnose the disease. In addition, it could be highly prone to human errors, and it's time consuming process when timely diagnosis is required. To assit radioligits, deep learning is being used. Deep Learning has shown remarkable performance in medical imaging over the years. Therefore, to train a deep learning model, a large dataset is being used to train the AI model for accurate diagnosis for early treamtment of the disease. 
 
 ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif)
 
