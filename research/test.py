@@ -3,7 +3,7 @@ from models.SegResNet.buillding_block import ResidualBlock
 from models.SegResNet.models import SegResNet
 import torch
 import time
-
+from torchsummary import summary
 
 
 input = torch.rand(4, 155, 240, 240, dtype = torch.float32, requires_grad = True)
