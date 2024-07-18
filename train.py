@@ -380,7 +380,6 @@ def run(args, model,
 
 
 # training
-# TODO: Faizan, to add multi-GPU support for parrellel compute
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
     logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
