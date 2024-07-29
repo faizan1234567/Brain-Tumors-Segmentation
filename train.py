@@ -29,10 +29,11 @@ import monai
 from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batch
 import torch
 import torch.nn as nn
+from torch.backends import cudnn
 
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
-from monai.networks.nets import SwinUNETR
+from monai.networks.nets import SwinUNETR, SegResNet, VNet, DynUNet, BasicUNetPlusPlus
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
 from monai import transforms
@@ -59,23 +60,73 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-def read_args():
-    """read commmand line arguments"""
-    parser = argparse.ArgumentParser(description="command line args")
-    parser.add_argument('--data', default= "", type= str, help= "dataset root directory path")
-    parser.add_argument('--fold', default= 0, type = int, help="folder name or number")
-    parser.add_argument('--json_file', default= "", type = str, help ="path to json file for splitting train and val folds")
-    parser.add_argument('--batch', default=1, type= int, help= "batch size")
-    parser.add_argument('--img_roi', default=128, type = int, help = 'image roi size')
-    parser.add_argument('--val_every', default= 2, type = int, help= "validate every 2 epochs")
-    parser.add_argument('--max_epochs', default= 100, type= int, help= "maximum number of epoch to train")
-    parser.add_argument('--workers', default=2, type = int, help= "Number of data loading workers")
-    parser.add_argument('--pretrained_model', default= "", type = str, help = "path to pretraiend model")
-    parser.add_argument('--pretrained', action= 'store_true', help= "use pretrained weights.")
-    parser.add_argument('--resume', action= 'store_true', help="starting training from the saved ckpt.")
-    parser.add_argument('--colab', action='store_true', help="colab, configure paths on drive")
-    opt = parser.parse_args()
-    return opt
+
+class NeuralNet:
+    """pick the model for training"""
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self._all_models = {
+            "SegResNet": SegResNet(spatial_dims=3, init_filters=32, 
+                                   in_channels=4, out_channels=3, 
+                                   dropout_prob=0.2, blocks_down=(1, 2, 2, 4), 
+                                   blocks_up=(1, 1, 1)),
+            # "VNet":VNet(),
+            # "DynUNet": DynUNet(),
+            # "UNet++": BasicUNetPlusPlus(),
+            "SwinUNetR": SwinUNETR(
+                    img_size=128,
+                    in_channels=4,
+                    out_channels=3,
+                    feature_size=48,
+                    drop_rate=0.0,
+                    attn_drop_rate=0.0,
+                    dropout_path_rate=0.0,
+                    use_checkpoint=True,
+                            )}
+    def select_model(self):
+        return self._all_models[self.model_name]
+    
+class Solver:
+    """list of optimizers for training NN"""
+    def __init__(self, model: nn.Module, lr: float = 1e-4, weight_decay: float = 1e-5):
+        self.lr = lr
+        self.weight_decay = weight_decay
+
+        self.all_solvers = {
+            "Adam": torch.optim.Adam(model.parameters(), lr=self.lr, 
+                                     weight_decay= self.weight_decay, 
+                                     amsgrad=True), 
+            "AdamW": torch.optim.AdamW(model.parameters(), lr=self.lr, 
+                                     weight_decay= self.weight_decay, 
+                                     amsgrad=True),
+            "SGD": torch.optim.SGD(model.parameters(), lr=self.lr, 
+                                     weight_decay= self.weight_decay),
+        }
+    def select_solver(self, name):
+        return self.all_solvers[name]
+
+def save_best_model(dir_name, model, name="best_model"):
+    torch.save(model.state_dict(), f"{dir_name}/{name}.pkl")
+    
+def save_checkpoint(dir_name, state, name="checkpoint"):
+    torch.save(state, f"{dir_name}/{name}.pth.tar")
+ 
+def create_dirs(dir_name):
+    """create experiment directory storing
+    checkpoint and best weights"""
+    os.makedirs(dir_name, exist_ok=True)
+    os.makedirs(os.path.join(dir_name, "checkpoint"), exist_ok=True)
+    os.makedirs(os.path.join(dir_name, "best-model"), exist_ok=True)
+
+def init_random(seed):
+    torch.manual_seed(seed)        
+    torch.cuda.manual_seed(seed)  
+    torch.cuda.manual_seed_all(seed) 
+    random.seed(seed)
+    np.random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    cudnn.benchmark = False         
+    cudnn.deterministic = True
 
 # train for an epoch
 def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
@@ -190,7 +241,8 @@ def save_data(training_loss,
     data_df.to_csv('training_data.csv')
     return data
 
-def trainer(model,
+def trainer(cfg,
+            model,
             train_loader,
             val_loader,
             optimizer,
@@ -277,10 +329,9 @@ def trainer(model,
             if val_mean_acc > val_acc_max:
                 print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_mean_acc))
                 val_acc_max = val_mean_acc
-                save_checkpoint(model=model,
-                                epoch= epoch,
-                                best_acc=val_acc_max)
+                save_best_model(cfg.training.exp_name, model, "best_model")
             scheduler.step()
+            save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print("Training Finished !, Best Accuracy: ", val_acc_max)
     save_data(training_loss=training_loss,
               et= dices_et,
@@ -298,7 +349,7 @@ def trainer(model,
         training_loss,
         train_epochs)
 
-def run(args, model,
+def run(cfg, model,
         loss_func,
         acc_func,
         optimizer,
@@ -309,7 +360,6 @@ def run(args, model,
         post_sigmoid = None, 
         post_pred = None,
         max_epochs = 100,
-        start_epoch = 0,
         val_every = 2
         ):
     '''Now train the model
@@ -331,17 +381,20 @@ def run(args, model,
     start_epoch: int
     val_every: int
     '''
-    if args.pretrained:
-        print('Loading a pretrained model')
-        print()
-        model = load_pretrained_model(model, args.pretrained_model)
-    if args.resume:
+    # create experiments folders
+    create_dirs(cfg.training.exp_name)
+    if cfg.training.resume:
         print('Resuming training...')
-        model = resume_training(model, args.pretrained_model)
-    elif args.pretrained:
-        print("Using a pretrained model...")
+        checkpoint = os.path.join(cfg.training.exp_name, "checkpoint", "checkpoint.pth.tar")
+        model.load_state_dict(checkpoint['model'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        start_epoch = checkpoint['epoch']
+        scheduler.load_state_dict(checkpoint['scheduler'])
+        print(f"start train from epoch = {start_epoch}")
+
     else:
         print('Trainig from scrath!')
+        start_epoch = 0
 
     total_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print()
@@ -356,6 +409,7 @@ def run(args, model,
     train_losses,
     train_epochs,
     ) = trainer(
+        cfg, 
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
@@ -382,11 +436,13 @@ def run(args, model,
 # Train
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
-    logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
+    # logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
     args = read_args()
+
+    # Initialize random
+    init_random(seed=cfg.training.seed)
     
     # set cuda if available and use CuDNN for efficient NN training
-    start_epoch = 0
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     torch.backends.cudnn.benchmark = True
 
@@ -396,25 +452,17 @@ def main(cfg: DictConfig):
     
     # define model 
     roi = cfg.model.roi
-    model = SwinUNETR(
-                    img_size=roi,
-                    in_channels=4,
-                    out_channels=3,
-                    feature_size=48,
-                    drop_rate=0.0,
-                    attn_drop_rate=0.0,
-                    dropout_path_rate=0.0,
-                    use_checkpoint=True,
-                            ).to(device)
+    models = NeuralNet(cfg.model.model_name)
+    model = models.select_model()
     
     model_inferer = partial(
                         sliding_window_inference,
-                        roi_size=[roi] * 3,
+                        roi_size=[roi] * 3, # may very for other models
                         sw_batch_size=cfg.training.sw_batch_size,
                         predictor=model,
                         overlap=cfg.model.infer_overlap)
     
-    val_every = args.val_every
+    val_every = cfg.training.val_every
 
     # loss function (dice loss for semantic segmentation)
     loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
@@ -424,19 +472,19 @@ def main(cfg: DictConfig):
                                       get_not_nans=True)
     
     # default optimizer (experiment with other ones)
-    optimizer = torch.optim.AdamW(model.parameters(), lr= cfg.training.learning_rate, 
-                                              weight_decay=cfg.training.weight_decay)
-    
+    solver = Solver(model=model, lr=cfg.training.learning_rate, 
+                       weight_decay=cfg.training.weight_decay)
+    optimizer = solver.select_solver(cfg.training.solver_name)
+
      # set maximum training epochs
-    max_epochs = args.max_epochs if args.max_epochs else cfg.training.max_epochs
+    max_epochs = cfg.training.max_epochs
 
     # Cosine Annearling learning rate schedular 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max= max_epochs)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
     
     # configure batch size and workers
-    dataset_info_csv = cfg.paths.dataset_file 
-    batch_size = args.batch if args.batch else cfg.training.batch_size
-    num_workers = args.workers if args.workers else cfg.training.num_workers
+    batch_size = cfg.training.batch_size
+    num_workers = cfg.training.num_workers
     
     # if using Google colab to access drive or other platform please configure 
     # paths belows
@@ -446,8 +494,8 @@ def main(cfg: DictConfig):
         json_file =cfg.colab.json_file
     else:
         train_dir = cfg.paths.train_path
-        dataset_info_csv = cfg.paths.dataset_file
-        json_file = cfg.paths.json_file
+        dataset_info_csv = cfg.paths.dataset_file # datsaet information file
+        json_file = cfg.paths.json_file # for 5 fold split
 
     logger.info("Configured. Now Loading the dataset...\n")
 
@@ -458,7 +506,7 @@ def main(cfg: DictConfig):
                                   batch_size = batch_size, 
                                   num_workers = num_workers,
                                   json_file = json_file,
-                                  fold = args.fold,
+                                  fold = cfg.training.fold,
                                   train_dir = train_dir)
     # validation data loader
     val_loader = get_dataloader(BraTSDataset, 
@@ -467,13 +515,13 @@ def main(cfg: DictConfig):
                                 batch_size = batch_size,  
                                 num_workers = num_workers,
                                 json_file = json_file,
-                                fold = args.fold, 
+                                fold = cfg.training.fold, 
                                 train_dir = train_dir)
     
     logger.info('starting training...')
 
     # run training
-    run(args, model=model,
+    run(cfg, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
         optimizer= optimizer,
@@ -484,14 +532,8 @@ def main(cfg: DictConfig):
         post_sigmoid=post_sigmoid,
         post_pred=post_pred,
         max_epochs=max_epochs,
-        start_epoch=start_epoch,
         val_every=val_every)
     
     logger.info('Training complete!!!')
-#TODO: 
-# - Write Seperate class for optimizer, loss, evaluation metrics, scheduler, and models
-# - Customize Data loading class to work in general
-# - Customize to work completely with BraTS 2023 datast
-# - Model configuration addition
 if __name__ == "__main__":
     main()
