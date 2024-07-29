@@ -379,11 +379,10 @@ def run(args, model,
             train_epochs)
 
 
-# training
+# Train
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
     logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
-    # read command line args
     args = read_args()
     
     # set cuda if available and use CuDNN for efficient NN training
@@ -489,6 +488,10 @@ def main(cfg: DictConfig):
         val_every=val_every)
     
     logger.info('Training complete!!!')
-
+#TODO: 
+# - Write Seperate class for optimizer, loss, evaluation metrics, scheduler, and models
+# - Customize Data loading class to work in general
+# - Customize to work completely with BraTS 2023 datast
+# - Model configuration addition
 if __name__ == "__main__":
     main()
