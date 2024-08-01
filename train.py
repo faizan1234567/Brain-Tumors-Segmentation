@@ -43,7 +43,7 @@ from monai.transforms import (
 )
 from functools import partial
 
-# configure logger
+# Configure logger
 import logging
 import hydra
 from omegaconf import OmegaConf, DictConfig
@@ -311,7 +311,8 @@ def trainer(cfg,
             scheduler.step()
             save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print("Training Finished !, Best Accuracy: ", val_acc_max)
-    # save important data
+
+    # Save important data
     save_data(training_loss=training_loss,
               et= dices_et,
               wt= dices_wt,
@@ -360,8 +361,10 @@ def run(cfg, model,
     start_epoch: int
     val_every: int
     '''
-    # create experiments folders
+    # Create experiments folders
     create_dirs(cfg.training.exp_name)
+
+    # resume 
     if cfg.training.resume:
         print('Resuming training...')
         checkpoint = os.path.join(cfg.training.exp_name, "checkpoint", "checkpoint.pth.tar")
@@ -372,6 +375,7 @@ def run(cfg, model,
         print(f"start train from epoch = {start_epoch}")
 
     else:
+        # Training from scratch
         print('Trainig from scrath!')
         start_epoch = 0
 
