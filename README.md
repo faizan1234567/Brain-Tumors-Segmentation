@@ -168,16 +168,28 @@ If you find this project useful in your research, please consider cite:
 ```
 
 ### Acknowledgements
-[1]. http://braintumorsegmentation.org/
+[1]. MICCAI BRATS. (n.d.). MICCAI brats - the multimodal brain tumor segmentation challenge. MICCAI BRATS - The Multimodal Brain Tumor Segmentation Challenge. http://braintumorsegmentation.org/ 
 
-[2]. https://monai.io/
+[2]. monai. (n.d.). Home. MONAI. https://monai.io/ 
 
-[3]. https://github.com/Project-MONAI/research-contributions/tree/main/SwinUNETR/BRATS21
+[4]. Chadha, A. (n.d.). Amanchadha/Coursera-ai-for-Medicine-specialization: Programming assignments, labs and quizzes from all courses in the Coursera AI for Medicine Specialization offered by deeplearning.ai. GitHub. https://github.com/amanchadha/coursera-ai-for-medicine-specialization 
 
-[4]. https://github.com/amanchadha/coursera-ai-for-medicine-specialization
+[5]. Zhou, C., Ding, C., Wang, X., Lu, Z., & Tao, D. (2020). One-pass multi-task networks with cross-task guided attention for brain tumor segmentation. IEEE Transactions on Image Processing, 29, 4516-4529.
 
-[5]. https://arxiv.org/pdf/1906.01796v2.pdf
+[6]. Liu, Z., Lin, Y., Cao, Y., Hu, H., Wei, Y., Zhang, Z., ... & Guo, B. (2021). Swin transformer: Hierarchical vision transformer using shifted windows. In Proceedings of the IEEE/CVF international conference on computer vision (pp. 10012-10022).
 
-[6]. https://arxiv.org/abs/2103.14030
+[7]. He, K., Zhang, X., Ren, S., & Sun, J. (2016). Deep residual learning for image recognition. In Proceedings of the IEEE conference on computer vision and pattern recognition (pp. 770-778).
 
-[7]. https://arxiv.org/abs/1512.03385
+[8]. Ronneberger, O., Fischer, P., & Brox, T. (2015). U-net: Convolutional networks for biomedical image segmentation. In Medical image computing and computer-assisted intervention–MICCAI 2015: 18th international conference, Munich, Germany, October 5-9, 2015, proceedings, part III 18 (pp. 234-241). Springer International Publishing.
+
+[9]. Lin, J., Lin, J., Lu, C., Chen, H., Lin, H., Zhao, B., ... & Han, C. (2023). CKD-TransBTS: clinical knowledge-driven hybrid transformer with modality-correlated cross-attention for brain tumor segmentation. IEEE transactions on medical imaging, 42(8), 2451-2461.
+
+[10]. Myronenko, A. (2019). 3D MRI brain tumor segmentation using autoencoder regularization. In Brainlesion: Glioma, Multiple Sclerosis, Stroke and Traumatic Brain Injuries: 4th International Workshop, BrainLes 2018, Held in Conjunction with MICCAI 2018, Granada, Spain, September 16, 2018, Revised Selected Papers, Part II 4 (pp. 311-320). Springer International Publishing.
+
+[11]. Ranzini, M., Fidon, L., Ourselin, S., Modat, M., & Vercauteren, T. (2021). MONAIfbs: MONAI-based fetal brain MRI deep learning segmentation. arXiv preprint arXiv:2103.13314.
+
+[12]. Zhou, Z., Rahman Siddiquee, M. M., Tajbakhsh, N., & Liang, J. (2018). Unet++: A nested u-net architecture for medical image segmentation. In Deep Learning in Medical Image Analysis and Multimodal Learning for Clinical Decision Support: 4th International Workshop, DLMIA 2018, and 8th International Workshop, ML-CDS 2018, Held in Conjunction with MICCAI 2018, Granada, Spain, September 20, 2018, Proceedings 4 (pp. 3-11). Springer International Publishing.
+
+[13].Hatamizadeh, A., Nath, V., Tang, Y., Yang, D., Roth, H. R., & Xu, D. (2021, September). Swin unetr: Swin transformers for semantic segmentation of brain tumors in mri images. In International MICCAI brainlesion workshop (pp. 272-284). Cham: Springer International Publishing.
+
+[14]. Milletari, F., Navab, N., & Ahmadi, S. A. (2016, October). V-net: Fully convolutional neural networks for volumetric medical image segmentation. In 2016 fourth international conference on 3D vision (3DV) (pp. 565-571). Ieee.
