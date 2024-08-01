@@ -23,7 +23,7 @@ import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
-from DataLoader.dataset import BraTSDataset, get_dataloader
+from brats import get_datasets
 
 import monai
 from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batch
@@ -419,19 +419,19 @@ def main(cfg: DictConfig):
     # Initialize random
     init_random(seed=cfg.training.seed)
     
-    # set cuda if available and use CuDNN for efficient NN training
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # Efficient training
     torch.backends.cudnn.benchmark = True
 
-    # post processing 
+    # Post processing 
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
     
-    # define model 
+    # Define model 
     roi = cfg.model.roi
     models = NeuralNet(cfg.model.model_name)
     model = models.select_model()
     
+    # Sliding window inference on test data
     model_inferer = partial(
                         sliding_window_inference,
                         roi_size=[roi] * 3, # may very for other models
@@ -439,65 +439,54 @@ def main(cfg: DictConfig):
                         predictor=model,
                         overlap=cfg.model.infer_overlap)
     
+    # Validation frequency
     val_every = cfg.training.val_every
 
-    # loss function (dice loss for semantic segmentation)
+    # Loss function (dice loss for semantic segmentation)
     loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
 
-    # Dice metric for performance evaluation
+    # Dice metric 
     acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
                                       get_not_nans=True)
     
-    # default optimizer (experiment with other ones)
+    # Solver 
     solver = Solver(model=model, lr=cfg.training.learning_rate, 
                        weight_decay=cfg.training.weight_decay)
     optimizer = solver.select_solver(cfg.training.solver_name)
 
-     # set maximum training epochs
+     # Max epochs
     max_epochs = cfg.training.max_epochs
 
-    # Cosine Annearling learning rate schedular 
+    # Learning rate scheduler 
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
     
-    # configure batch size and workers
+    # Batch and workers 
     batch_size = cfg.training.batch_size
     num_workers = cfg.training.num_workers
     
-    # if using Google colab to access drive or other platform please configure 
-    # paths belows
+    # Platform specific 
     if cfg.training.colab:
-        train_dir = cfg.colab.train_path
-        dataset_info_csv = cfg.colab.dataset_file
-        json_file =cfg.colab.json_file
+        dataset_dir = cfg.dataset.colab
     else:
-        train_dir = cfg.paths.train_path
-        dataset_info_csv = cfg.paths.dataset_file # datsaet information file
-        json_file = cfg.paths.json_file # for 5 fold split
+        dataset_dir = cfg.dataset.dataset_folder
 
     logger.info("Configured. Now Loading the dataset...\n")
 
-    # load training and validation datasets
-    train_loader = get_dataloader(BraTSDataset, 
-                                  dataset_info_csv, 
-                                  phase = "train",
-                                  batch_size = batch_size, 
-                                  num_workers = num_workers,
-                                  json_file = json_file,
-                                  fold = cfg.training.fold,
-                                  train_dir = train_dir)
-    # validation data loader
-    val_loader = get_dataloader(BraTSDataset, 
-                                dataset_info_csv, 
-                                phase= "val", 
-                                batch_size = batch_size,  
-                                num_workers = num_workers,
-                                json_file = json_file,
-                                fold = cfg.training.fold, 
-                                train_dir = train_dir)
+    # Data Loading
+    train_dataset = get_datasets(dataset_dir, "train")
+    train_val_dataset = get_datasets(dataset_dir, "train_val")
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
+                                               shuffle=True, num_workers=num_workers, 
+                                               drop_last=False, pin_memory=True)
     
+    val_loader = torch.utils.data.DataLoader(train_val_dataset, 
+                                            batch_size=batch_size, 
+                                            shuffle=False, num_workers=num_workers, 
+                                            pin_memory=True)
+
     logger.info('starting training...')
 
-    # run training
+    # Start training
     run(cfg, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
@@ -512,5 +501,7 @@ def main(cfg: DictConfig):
         val_every=val_every)
     
     logger.info('Training complete!!!')
+
+
 if __name__ == "__main__":
     main()
