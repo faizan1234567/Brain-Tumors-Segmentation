@@ -1,4 +1,4 @@
 train_path: "/gdrive/MyDrive/BraTS2023_backup/BraTS23/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData"
-json_file: ""
+json_file: 
 dataset_file: "/gdrive/MyDrive/BraTS2023_backup/BraTS23/BraTS2023_2017_GLI_Mapping.xlsx"
 test_patient: "/gdrive/MyDrive/BraTS2023_backup/BraTS23/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData/BraTS-GLI-00003-000"
