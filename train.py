@@ -436,8 +436,6 @@ def run(cfg, model,
 # Train
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
-    # logging.info(f'Configs: {OmegaConf.to_yaml(cfg)}')
-    args = read_args()
 
     # Initialize random
     init_random(seed=cfg.training.seed)
@@ -488,7 +486,7 @@ def main(cfg: DictConfig):
     
     # if using Google colab to access drive or other platform please configure 
     # paths belows
-    if args.colab:
+    if cfg.training.colab:
         train_dir = cfg.colab.train_path
         dataset_info_csv = cfg.colab.dataset_file
         json_file =cfg.colab.json_file

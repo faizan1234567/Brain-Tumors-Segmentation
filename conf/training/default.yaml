@@ -13,3 +13,4 @@ pretrained: False
 resume: False
 exp_name: SegResNet-runs
 seed: 123
+colab: False
