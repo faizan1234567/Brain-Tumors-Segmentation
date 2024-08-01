@@ -13,7 +13,7 @@ runs/
 configs/
 test_scripts/
 outputs/
-
+SegResNet-runs/
 # avoid pushing some common extensions mentioned here...
 *.pth
 *.pdf
