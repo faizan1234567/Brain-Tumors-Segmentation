@@ -1,19 +1,19 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS21_setup.ipynb)
-# Brain Tumors Segmentation on BraTS23 Dataset (New)
+## Brain Tumors Segmentation on BraTS23 Dataset (New)
 Brain tumors are among the deadliest diseases worldwide, with gliomas being particularly prevalent and challenging to diagnose. Traditionally, physicians and radiologists rely on MRI and CT scans to identify and assess these tumors. However, this diagnostic process is not only time-consuming but also susceptible to human error, which can delay crucial treatment decisions.
 
 To enhance diagnostic accuracy and efficiency, deep learning techniques are increasingly being integrated into medical imaging. Over the years, deep learning has demonstrated exceptional performance in analyzing complex medical images, providing reliable support to healthcare professionals. By leveraging large datasets, deep learning models can be trained to recognize patterns and anomalies in brain scans with reasonable accuracy, facilitating early detection and treatment of brain tumors.
 
-This repository utilizes the BraTS 2021 and BraTS 2022 datasets to develop and evaluate both new and existing state-of-the-art algorithms for brain tumor segmentation. To facilitate research, we have made the code for training, evaluation, data loading, preprocessing, and model development open source. Researchers can use this template to build their models, enhancing accuracy and explainability.
+This repository utilizes the ```BraTS 2021``` and ```BraTS 2023``` datasets to develop and evaluate both new and existing state-of-the-art algorithms for brain tumor segmentation. To facilitate research, we have made the code for training, evaluation, data loading, preprocessing, and model development open source. Researchers can use this template to build their models, enhancing accuracy and explainability.
 
 ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif)
 
-## Dataset Description
-All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and include T2 Fluid Attenuated Inversion Recovery (FLAIR), native (T1), T2-weighted (T2), and post-contrast T1-weighted (T1Gd) images. These scans were acquired using different clinical protocols and various scanners from multiple institutions.
+### The Dataset 
+All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and include ```T2 Fluid Attenuated Inversion Recovery (FLAIR)```, ```native (T1)```, ```T2-weighted (T2)```, and post-contrast ```T1-weighted (T1Gd)``` images. These scans were acquired using different clinical protocols and various scanners from multiple institutions.
 
-Annotations consist of GD-enhancing tumor (ET — label 3), peritumoral edematous/invaded tissue (ED — label 2), and necrotic tumor core (NCR — label 1). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351).
+Annotations consist of GD-enhancing tumor (```ET — label 3```), peritumoral edematous/invaded tissue (```ED — label 2```), and necrotic tumor core (```NCR — label 1```). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351). These subregions can be clustered into three more segmentation-friendly regions which are used to evaluate the segmentation performance, including enhanced tumor (ET), tumor core (TC) (joining ET and NCR), and whole tumor (WT) (joining ED to TC).
 
-The dataset contains 1,251 patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains 833, validation and test sets contains 209 patient records each for model evaluation. 
+The dataset contains ```1,251``` patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains ```833```, validation and test sets contains ```209``` patient records each for model evaluation. [1]
 
 ```
 └── dataset
@@ -59,30 +59,14 @@ create a virtual environment in Anaconda and activate it.
 conda create -n brats_segmentation python=3.9.0 -y 
 conda activate brats_segmentation
 ```
-
-if you forgot the created enviroment name, you can get it with:
-```
-conda env list
-```
-
-if you mistakenly created an environment with wrong name or it has some issues, you can
-remove it and create another one again with a unique name:
-```
-conda env remove --name your_venv
-```
-
 Now install all the dependencies
 ```
 pip install --upgrade pip
 pip install -r requirements.txt
-
-# to check packages
-pip list
 ```
-installation complete!
 
 ## Google Colab Usage
-Upload the dataset on your drive. Update the train, json file, and dataset csv file paths in the colab config in the conf directory. Then mount drive with colab:
+Upload the dataset on your drive. Update the dataset path in the configs according to the dataset split information shown above:
 ```python
 from google.colab import drive
 drive.mount('/gdrive')
@@ -91,7 +75,6 @@ clone the repo in colab notebook, and then install all the dependencies:
 ```
 !pip install -r requirments.txt
 ```
-and make sure to set colab with command line argument, so the system can load corresponding paths for colab and start loading the data for training.
 
 ## Usage
 To train on Brats23, run the training command
