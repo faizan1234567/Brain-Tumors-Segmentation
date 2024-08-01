@@ -473,8 +473,6 @@ def main(cfg: DictConfig):
     else:
         dataset_dir = cfg.dataset.dataset_folder
 
-    logger.info("Configured. Now Loading the dataset...\n")
-
     # Data Loading
     train_dataset = get_datasets(dataset_dir, "train")
     train_val_dataset = get_datasets(dataset_dir, "train_val")
@@ -486,8 +484,7 @@ def main(cfg: DictConfig):
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=num_workers, 
                                             pin_memory=True)
-
-    logger.info('starting training...')
+    print('starting training...')
 
     # Start training
     run(cfg, model=model,
