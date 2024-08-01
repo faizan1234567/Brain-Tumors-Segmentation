@@ -8,16 +8,7 @@ credit: https://github.com/faizan1234567/CKD-TransBTS/blob/main/BraTS.py
 import torch
 import os
 from torch.utils.data.dataset import Dataset
-from utils.all_utils import pad_or_crop_image, minmax, load_nii, pad_image_and_label, listdir
-
-def get_brats_folder(dataset_folder, mode):
-    assert mode in ["train","train_val", "test"]
-    if mode == "train":
-        return os.path.join(dataset_folder, "brats2023", "train")
-    elif mode == "train_val":
-        return os.path.join(dataset_folder, "brats2023", "val")
-    elif mode == "test" :
-        return os.path.join(dataset_folder, "brats2023", "test")
+from utils.all_utils import pad_or_crop_image, minmax, load_nii, pad_image_and_label, listdir, get_brats_folder
 
 class BraTS(Dataset):
     def __init__(self, patients_dir, patient_ids, mode):

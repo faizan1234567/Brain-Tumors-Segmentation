@@ -5,9 +5,8 @@ on the BraTS dataset
 ========================================================
 
 Author: Muhammad Faizan
-Date: 5 May 2023
-National University of Sciences and Technology Islamabad, 
-Pakistan
+
+All right reserved.
 =========================================================
 """
 import os
