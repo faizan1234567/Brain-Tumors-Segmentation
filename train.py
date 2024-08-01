@@ -47,6 +47,7 @@ from functools import partial
 import logging
 import hydra
 from omegaconf import OmegaConf, DictConfig
+from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -144,21 +145,15 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.train() 
-    tic = time.time()
     run_loss = AverageMeter()
-    for index, batch_data in enumerate(loader):
+    for batch_data in loader:
         logits = model(batch_data["image"].to(device))
         loss = loss_func(logits, batch_data["label"].to(device))
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
         run_loss.update(loss.item(), n = batch_data["image"].shape[0])
-        print(
-            "Epoch {}/{} {}/{}".format(epoch, max_epochs, index, len(loader)),
-            "loss: {:.4f}".format(run_loss.avg),
-            "time {:.2f}s".format(time.time() - tic))
-        print()
-        tic = time.time()
+    torch.cuda.empty_cache()
     return run_loss.avg
 
 # validate the model
@@ -183,10 +178,9 @@ def val(model, loader, acc_func,
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    tic = time.time()
     run_acc = AverageMeter()
     with torch.no_grad():
-        for index, batch_data in enumerate(loader):
+        for batch_data in loader:
             logits = model_inferer(batch_data["image"].to(device))
             masks = decollate_batch(batch_data["label"].to(device)) 
             prediction_lists = decollate_batch(logits)
@@ -195,28 +189,12 @@ def val(model, loader, acc_func,
             acc_func(y_pred = predictions, y = masks)
             acc, not_nans = acc_func.aggregate()
             run_acc.update(acc.cpu().numpy(), n = not_nans.cpu().numpy())
-            dice_tc = run_acc.avg[0]
-            dice_wt = run_acc.avg[1]
-            dice_et = run_acc.avg[2]
-            print(
-                "Val {}/{} {}/{}".format(epoch, max_epochs, index, len(loader)),
-                ", dice_tc:",
-                dice_tc,
-                ", dice_wt:",
-                dice_wt,
-                ", dice_et:",
-                dice_et,
-                ", time {:.2f}s".format(time.time() - tic),
-            )
-            tic = time.time()
     return run_acc.avg
 
 # save trained results
 def save_data(training_loss,
               et, wt, tc,
               val_mean_acc,
-              val_losses,
-              training_dices,
               epochs):
     """
     save the training data for later use
@@ -238,7 +216,8 @@ def save_data(training_loss,
     for i in range(len(NAMES)):
         data[f"{NAMES[i]}"] = data_lists[i]
     data_df = pd.DataFrame(data)
-    data_df.to_csv('training_data.csv')
+    os.makedirs("csv", exist_ok= True)
+    data_df.to_csv('csv/training_data.csv')
     return data
 
 def trainer(cfg,
@@ -297,7 +276,6 @@ def trainer(cfg,
         if epoch % val_every == 0 or epoch == 0:
             epoch_losses.append(training_loss)
             train_epochs.append(int(epoch))
-            val_epoch_time = time.time()
             val_acc =  val(model= model,
                           loader= val_loader,
                           acc_func= acc_func,
@@ -327,12 +305,13 @@ def trainer(cfg,
             dices_wt.append(dices_wt)
             mean_dices.append(val_mean_acc)
             if val_mean_acc > val_acc_max:
-                print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_mean_acc))
+                # print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_mean_acc))
                 val_acc_max = val_mean_acc
                 save_best_model(cfg.training.exp_name, model, "best_model")
             scheduler.step()
             save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print("Training Finished !, Best Accuracy: ", val_acc_max)
+    # save important data
     save_data(training_loss=training_loss,
               et= dices_et,
               wt= dices_wt,
