@@ -1,17 +1,21 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS21_setup.ipynb)
 # Brain Tumors Segmentation on BraTS23 Dataset (New)
-Brain tumor is one of the deadlist kind of disease around the world. Among these, gliomas are ubiquitous. Physcians and Radiologists use MRI scans and CT scans to diagnose the disease. In addition, it could be highly prone to human errors, and it's time consuming process when timely diagnosis is required. To assit radioligits, deep learning is being used. Deep Learning has shown remarkable performance in medical imaging over the years. Therefore, to train a deep learning model, a large dataset is being used to train the AI model for accurate diagnosis for early treamtment of the disease. 
+Brain tumors are among the deadliest diseases worldwide, with gliomas being particularly prevalent and challenging to diagnose. Traditionally, physicians and radiologists rely on MRI and CT scans to identify and assess these tumors. However, this diagnostic process is not only time-consuming but also susceptible to human error, which can delay crucial treatment decisions.
+
+To enhance diagnostic accuracy and efficiency, deep learning techniques are increasingly being integrated into medical imaging. Over the years, deep learning has demonstrated exceptional performance in analyzing complex medical images, providing reliable support to healthcare professionals. By leveraging large datasets, deep learning models can be trained to recognize patterns and anomalies in brain scans with reasonable accuracy, facilitating early detection and treatment of brain tumors.
+
+This repository utilizes the BraTS 2021 and BraTS 2022 datasets to develop and evaluate both new and existing state-of-the-art algorithms for brain tumor segmentation. To facilitate research, we have made the code for training, evaluation, data loading, preprocessing, and model development open source. Researchers can use this template to build their models, enhancing accuracy and explainability.
 
 ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif)
 
 ## Dataset Description
-All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are  available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and described as  T2 Fluid Attenuated Inversion Recovery(Flair), native(T1), T2-weighted(T2), and post-contrast T1-weighted (T1Gd). They were acquired with differnt clinical protocals and various scanners from different institutions.
+All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and include T2 Fluid Attenuated Inversion Recovery (FLAIR), native (T1), T2-weighted (T2), and post-contrast T1-weighted (T1Gd) images. These scans were acquired using different clinical protocols and various scanners from multiple institutions.
 
-Annotations consistsof  GD-enhancing tumor (ET — label 3), the peritumoral edematous/invaded tissue (ED — label 2), and the necrotic tumor core (NCR — label 1), more detail [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351).
+Annotations consist of GD-enhancing tumor (ET — label 3), peritumoral edematous/invaded tissue (ED — label 2), and necrotic tumor core (NCR — label 1). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351).
 
-The dataset contains 1251 patient cases that are labelled by expert radiologists. However, cases in validation set are not labelled. Therefore,the dataset has been divided into five folders. Four of them are used for training and one is used for evaluation.
+The dataset contains 1,251 patient cases labeled by expert radiologists. However, cases in the validation set are not labeled. The dataset is divided into five folders: four for training and one for evaluation.
 
-The dataset is represented in a directory in the following sturcture, please make necessary changes if required in your case. And make sure to add other helping files in the dataset directory.
+The directory structure of the dataset is as follows. Please make necessary adjustments if required and ensure to add other supporting files in the dataset directory.
 
 ```
 Dataset/
