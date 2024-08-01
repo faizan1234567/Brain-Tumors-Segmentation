@@ -59,7 +59,7 @@ The dataset contains ```1,251``` patient cases labeled by expert radiologists. H
 ![alt text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/fig_brats21.png)
 image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 
-## Installation
+### Installation
 
 ```
 git clone https://github.com/faizan1234567/BraTS23-Tumors-Segmentation
@@ -77,7 +77,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Google Colab Usage
+### Google Colab Usage
 Upload the dataset on your drive. Update the dataset path in the configs according to the dataset split information shown above:
 ```python
 from google.colab import drive
@@ -88,7 +88,7 @@ clone the repo in colab notebook, and then install all the dependencies:
 !pip install -r requirments.txt
 ```
 
-## Usage
+### Usage
 To train on Brats23, run the training command
 First configure some paths in configs.py, these are some necessary paths about the dataset directory, data loading, and other important parameters.
 ```
@@ -148,16 +148,13 @@ optional arguments:
 python show.py --json_file <path> --fold 0 --phase <"val"> --save <path> 
 ```
 
-## New Features (to be added)
-- MLOps tools integration such as MLflow
-- Experiment tracking & Monitoring.
-- Multi-GPU training 
-- Novel architecture design (private)
-- New Data augmentation options (private)
-- automatic hyperparameters optimization (private)
-- CKD-TransBTS and other SOTA semantic segmentation models to be added
+### TODO
+[] MLOps tools integration such as Weight & Baises
+[] Multi-GPU training 
+[x] New Data augmentation options (private)
+[x] CKD-TransBTS and other SOTA semantic segmentation models to be added
 
-## Cite
+### Cite
 
 If you find this project useful in your research, please consider cite:
 
@@ -170,7 +167,7 @@ If you find this project useful in your research, please consider cite:
 }
 ```
 
-## Acknowledgements
+### Acknowledgements
 [1]. http://braintumorsegmentation.org/
 
 [2]. https://monai.io/
