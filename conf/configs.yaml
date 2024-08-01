@@ -2,6 +2,3 @@ defaults:
   - model: default
   - dataset: default
   - training: default
-  - paths: default
-  # - override hydra/job_logging: colorlog
-  # - override hydra/hydra_logging: colorlog

@@ -1,7 +1,2 @@
-a_test_patient: /BraTS-GLI-00016-000
-dataset_xlsx: /BraTS2023_2017_GLI_Mapping.xlsx
-json_file: /json_files/dataset.json
-root_dir: E:/Brats23 Data/Dataset
-
-train_sub_dir: /all_training_data/ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData
-validation_sub_dir: /all_validation_data/ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData
+dataset-folder: "E:/Brats23 Data/Dataset/BraTS23_mapped"
+colab: "/gdrive/MyDrive/BraTS2023/"

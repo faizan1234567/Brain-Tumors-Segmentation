@@ -1,6 +1,0 @@
-# UNet Configuration settings here
-
-training:
-  batch_size:
-  Epochs:
-  lr:
