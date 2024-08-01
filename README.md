@@ -13,31 +13,35 @@ All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [
 
 Annotations consist of GD-enhancing tumor (ET — label 3), peritumoral edematous/invaded tissue (ED — label 2), and necrotic tumor core (NCR — label 1). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351).
 
-The dataset contains 1,251 patient cases labeled by expert radiologists. However, cases in the validation set are not labeled. The dataset is divided into five folders: four for training and one for evaluation.
-
-The directory structure of the dataset is as follows. Please make necessary adjustments if required and ensure to add other supporting files in the dataset directory.
+The dataset contains 1,251 patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains 833, validation and test sets contains 209 patient records each for model evaluation. 
 
 ```
-Dataset/
-├── training/
-│   ├── ASNR-MICCAI-BraTS2023-GLI-Challenge-TrainingData/
-│       ├── BraTS-GLI-00000-000/
-│       │   ├── BraTS-GLI-00000-000-t2f.nii.gz
-│       │   ├── BraTS-GLI-00000-000-seg.nii.gz
-│       │   ├── BraTS-GLI-00000-000-t1n.nii.gz
-│       │   ├── BraTS-GLI-00000-000-t2w.nii.gz
-│       │   └── BraTS-GLI-00000-000-t1c.nii.gz
-│       └── ...
-│   
-└── validation/
-    └── ASNR-MICCAI-BraTS2023-GLI-Challenge-ValidationData/
-        ├── BraTS-GLI-00001-000/
-        │   ├── BraTS-GLI-00001-000-t1c.nii.gz
-        │   ├── BraTS-GLI-00001-000-t2f.nii.gz
-        │   ├── BraTS-GLI-00001-000-t1n.nii.gz
-        │   └── BraTS-GLI-00001-000-t2w.nii.gz
-        └── ...
-
+└── dataset
+    └── brats2023
+        ├── train
+        │   ├── BraTS-GLI-00000-000
+        │   │   ├── BraTS-GLI-00000-000-seg.nii.gz
+        │   │   ├── BraTS-GLI-00000-000-t1c.nii.gz
+        │   │   ├── BraTS-GLI-00000-000-t1n.nii.gz
+        │   │   ├── BraTS-GLI-00000-000-t2f.nii.gz
+        │   │   └── BraTS-GLI-00000-000-t2w.nii.gz
+        │   └── ...
+        ├── val
+        │   ├── BraTS-GLI-00006-000
+        │   │   ├── BraTS-GLI-00006-000-seg.nii.gz
+        │   │   ├── BraTS-GLI-00006-000-t1c.nii.gz
+        │   │   ├── BraTS-GLI-00006-000-t1n.nii.gz
+        │   │   ├── BraTS-GLI-00006-000-t2f.nii.gz
+        │   │   └── BraTS-GLI-00006-000-t2w.nii.gz
+        │   └── ...
+        └── test
+            ├── BraTS-GLI-00009-000
+            │   ├── BraTS-GLI-00009-000-seg.nii.gz
+            │   ├── BraTS-GLI-00009-000-t1c.nii.gz
+            │   ├── BraTS-GLI-00009-000-t1n.nii.gz
+            │   ├── BraTS-GLI-00009-000-t2f.nii.gz
+            │   └── BraTS-GLI-00009-000-t2w.nii.gz
+            └── ...
 ```
 
 ![alt text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/fig_brats21.png)
