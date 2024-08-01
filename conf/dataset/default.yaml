@@ -1,2 +1,2 @@
-dataset_folder: "E:/Brats23 Data/Dataset/BraTS23_mapped"
+dataset_folder: "E:/Brats23 Data/Dataset/BraTS23_mapped/dataset"
 colab: "/gdrive/MyDrive/BraTS2023/"
