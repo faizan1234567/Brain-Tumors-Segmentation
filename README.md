@@ -156,7 +156,7 @@ python show.py --json_file <path> --fold 0 --phase <"val"> --save <path>
 
 ### Cite
 
-If you find this project useful in your research, please consider cite and start the repository:
+If you find this project useful in your research, please consider cite and star the repository:
 
 ```latex
 @misc{brats23-tumor-segmentation,
