@@ -289,16 +289,11 @@ def trainer(cfg,
             val_mean_acc = np.mean(val_acc)
             print(
                 " Validation: "
-                " dice_tc: ",
-                 dice_tc,
-                ", dice_wt: ",
-                 dice_wt,
-                ", dice_et: ",
-                 dice_et,
-                ", mean_dice: ",
-                 val_mean_acc,
-                ", time {:.2f}s".format(time.time() - epoch_time),
-            )
+                "dice_tc:", "{:.4f},".format(dice_tc),
+                " dice_wt:", "{:.4f},".format(dice_wt),
+                " dice_et:", "{:.4f},".format(dice_et),
+                " mean_dice:", "{:.4f}".format(val_mean_acc))
+            
             dices_tc.append(dice_tc)
             dices_et.append(dice_et)
             dices_wt.append(dices_wt)
