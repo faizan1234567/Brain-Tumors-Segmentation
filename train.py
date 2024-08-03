@@ -288,7 +288,7 @@ def trainer(cfg,
             dice_et = val_acc[2]
             val_mean_acc = np.mean(val_acc)
             print(
-                "Validation: Epoch {}/{}".format(epoch + 1, max_epochs - 1),
+                "Validation: "
                 ", dice_tc:",
                 dice_tc,
                 ", dice_wt:",
@@ -304,7 +304,6 @@ def trainer(cfg,
             dices_wt.append(dices_wt)
             mean_dices.append(val_mean_acc)
             if val_mean_acc > val_acc_max:
-                # print("new best ({:.6f} --> {:.6f}). ".format(val_acc_max, val_mean_acc))
                 val_acc_max = val_mean_acc
                 save_best_model(cfg.training.exp_name, model, "best_model")
             scheduler.step()
