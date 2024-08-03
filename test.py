@@ -4,7 +4,6 @@ A script to evaluate the model performance
 test set evaluation on BraTS23 dataset.
 ==========================================
 
-import neccassary packages...
 Author: Muhammad Faizan
 Date: 16.09.2022
 ==========================================
