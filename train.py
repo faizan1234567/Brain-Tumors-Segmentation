@@ -73,7 +73,7 @@ class NeuralNet:
             # "VNet":VNet(),
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
-            "SwinUNetR": SwinUNETR(
+            "SwinUNetR": Swin
                     in_channels=4,
                     out_channels=3,
                     feature_size=48,
@@ -288,15 +288,15 @@ def trainer(cfg,
             val_mean_acc = np.mean(val_acc)
             print(
                 " Validation: "
-                " dice_tc:",
-                dice_tc + ",",
-                " dice_wt:",
-                dice_wt + ",",
-                " dice_et:",
-                dice_et + ",",
-                " mean_dice:",
-                val_mean_acc + ",",
-                " time {:.2f}s".format(time.time() - epoch_time),
+                " dice_tc: ",
+                 dice_tc,
+                ", dice_wt: ",
+                 dice_wt,
+                ", dice_et: ",
+                 dice_et,
+                ", mean_dice: ",
+                 val_mean_acc,
+                ", time {:.2f}s".format(time.time() - epoch_time),
             )
             dices_tc.append(dice_tc)
             dices_et.append(dice_et)
