@@ -73,7 +73,7 @@ class NeuralNet:
             # "VNet":VNet(),
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
-            "SwinUNetR": Swin
+            "SwinUNetR": SwinUNETR(
                     in_channels=4,
                     out_channels=3,
                     feature_size=48,
