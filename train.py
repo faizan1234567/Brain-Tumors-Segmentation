@@ -74,7 +74,6 @@ class NeuralNet:
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
             "SwinUNetR": SwinUNETR(
-                    img_size=128,
                     in_channels=4,
                     out_channels=3,
                     feature_size=48,
