@@ -1,0 +1,6 @@
+weights:
+tta: True
+sw_batch: 2
+batch: 1
+infer_overlap: 0.6
+workers: 8

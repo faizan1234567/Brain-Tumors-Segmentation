@@ -8,22 +8,21 @@ Author: Muhammad Faizan
 Date: 16.09.2022
 ==========================================
 """
-
-import argparse
-import os
 import pandas as pd
 import numpy as np
-import time
 import matplotlib.pyplot as plt
 import torch
-from DataLoader.dataset import BraTSDataset, get_dataloader
-from monai.data import DataLoader, decollate_batch
+from monai.data import decollate_batch
 from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
 from utils.general import load_pretrained_model
+from utils.all_utils import save_seg_csv, cal_confuse, cal_dice
+from brats import get_datasets
 from utils.meter import AverageMeter
+from train import NeuralNet
 
 from monai.metrics import DiceMetric
+from monai.metrics.hausdorff_distance import HausdorffDistanceMetric
 from monai.utils.enums import MetricReduction
 from monai.inferers import sliding_window_inference
 from monai.networks.nets import SwinUNETR
@@ -37,175 +36,114 @@ import hydra
 from omegaconf import OmegaConf, DictConfig
 import logging
 
-# configure logger as INFO
+# Logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler(filename= "logger.log")
+file_handler = logging.FileHandler(filename= "logger/logger_test.log")
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')
 file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
-# set as file handler and stream handler
+# Stream and file logging
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-# read command line args
-def read_args():
-    '''command line arguments for setting up 
-    neccassary paths and params'''
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type = str, default = "", help = "weight \
-        file path ")
-    parser.add_argument('--fold', default= 0, type= int, 
-                        help= "fold number for evaluation")
-    parser.add_argument('--workers', type = int, default=2,\
-        help = "number of workers")
-    parser.add_argument('--batch', type = int, default=1, \
-        help= "batch size to load the dataset")
-    parser.add_argument('--json_file', type = str, default= "", \
-                        help= "path to the data json file")
-    parser.add_argument('--platform_changed', action= 'store_true', help= "running on other platfrom")
-    opt = parser.parse_args()
-    return opt
 
-# run evaluation on the test set
-def evaluate(model,
-              weights, 
-              loader, 
-              post_pred = None, 
-              post_sigmoid = None,
-              acc_func = None,
-              model_inferer = None):
-    '''
-    To evaluate the model performance
+def get_value(value):
+    """proprecess value to scaler"""
+    if torch.is_tensor(value):
+        return value.item()
+    return value
+  
+def reconstruct_label(image):
+    """reconstruct image label"""
+    if type(image) == torch.Tensor:
+        image = image.cpu().numpy()
+    c1, c2, c3 = image[0], image[1], image[2]
+    image = (c3 > 0).astype(np.uint8)
+    image[(c2 == False)*(c3 == True)] = 2
+    image[(c1 == True)*(c3 == True)] = 4
+    return image
+
+def inference(model, input, batch_size, overlap):
+    """inference on input with trained model"""
+    def _compute(input):
+        return sliding_window_inference(inputs=input, roi_size=(128, 128, 128), sw_batch_size=batch_size, predictor=model, overlap=overlap)
+    return _compute(input)
 
 
-    Parameters
-    ----------:
-    model: nn.Module
-    weight: str
-    loader: torch.utils.data.Dataset
-    post_pred: monai.transforms.post.array.AsDiscrete
-    post_sigmoid: monai.transforms.post.array.Activations
-    acc_func: monai.metrics.meandice.DiceMetric 
-    model_inferer: nn.Module
-    '''
-    # set cuda
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def test(args, mode, data_loader, model):
+    """test the model on the test dataset"""
+    metrics_dict = []
+    haussdor = HausdorffDistanceMetric(include_background=True, percentile=95)
+    meandice = DiceMetric(include_background=True)
+    sw_bs = args.test.sw_batch
+    infer_overlap = args.test.infer_overlap
+    for i, data in enumerate(data_loader):
+        patient_id = data["patient_id"][0]
+        inputs = data["image"]
+        targets = data["label"].cuda()
+        pad_list = data["pad_list"]
+        inputs = inputs.cuda()
+        model.cuda()
+        with torch.no_grad():  
+            if args.test.tta:
+                predict = torch.sigmoid(inference(model, inputs, batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(2,)).flip(dims=(2,)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(3,)).flip(dims=(3,)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(4,)).flip(dims=(4,)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(2, 3)).flip(dims=(2, 3)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(2, 4)).flip(dims=(2, 4)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(3, 4)).flip(dims=(3, 4)), batch_size=sw_bs, overlap=infer_overlap))
+                predict += torch.sigmoid(inference(model, inputs.flip(dims=(2, 3, 4)).flip(dims=(2, 3, 4)), batch_size=sw_bs, overlap=infer_overlap))
+                predict = predict / 8.0 
+            else:
+                predict = torch.sigmoid(inference(model, inputs, batch_size=sw_bs, overlap=infer_overlap))
+                
+        targets = targets[:, :, pad_list[-4]:targets.shape[2]-pad_list[-3], pad_list[-6]:targets.shape[3]-pad_list[-5], pad_list[-8]:targets.shape[4]-pad_list[-7]]
+        predict = predict[:, :, pad_list[-4]:predict.shape[2]-pad_list[-3], pad_list[-6]:predict.shape[3]-pad_list[-5], pad_list[-8]:predict.shape[4]-pad_list[-7]]
+        predict = (predict>0.5).squeeze()
+        targets = targets.squeeze()
+        dice_metrics = cal_dice(predict, targets, haussdor, meandice)
+        confuse_metric = cal_confuse(predict, targets, patient_id)
+        et_dice, tc_dice, wt_dice = dice_metrics[0], dice_metrics[1], dice_metrics[2]
+        et_hd, tc_hd, wt_hd = dice_metrics[3], dice_metrics[4], dice_metrics[5]
+        et_sens, tc_sens, wt_sens = get_value(confuse_metric[0][0]), get_value(confuse_metric[1][0]), get_value(confuse_metric[2][0])
+        et_spec, tc_spec, wt_spec = get_value(confuse_metric[0][1]), get_value(confuse_metric[1][1]), get_value(confuse_metric[2][1])
+        metrics_dict.append(dict(id=patient_id,
+            et_dice=et_dice, tc_dice=tc_dice, wt_dice=wt_dice, 
+            et_hd=et_hd, tc_hd=tc_hd, wt_hd=wt_hd,
+            et_sens=et_sens, tc_sens=tc_sens, wt_sens=wt_sens,
+            et_spec=et_spec, tc_spec=tc_spec, wt_spec=wt_spec))
+    save_seg_csv(args, mode, metrics_dict)
 
-    # load the model and set the model on evaluation mode
-    model = load_pretrained_model(model, state_path=weights)
-    model.eval()
-    model.to(device)
-    tic = time.time()
-    run_acc = AverageMeter()
-    # run evaluation
-    with torch.no_grad():
-        for index, batch_data in enumerate(loader):
-            prediction_lists = decollate_batch(model_inferer(batch_data["image"].to(device)))
-            masks = decollate_batch(batch_data["label"].to(device)) 
-            predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
-            acc_func.reset()
-            acc_func(y_pred = predictions, y = masks)
-            acc, not_nans = acc_func.aggregate()
-            run_acc.update(acc.cpu().numpy(), n = not_nans.cpu().numpy())
-            dice_tc = run_acc.avg[0]
-            dice_wt = run_acc.avg[1]
-            dice_et = run_acc.avg[2]
-            print(
-                "Val  {}/{}".format(index, len(loader)),
-                ", dice_tc:",
-                dice_tc,
-                ", dice_wt:",
-                dice_wt,
-                ", dice_et:",
-                dice_et,
-                ", time {:.2f}s".format(time.time() - tic),
-            )
-            tic = time.time()
-    return run_acc.avg
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
-    """
-    Function that handles everything..
-    """
-    # command line args
-    args = read_args()
-
-    # choose cuda if available
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
-    # if training on colab or other platform, set paths accordingly
-    if args.platform_changed:
-        data_csv_file_path = cfg.paths.dataset_file
-        data_json_file = cfg.paths.json_file
-        data_dir = cfg.paths.train_dir
-    else:
-        data_csv_file_path = cfg.paths.dataset_file
-        data_json_file = cfg.paths.json_file
-        data_dir = cfg.paths.train_path
-
-    # configure model
-    roi = cfg.model.roi
-    model =   SwinUNETR(
-                    img_size=roi,
-                    in_channels=4,
-                    out_channels=3,
-                    feature_size=48,
-                    drop_rate=0.0,
-                    attn_drop_rate=0.0,
-                    dropout_path_rate=0.0,
-                    use_checkpoint=True,
-                            ).to(device)
+    # Select model
+    models = NeuralNet(cfg.model.model_name)
+    model = models.select_model()
     
-    weights = args.weights
-    batch_size = args.batch
-    wokers = args.workers
-    fold = args.fold
+    # Hyperparameters
+    batch_size = cfg.test.batch
+    workers = cfg.test.workers
+    dataset_folder = cfg.dataset.dataset_folder
 
-    post_pred = AsDiscrete(argmax= False, threshold = 0.5)
-    post_sigmoid = Activations(sigmoid= True)
-    acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
-                                      get_not_nans=True)
-    model_inferer = partial(
-                        sliding_window_inference,
-                        roi_size=[roi] * 3,
-                        sw_batch_size=cfg.training.sw_batch_size,
-                        predictor=model,
-                        overlap=cfg.model.infer_overlap)
-    if args.json_file:
-        data_json_file = args.json_file
-    logging.info('Loading dataset')
-
-    # load test dataset
-    test_loader = get_dataloader(BraTSDataset,
-                                 path_to_csv= data_csv_file_path,
-                                 phase = 'val',
-                                 batch_size= batch_size,
-                                 num_workers= wokers,
-                                 json_file=data_json_file,
-                                 fold = fold,
-                                 train_dir= data_dir)
-    
-    logger.info('Successfully loaded. \n')
-    logger.info(f'Dataset size: {len(test_loader)}')
+    # Load dataset
+    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test")
+    test_loader = torch.utils.data.DataLoader(test_loader, 
+                                            batch_size=batch_size, 
+                                            shuffle=False, num_workers=workers, 
+                                            pin_memory=True) 
     
     logger.info('Evaluate on the test set')
 
-    # evaluate the test set on a trained model
-    mean_dice = evaluate(model= model,
-             weights=weights,
-             loader= test_loader,
-             post_pred= post_pred,
-             post_sigmoid= post_sigmoid,
-             acc_func= acc_func,
-             model_inferer= model_inferer)
-    
-    logger.info(f"Mean dice on the test set: {mean_dice}")
+    # Evaluate
+    test(cfg, "test", test_loader, model)
 
+    print('done!!')
 
 if __name__ == '__main__':
     main()
