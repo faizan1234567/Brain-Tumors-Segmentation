@@ -151,7 +151,7 @@ python show.py --json_file <path> --fold 0 --phase <"val"> --save <path>
 ### TODO
 - [ ] MLOps tools integration such as Weight & Baises
 - [ ] Multi-GPU training 
-- [x] New Data augmentation options (private)
+- [x] New Data augmentation options
 - [x] CKD-TransBTS and other SOTA semantic segmentation models to be added
 
 ### Cite
