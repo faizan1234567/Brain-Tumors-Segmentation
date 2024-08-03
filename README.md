@@ -89,45 +89,15 @@ clone the repo in colab notebook, and then install all the dependencies:
 ```
 
 ### Usage
-To train on Brats23, run the training command
-First configure some paths in configs.py, these are some necessary paths about the dataset directory, data loading, and other important parameters.
+To train on BraTS 2023 or BraTS 2021, run the training command below:
 ```
 python train.py -h
-optional arguments:
-  -h, --help            show this help message and exit
-  --data DATA           dataset root directory path
-  --fold FOLD           folder name
-  --json_file JSON_FILE
-                        path to json file
-  --batch BATCH         batch size
-  --img_roi IMG_ROI     image roi size
-  --val_every VAL_EVERY
-                        validate every 2 epochs
-  --max_epochs MAX_EPOCHS
-                        maximum number of epoch to train
-  --workers WORKERS     Number of data loading workers
-  --pretrained_model PRETRAINED_MODEL
-                        path to pretraiend model
-  --pretrained          use pretrained weights.
-  --resume              starting training from the saved ckpt.
-  --platform_changed    pc changed, so that dataset dir has been set accordingly
-
-python train.py --data <dataset-dir> --fold 0 --json_file <dataset-split-file-path>
- --batch 1 --workers 8 --val_every 2 --max_epochs 100 --pretrained_model <pretrained-model-path> 
-   ```
-To test the model:
+python train.py dataset.dataset_folder=<path to dataset> training.max_epochs=100 training.batch_size=1 training.val_every=1 training.learning_rate=1e-4 model.model_name=SegResNet_runs
+```
+test and visulize to be updated...
+To test the model on the tess set use the following command:
 ```
 python test.py -h
-optional arguments:
-  -h, --help            show this help message and exit
-  --weights WEIGHTS     weight file path
-  --fold FOLD           fold number for evaluation
-  --workers WORKERS     number of workers
-  --batch BATCH         batch size to load the dataset
-  --json_file JSON_FILE
-                        path to the data json file
-  --platform_changed    running on other platfrom
-
 python test.py --weights <path-to-weights>  --fold 0 --workers 2 --batch 1 --json_file <dataset-split-file-path>
    ```
 To visualize, use:
