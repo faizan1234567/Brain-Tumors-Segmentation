@@ -98,24 +98,12 @@ test and visulize to be updated...
 To test the model on the tess set use the following command:
 ```
 python test.py -h
-python test.py --weights <path-to-weights>  --fold 0 --workers 2 --batch 1 --json_file <dataset-split-file-path>
+python test.py test.weights=<path> dataset.dataset_folder=<path> test.batch=1 model.model_name=SegResNet
    ```
 To visualize, use:
 ```
 python show.py -h
-optional arguments:
-  -h, --help            show this help message and exit
-  --json_file JSON_FILE
-                        dataset split file
-  --fold FOLD           folder number
-  --phase PHASE         validation or training.
-  --save SAVE           results save directory
-  --get_abnormal_area   get full abnormal are
-  --visualize_data_gif  visulize data gif, and create a gif file
-  --visualize_data_sample
-                        visualize one sample
-
-python show.py --json_file <path> --fold 0 --phase <"val"> --save <path> 
+python show.py --type "get-gif"
 ```
 
 ### TODO
