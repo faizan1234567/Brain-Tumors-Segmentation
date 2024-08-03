@@ -235,7 +235,7 @@ def trainer(cfg,
             val_every = 2):
     """
     train and validate the model
-    
+
     model: nn.Module
     train_loader: torch.utils.data.Dataset
     val_loader: torch.utils.data.Dataset
@@ -266,9 +266,9 @@ def trainer(cfg,
                                     epoch= epoch,
                                     max_epochs=max_epochs)
         print(
-            "Epoch  {}/{}".format(epoch + 1, max_epochs - 1),
-            "loss: {:.4f}".format(training_loss),
-            "time {:.2f}s".format(time.time() - epoch_time),
+            "Epoch  {}/{},".format(epoch + 1, max_epochs - 1),
+            "loss: {:.4f},".format(training_loss),
+            "time {:.2f}s,".format(time.time() - epoch_time),
             end=""
         )
 
@@ -288,16 +288,16 @@ def trainer(cfg,
             dice_et = val_acc[2]
             val_mean_acc = np.mean(val_acc)
             print(
-                "Validation: "
-                ", dice_tc:",
-                dice_tc,
-                ", dice_wt:",
-                dice_wt,
-                ", dice_et:",
-                dice_et,
-                ", Dice_Avg:",
-                val_mean_acc,
-                ", time {:.2f}s".format(time.time() - epoch_time),
+                " Validation: "
+                " dice_tc:",
+                dice_tc + ",",
+                " dice_wt:",
+                dice_wt + ",",
+                " dice_et:",
+                dice_et + ",",
+                " mean_dice:",
+                val_mean_acc + ",",
+                " time {:.2f}s".format(time.time() - epoch_time),
             )
             dices_tc.append(dice_tc)
             dices_et.append(dice_et)
