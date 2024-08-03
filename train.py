@@ -266,7 +266,7 @@ def trainer(cfg,
                                     epoch= epoch,
                                     max_epochs=max_epochs)
         print(
-            "Epoch  {}/{},".format(epoch + 1, max_epochs - 1),
+            "Epoch  {}/{},".format(epoch + 1, max_epochs),
             "loss: {:.4f},".format(training_loss),
             "time {:.2f}s,".format(time.time() - epoch_time),
             end=""
@@ -406,7 +406,6 @@ def run(cfg, model,
         post_pred=post_pred,
     )
     print()
-    logger.info(f"train completed, best average dice: {val_mean_dice_max:.4f} ")
     return (val_mean_dice_max, 
             dices_tc,
             dices_wt,
@@ -500,8 +499,6 @@ def main(cfg: DictConfig):
         post_pred=post_pred,
         max_epochs=max_epochs,
         val_every=val_every)
-    
-    logger.info('Training complete!!!')
 
 
 if __name__ == "__main__":
