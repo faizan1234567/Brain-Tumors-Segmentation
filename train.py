@@ -258,7 +258,6 @@ def trainer(cfg,
     train_epochs = []
     for epoch in range(start_epoch, max_epochs):
         print()
-        print(time.ctime(), "Epoch: ", epoch)
         epoch_time = time.time()
         training_loss = train_epoch(model=model,
                                     loader= train_loader,
@@ -267,9 +266,10 @@ def trainer(cfg,
                                     epoch= epoch,
                                     max_epochs=max_epochs)
         print(
-            "Final training  {}/{}".format(epoch + 1, max_epochs - 1),
+            "Epoch  {}/{}".format(epoch + 1, max_epochs - 1),
             "loss: {:.4f}".format(training_loss),
             "time {:.2f}s".format(time.time() - epoch_time),
+            end=""
         )
 
         if epoch % val_every == 0 or epoch == 0:
@@ -288,7 +288,7 @@ def trainer(cfg,
             dice_et = val_acc[2]
             val_mean_acc = np.mean(val_acc)
             print(
-                "Final validation stats {}/{}".format(epoch + 1, max_epochs - 1),
+                "Validation: Epoch {}/{}".format(epoch + 1, max_epochs - 1),
                 ", dice_tc:",
                 dice_tc,
                 ", dice_wt:",
