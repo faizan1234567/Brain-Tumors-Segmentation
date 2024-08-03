@@ -69,7 +69,7 @@ class NeuralNet:
             "SegResNet": SegResNet(spatial_dims=3, init_filters=32, 
                                    in_channels=4, out_channels=3, 
                                    dropout_prob=0.2, blocks_down=(1, 2, 2, 4), 
-                                   blocks_up=(1, 1, 1)),
+                                   blocks_up=(1, 1, 1)).cuda(),
             # "VNet":VNet(),
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
@@ -82,7 +82,7 @@ class NeuralNet:
                     attn_drop_rate=0.0,
                     dropout_path_rate=0.0,
                     use_checkpoint=True,
-                            )}
+                            ).cuda()}
     def select_model(self):
         return self._all_models[self.model_name]
     
