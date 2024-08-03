@@ -235,7 +235,7 @@ def trainer(cfg,
             val_every = 2):
     """
     train and validate the model
-
+    
     model: nn.Module
     train_loader: torch.utils.data.Dataset
     val_loader: torch.utils.data.Dataset
@@ -400,7 +400,9 @@ def run(cfg, model,
         scheduler=scheduler,
         model_inferer=model_inferer,
         start_epoch=start_epoch,
+        max_epochs= max_epochs,
         post_sigmoid=post_sigmoid,
+        val_every=val_every,
         post_pred=post_pred,
     )
     print()
