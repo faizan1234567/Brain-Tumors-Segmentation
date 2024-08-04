@@ -75,13 +75,13 @@ class SegResNetScheduler(_LRScheduler):
 
 class NeuralNet:
     """pick the model for training"""
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, device = None):
         self.model_name = model_name
         self._all_models = {
             "SegResNet": SegResNet(spatial_dims=3, init_filters=32, 
                                    in_channels=4, out_channels=3, 
                                    dropout_prob=0.2, blocks_down=(1, 2, 2, 4), 
-                                   blocks_up=(1, 1, 1)).cuda(),
+                                   blocks_up=(1, 1, 1)).to(device),
             # "VNet":VNet(),
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
@@ -94,7 +94,7 @@ class NeuralNet:
                     attn_drop_rate=0.0,
                     dropout_path_rate=0.0,
                     use_checkpoint=True,
-                            ).cuda()}
+                            ).to(device)}
     def select_model(self):
         return self._all_models[self.model_name]
     
@@ -428,6 +428,9 @@ def main(cfg: DictConfig):
 
     # Initialize random
     init_random(seed=cfg.training.seed)
+
+    # CUDA or CPU
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Efficient training
     torch.backends.cudnn.benchmark = True
@@ -438,7 +441,7 @@ def main(cfg: DictConfig):
     
     # Define model 
     roi = cfg.model.roi
-    models = NeuralNet(cfg.model.model_name)
+    models = NeuralNet(cfg.model.model_name, device = device)
     model = models.select_model()
     
     # Sliding window inference on test data
@@ -484,7 +487,7 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.dataset_folder
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train")
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(160, 192, 128))
     train_val_dataset = get_datasets(dataset_dir, "train_val")
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 

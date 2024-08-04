@@ -123,7 +123,7 @@ def pad_or_crop_image(image, seg, target_size=(128, 128, 128)):
     image = image[:, z_slice[0]:z_slice[1], y_slice[0]:y_slice[1], x_slice[0]:x_slice[1]]
     if seg is not None:
         seg = seg[:, z_slice[0]:z_slice[1], y_slice[0]:y_slice[1], x_slice[0]:x_slice[1]]
-    image, seg, pad_list = pad_image_and_label(image, seg)
+    image, seg, pad_list = pad_image_and_label(image, seg, target_size=target_size)
     return image, seg, pad_list, crop_list
 
 def normalize(image):

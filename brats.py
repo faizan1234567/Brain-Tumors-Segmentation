@@ -44,7 +44,7 @@ class BraTS(Dataset):
             wt = torch.logical_or(tc, patient_label == 2)
             patient_label = torch.stack([et, tc, wt])
 
-        #Removing black area from the edge of the MRI
+        # Removing black area from the edge of the MRI
         nonzero_index = torch.nonzero(torch.sum(patient_image, axis=0)!=0)
         z_indexes, y_indexes, x_indexes = nonzero_index[:,0], nonzero_index[:,1], nonzero_index[:,2]
         zmin, ymin, xmin = [max(0, int(torch.min(arr) - 1)) for arr in (z_indexes, y_indexes, x_indexes)]
@@ -76,8 +76,8 @@ class BraTS(Dataset):
     def __len__(self):
         return len(self.datas)
 
-def get_datasets(dataset_folder, mode):
+def get_datasets(dataset_folder, mode, target_size = (128, 128, 128)):
     dataset_folder = get_brats_folder(dataset_folder, mode)
     assert os.path.exists(dataset_folder), "Dataset Folder Does Not Exist1"
     patients_ids = [x for x in listdir(dataset_folder)]
-    return BraTS(dataset_folder, patients_ids, mode)
+    return BraTS(dataset_folder, patients_ids, mode, target_size=target_size)
