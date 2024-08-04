@@ -118,10 +118,12 @@ class Solver:
         return self.all_solvers[name]
 
 def save_best_model(dir_name, model, name="best_model"):
-    torch.save(model.state_dict(), f"{dir_name}/{name}.pkl")
+    """save best model weights"""
+    torch.save(model.state_dict(), f"{dir_name}/{name}/{name}.pkl")
     
 def save_checkpoint(dir_name, state, name="checkpoint"):
-    torch.save(state, f"{dir_name}/{name}.pth.tar")
+    """save checkpoint with each epoch to resume"""
+    torch.save(state, f"{dir_name}/{name}/{name}.pth.tar")
  
 def create_dirs(dir_name):
     """create experiment directory storing
@@ -140,8 +142,8 @@ def init_random(seed):
     cudnn.benchmark = False         
     cudnn.deterministic = True
 
-# train for an epoch
-def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
+# Train for an epoch
+def train_epoch(model, loader, optimizer, loss_func):
     """
     train the model for epoch on MRI image and given ground truth labels
     using set of arguments
@@ -167,9 +169,8 @@ def train_epoch(model, loader, optimizer, loss_func, epoch, max_epochs = 100):
     torch.cuda.empty_cache()
     return run_loss.avg
 
-# validate the model
-def val(model, loader, acc_func,
-        max_epochs = None, epoch = None, model_inferer = None,
+# Validate the model
+def val(model, loader, acc_func, model_inferer = None,
         post_sigmoid = None, post_pred = None):
     """
     Validation phase
@@ -271,12 +272,10 @@ def trainer(cfg,
     for epoch in range(start_epoch, max_epochs):
         print()
         epoch_time = time.time()
-        training_loss = train_epoch(model=model,
-                                    loader= train_loader,
-                                    optimizer=optimizer,
-                                    loss_func= loss_func,
-                                    epoch= epoch,
-                                    max_epochs=max_epochs)
+        training_loss = train_epoch(model = model,
+                                    loader = train_loader,
+                                    optimizer = optimizer,
+                                    loss_func = loss_func)
         print(
             "Epoch  {}/{},".format(epoch + 1, max_epochs),
             "loss: {:.4f},".format(training_loss),
@@ -287,11 +286,9 @@ def trainer(cfg,
         if epoch % val_every == 0 or epoch == 0:
             epoch_losses.append(training_loss)
             train_epochs.append(int(epoch))
-            val_acc =  val(model= model,
-                          loader= val_loader,
-                          acc_func= acc_func,
-                          max_epochs= max_epochs,
-                          epoch = epoch,
+            val_acc =  val(model = model,
+                          loader = val_loader,
+                          acc_func = acc_func,
                           model_inferer= model_inferer,
                           post_sigmoid=post_sigmoid,
                           post_pred=post_pred)
@@ -315,6 +312,7 @@ def trainer(cfg,
                 save_best_model(cfg.training.exp_name, model, "best_model")
             scheduler.step()
             save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
+    print()
     print("Training Finished !, Best Accuracy: ", val_acc_max)
 
     # Save important data

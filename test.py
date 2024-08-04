@@ -35,11 +35,13 @@ from functools import partial
 import hydra
 from omegaconf import OmegaConf, DictConfig
 import logging
+import os
 
 # Logger
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+os.makedirs("logger/", exist_ok= True)
 file_handler = logging.FileHandler(filename= "logger/logger_test.log")
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')
@@ -132,7 +134,7 @@ def main(cfg: DictConfig):
     dataset_folder = cfg.dataset.dataset_folder
 
     # Load dataset
-    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test")
+    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(160, 192, 128))
     test_loader = torch.utils.data.DataLoader(test_loader, 
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=workers, 
