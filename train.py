@@ -488,7 +488,7 @@ def main(cfg: DictConfig):
 
     # Data Loading
     train_dataset = get_datasets(dataset_dir, "train", target_size=(160, 192, 128))
-    train_val_dataset = get_datasets(dataset_dir, "train_val")
+    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(160, 192, 128))
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 
                                                drop_last=False, pin_memory=True)
