@@ -29,6 +29,7 @@ from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batc
 import torch
 import torch.nn as nn
 from torch.backends import cudnn
+from torch.optim.lr_scheduler import _LRScheduler
 
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
@@ -60,6 +61,17 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
+
+class SegResNetScheduler(_LRScheduler):
+    def __init__(self, optimizer, total_epochs, alpha, last_epoch=-1):
+        self.total_epochs = total_epochs
+        self.alpha = alpha
+        super(SegResNetScheduler, self).__init__(optimizer, last_epoch)
+
+    def get_lr(self):
+        current_epoch = self.last_epoch + 1
+        factor = (1 - current_epoch / self.total_epochs) ** 0.9
+        return [self.alpha * factor for _ in self.optimizer.param_groups]
 
 class NeuralNet:
     """pick the model for training"""
@@ -455,8 +467,11 @@ def main(cfg: DictConfig):
      # Max epochs
     max_epochs = cfg.training.max_epochs
 
-    # Learning rate scheduler 
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
+    # Learning rate scheduler
+    if cfg.model.model_name == "SegResNet":
+        scheduler = SegResNetScheduler(optimizer, max_epochs, cfg.training.learning_rate)
+    else:
+        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
     
     # Batch and workers 
     batch_size = cfg.training.batch_size

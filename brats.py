@@ -11,11 +11,12 @@ from torch.utils.data.dataset import Dataset
 from utils.all_utils import pad_or_crop_image, minmax, load_nii, pad_image_and_label, listdir, get_brats_folder
 
 class BraTS(Dataset):
-    def __init__(self, patients_dir, patient_ids, mode):
+    def __init__(self, patients_dir, patient_ids, mode, target_size = (128, 128, 128)):
         super(BraTS,self).__init__()
         self.patients_dir = patients_dir
         self.patients_ids = patient_ids
         self.mode = mode
+        self.target_size = target_size
         self.datas = []
         self.pattens =["-t1n","-t1c","-t2w","-t2f"]
         if mode == "train" or mode == "train_val" or mode == "test" :
@@ -55,7 +56,7 @@ class BraTS(Dataset):
         
         patient_label = patient_label[:, zmin:zmax, ymin:ymax, xmin:xmax]
         if self.mode == "train" or self.mode == "train_val" :
-            patient_image, patient_label, pad_list, crop_list = pad_or_crop_image(patient_image, patient_label, target_size=(128, 128, 128))
+            patient_image, patient_label, pad_list, crop_list = pad_or_crop_image(patient_image, patient_label, target_size=self.target_size)
         elif self.mode == "test":
             d, h, w = patient_image.shape[1:]
             pad_d = (128-d) if 128-d > 0 else 0
