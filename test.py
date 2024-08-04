@@ -41,7 +41,7 @@ import os
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-os.makedirs("logger/", exist_ok= True)
+os.makedirs("logger", exist_ok= True)
 file_handler = logging.FileHandler(filename= "logger/logger_test.log")
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')

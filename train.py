@@ -52,7 +52,8 @@ from tqdm import tqdm
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler(filename= "logger.log")
+os.makedirs("logger", exist_ok=True)
+file_handler = logging.FileHandler(filename= "logger/train_logger.log")
 stream_handler = logging.StreamHandler()
 formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%d %H:%M:%S')
 file_handler.setFormatter(formatter)
