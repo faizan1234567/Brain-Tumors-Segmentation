@@ -280,7 +280,7 @@ def trainer(cfg,
         print(
             "Epoch  {}/{},".format(epoch + 1, max_epochs),
             "loss: {:.4f},".format(training_loss),
-            "time {:.2f}s,".format(time.time() - epoch_time),
+            "time {:.2f} m,".format((time.time() - epoch_time)/60),
             end=""
         )
 
@@ -312,7 +312,7 @@ def trainer(cfg,
                 val_acc_max = val_mean_acc
                 save_best_model(cfg.training.exp_name, model, "best_model")
             scheduler.step()
-            save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
+            save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, max_epochs=max_epochs, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print()
     print("Training Finished !, Best Accuracy: ", val_acc_max)
 
@@ -375,6 +375,7 @@ def run(cfg, model,
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch']
+        max_epochs = checkpoint["max_epochs"]
         scheduler.load_state_dict(checkpoint['scheduler'])
         print(f"start train from epoch = {start_epoch}")
 
@@ -488,6 +489,7 @@ def main(cfg: DictConfig):
     # Data Loading
     train_dataset = get_datasets(dataset_dir, "train", target_size=(160, 192, 128))
     train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(160, 192, 128))
+
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 
                                                drop_last=False, pin_memory=True)
