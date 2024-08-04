@@ -134,7 +134,7 @@ def main(cfg: DictConfig):
     dataset_folder = cfg.dataset.dataset_folder
 
     # Load checkpoints
-    model.load_state_dict(torch.load(os.path.join(cfg.training.exp_name, "best-model", "best_model.pkl")))
+    model.load_state_dict(torch.load(cfg.test.weights))
     model.eval()
 
     # Load dataset
