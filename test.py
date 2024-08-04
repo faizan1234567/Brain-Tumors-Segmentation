@@ -133,6 +133,10 @@ def main(cfg: DictConfig):
     workers = cfg.test.workers
     dataset_folder = cfg.dataset.dataset_folder
 
+    # Load checkpoints
+    model.load_state_dict(torch.load(os.path.join(cfg.training.exp_name, "best-model", "best_model.pkl")))
+    model.eval()
+
     # Load dataset
     test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(160, 192, 128))
     test_loader = torch.utils.data.DataLoader(test_loader, 
@@ -140,9 +144,9 @@ def main(cfg: DictConfig):
                                             shuffle=False, num_workers=workers, 
                                             pin_memory=True) 
     
-    logger.info('Evaluate on the test set')
-
+    
     # Evaluate
+    print("start test")
     test(cfg, "test", test_loader, model)
 
     print('done!!')
