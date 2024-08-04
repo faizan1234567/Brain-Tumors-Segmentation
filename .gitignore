@@ -15,6 +15,7 @@ test_scripts/
 outputs/
 SegResNet-runs/
 logger/
+logger.log
 
 # avoid pushing some common extensions mentioned here...
 *.pth
