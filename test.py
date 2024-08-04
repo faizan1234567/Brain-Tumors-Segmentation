@@ -119,7 +119,7 @@ def test(args, mode, data_loader, model):
             et_hd=et_hd, tc_hd=tc_hd, wt_hd=wt_hd,
             et_sens=et_sens, tc_sens=tc_sens, wt_sens=wt_sens,
             et_spec=et_spec, tc_spec=tc_spec, wt_spec=wt_spec))
-    save_seg_csv(args, mode, metrics_dict)
+    save_seg_csv(metrics_dict)
 
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
