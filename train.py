@@ -373,7 +373,7 @@ def run(cfg, model,
     # resume 
     if cfg.training.resume:
         print('Resuming training...')
-        checkpoint = os.path.join(cfg.training.exp_name, "checkpoint", "checkpoint.pth.tar")
+        checkpoint = torch.load(os.path.join(cfg.training.exp_name, "checkpoint", "checkpoint.pth.tar"))
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch']
