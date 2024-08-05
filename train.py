@@ -310,7 +310,7 @@ def trainer(cfg,
             mean_dices.append(val_mean_acc)
             if val_mean_acc > val_acc_max:
                 val_acc_max = val_mean_acc
-                save_best_model(cfg.training.exp_name, model, "best_model")
+                save_best_model(cfg.training.exp_name, model, "best-model")
             scheduler.step()
             save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, max_epochs=max_epochs, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print()
