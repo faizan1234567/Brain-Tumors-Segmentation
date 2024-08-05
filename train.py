@@ -136,6 +136,7 @@ def create_dirs(dir_name):
     os.makedirs(os.path.join(dir_name, "best-model"), exist_ok=True)
 
 def init_random(seed):
+    """randomly initialize some options"""
     torch.manual_seed(seed)        
     torch.cuda.manual_seed(seed)  
     torch.cuda.manual_seed_all(seed) 
@@ -314,7 +315,7 @@ def trainer(cfg,
                 val_acc_max = val_mean_acc
                 save_best_model(cfg.training.exp_name, model, "best-model")
             scheduler.step()
-            save_checkpoint(cfg.training.exp_name, dict(epoch=epoch, max_epochs=max_epochs, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
+            save_checkpoint(cfg.training.exp_name, dict(epoch=epoch + 1, max_epochs=max_epochs, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print()
     print("Training Finished !, Best Accuracy: ", val_acc_max)
 
