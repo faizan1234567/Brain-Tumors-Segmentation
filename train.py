@@ -120,11 +120,13 @@ class Solver:
 
 def save_best_model(dir_name, model, name="best_model"):
     """save best model weights"""
-    torch.save(model.state_dict(), f"{dir_name}/{name}/{name}.pkl")
+    save_path = os.path.join(dir_name, name)
+    torch.save(model.state_dict(), f"{save_path}/{name}.pkl")
     
 def save_checkpoint(dir_name, state, name="checkpoint"):
     """save checkpoint with each epoch to resume"""
-    torch.save(state, f"{dir_name}/{name}/{name}.pth.tar")
+    save_path = os.path.join(dir_name, name)
+    torch.save(state, f"{save_path}/{name}.pth.tar")
  
 def create_dirs(dir_name):
     """create experiment directory storing
@@ -204,7 +206,7 @@ def val(model, loader, acc_func, model_inferer = None,
             run_acc.update(acc.cpu().numpy(), n = not_nans.cpu().numpy())
     return run_acc.avg
 
-# save trained results
+# Save trained results
 def save_data(training_loss,
               et, wt, tc,
               val_mean_acc,
