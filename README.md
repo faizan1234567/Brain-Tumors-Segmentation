@@ -77,22 +77,11 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Google Colab Usage
-Upload the dataset on your drive. Update the dataset path in the configs according to the dataset split information shown above:
-```python
-from google.colab import drive
-drive.mount('/gdrive')
-```
-clone the repo in colab notebook, and then install all the dependencies:
-```
-!pip install -r requirments.txt
-```
-
 ### Usage
 To train on BraTS 2023 or BraTS 2021, run the training command below:
 ```
 python train.py -h
-python train.py dataset.dataset_folder=<path to dataset> training.max_epochs=100 training.batch_size=1 training.val_every=1 training.learning_rate=1e-4 model.model_name=SegResNet_runs
+python train.py dataset.dataset_folder=<path to dataset> training.max_epochs=100 training.batch_size=1 training.val_every=1 training.learning_rate=1e-4 model.model_name=SegResNet
 ```
 test and visulize to be updated...
 To test the model on the tess set use the following command:
