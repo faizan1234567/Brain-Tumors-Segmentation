@@ -78,7 +78,7 @@ pip install -r requirements.txt
 ```
 
 ### Usage
-To train on BraTS 2023 or BraTS 2021, run the training command below:
+To train on BraTS 2023 or BraTS 2021 as both datasets are same except the naming convention is different, run the training command below:
 ```
 python train.py -h
 python train.py dataset.dataset_folder=<path to dataset> training.max_epochs=100 training.batch_size=1 training.val_every=1 training.learning_rate=1e-4 model.model_name=SegResNet
