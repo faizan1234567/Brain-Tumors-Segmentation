@@ -79,13 +79,23 @@ class NeuralNet:
     def __init__(self, model_name: str, device = None):
         self.model_name = model_name
         self._all_models = {
-            "SegResNet": SegResNet(spatial_dims=3, init_filters=32, 
-                                   in_channels=4, out_channels=3, 
-                                   dropout_prob=0.2, blocks_down=(1, 2, 2, 4), 
+            "SegResNet": SegResNet(spatial_dims=3, 
+                                   init_filters=32, 
+                                   in_channels=4, 
+                                   out_channels=3, 
+                                   dropout_prob=0.2, 
+                                   blocks_down=(1, 2, 2, 4), 
                                    blocks_up=(1, 1, 1)).to(device),
-            # "VNet":VNet(),
+
+            "VNet":VNet(spatial_dims=3, 
+                        in_channels=4, 
+                        out_channels=3,
+                        dropout_dim=1,
+                        bias= False
+                        ).to(device),
             # "DynUNet": DynUNet(),
             # "UNet++": BasicUNetPlusPlus(),
+
             "SwinUNetR": SwinUNETR(
                     img_size=128,
                     in_channels=4,
@@ -96,6 +106,7 @@ class NeuralNet:
                     dropout_path_rate=0.0,
                     use_checkpoint=True,
                             ).to(device)}
+        
     def select_model(self):
         return self._all_models[self.model_name]
     
@@ -424,8 +435,6 @@ def run(cfg, model,
             train_losses,
             train_epochs)
 
-
-# Train
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
 
@@ -490,8 +499,8 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.dataset_folder
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train", target_size=(160, 192, 128))
-    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(160, 192, 128))
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 64))
+    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 64))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 
