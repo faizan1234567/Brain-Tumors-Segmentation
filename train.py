@@ -328,7 +328,7 @@ def trainer(cfg,
             scheduler.step()
             save_checkpoint(cfg.training.exp_name, dict(epoch=epoch + 1, max_epochs=max_epochs, model = model.state_dict(), optimizer=optimizer.state_dict(), scheduler=scheduler.state_dict()), "checkpoint")
     print()
-    print("Training Finished !, Best Accuracy: ", val_acc_max)
+    print("Training Finished!, Best Accuracy: ", val_acc_max)
 
     # Save important data
     save_data(training_loss=training_loss,
