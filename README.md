@@ -83,7 +83,7 @@ To train on BraTS 2023 or BraTS 2021 as both datasets are same except the naming
 python train.py -h
 python train.py dataset.dataset_folder=<path to dataset> training.max_epochs=100 training.batch_size=1 training.val_every=1 training.learning_rate=1e-4 model.model_name=SegResNet
 ```
-test and visulize to be updated...
+
 To test the model on the tess set use the following command:
 ```
 python test.py -h
