@@ -36,6 +36,7 @@ import hydra
 from omegaconf import OmegaConf, DictConfig
 import logging
 import os
+from tqdm import tqdm
 
 # Logger
 logger = logging.getLogger(__name__)
@@ -83,7 +84,7 @@ def test(args, mode, data_loader, model):
     meandice = DiceMetric(include_background=True)
     sw_bs = args.test.sw_batch
     infer_overlap = args.test.infer_overlap
-    for i, data in enumerate(data_loader):
+    for data in tqdm(data_loader):
         patient_id = data["patient_id"][0]
         inputs = data["image"]
         targets = data["label"].cuda()
