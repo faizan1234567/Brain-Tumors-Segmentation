@@ -395,9 +395,13 @@ def run(cfg, model,
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
         start_epoch = checkpoint['epoch']
-        max_epochs = checkpoint["max_epochs"]
+        # Extend training from saved ckpt
+        if cfg.training.new_max_epochs is not None:
+            max_epochs = cfg.training.new_max_epochs
+        else:
+            max_epochs = checkpoint["max_epochs"]
         scheduler.load_state_dict(checkpoint['scheduler'])
-        print(f"start train from epoch = {start_epoch}")
+        print(f"start train from epoch = {start_epoch}/{max_epochs}")
 
     else:
         # Training from scratch
