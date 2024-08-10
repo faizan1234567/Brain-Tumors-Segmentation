@@ -99,6 +99,7 @@ class NeuralNet:
                                         in_channels=4,
                                         out_channels=3,
                                         deep_supervision=False,
+                                        features=(16, 16, 32, 64, 128, 16),
                                         dropout=0.2).to(device),
 
             "SwinUNetR": SwinUNETR(
