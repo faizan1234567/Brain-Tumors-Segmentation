@@ -94,8 +94,12 @@ class NeuralNet:
                         dropout_dim=1,
                         bias= False
                         ).to(device),
-            # "DynUNet": DynUNet(),
-            # "UNet++": BasicUNetPlusPlus(),
+                        
+            "UNet++": BasicUNetPlusPlus(spatial_dims=3, 
+                                        in_channels=4,
+                                        out_channels=3,
+                                        deep_supervision=False,
+                                        dropout=0.2).to(device),
 
             "SwinUNetR": SwinUNETR(
                     img_size=128,
