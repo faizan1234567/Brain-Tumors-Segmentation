@@ -94,7 +94,7 @@ class NeuralNet:
                         dropout_dim=1,
                         bias= False
                         ).to(device),
-                        
+
             "UNet++": BasicUNetPlusPlus(spatial_dims=3, 
                                         in_channels=4,
                                         out_channels=3,
@@ -510,7 +510,7 @@ def main(cfg: DictConfig):
     if cfg.training.colab:
         dataset_dir = cfg.dataset.colab
     else:
-        dataset_dir = cfg.dataset.dataset_folder
+        dataset_dir = cfg.dataset.irl_pc
 
     # Data Loading
     train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))

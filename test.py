@@ -132,7 +132,7 @@ def main(cfg: DictConfig):
     # Hyperparameters
     batch_size = cfg.test.batch
     workers = cfg.test.workers
-    dataset_folder = cfg.dataset.dataset_folder
+    dataset_folder = cfg.dataset.irl_pc
 
     # Load checkpoints
     model.load_state_dict(torch.load(cfg.test.weights))
