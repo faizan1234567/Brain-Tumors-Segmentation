@@ -226,7 +226,7 @@ def val(model, loader, acc_func, model_inferer = None,
 def save_data(training_loss,
               et, wt, tc,
               val_mean_acc,
-              epochs):
+              epochs, cfg):
     """
     save the training data for later use
     
@@ -247,8 +247,9 @@ def save_data(training_loss,
     for i in range(len(NAMES)):
         data[f"{NAMES[i]}"] = data_lists[i]
     data_df = pd.DataFrame(data)
-    os.makedirs("csv", exist_ok= True)
-    data_df.to_csv('csv/training_data.csv')
+    save_path = os.path.join(cfg.training.exp_name, "csv")
+    os.makedirs(save_path, exist_ok= True)
+    data_df.to_csv(os.path.join(save_path, "training_data.csv"))
     return data
 
 def trainer(cfg,
@@ -340,7 +341,8 @@ def trainer(cfg,
               wt= dices_wt,
               tc=dices_tc,
               val_mean_acc=mean_dices,
-              epochs=train_epochs)
+              epochs=train_epochs, 
+              cfg = cfg)
     
     return (
         val_acc_max,

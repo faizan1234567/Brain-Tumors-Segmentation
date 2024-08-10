@@ -77,7 +77,7 @@ def inference(model, input, batch_size, overlap):
     return _compute(input)
 
 
-def test(args, mode, data_loader, model):
+def test(args, data_loader, model):
     """test the model on the test dataset"""
     metrics_dict = []
     haussdor = HausdorffDistanceMetric(include_background=True, percentile=95)
@@ -120,7 +120,7 @@ def test(args, mode, data_loader, model):
             et_hd=et_hd, tc_hd=tc_hd, wt_hd=wt_hd,
             et_sens=et_sens, tc_sens=tc_sens, wt_sens=wt_sens,
             et_spec=et_spec, tc_spec=tc_spec, wt_spec=wt_spec))
-    save_seg_csv(metrics_dict)
+    save_seg_csv(metrics_dict, args)
 
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
@@ -148,7 +148,7 @@ def main(cfg: DictConfig):
     
     # Evaluate
     print("start test")
-    test(cfg, "test", test_loader, model)
+    test(cfg, test_loader, model)
 
     print('done!!')
 

@@ -34,12 +34,14 @@ def save_best_model(args, model, name="best_model"):
 def save_checkpoint(args, state, name="checkpont"):
     torch.save(state, f"{args.checkpoint_folder}/{name}.pth.tar")
 
-def save_seg_csv(csv):
+def save_seg_csv(csv, args):
     try:
         val_metrics = pd.DataFrame.from_records(csv)
         columns = ['id', 'et_dice', 'tc_dice', 'wt_dice', 'et_hd', 'tc_hd', 'wt_hd', 'et_sens', 'tc_sens', 'wt_sens', 'et_spec', 'tc_spec', 'wt_spec']
-        os.makedirs("csv", exist_ok= True)
-        val_metrics.to_csv(f'csv/metrics.csv', index=False, columns=columns)
+        save_path = os.path.join(args.training.exp_name, "csv")
+        os.makedirs(save_path, exist_ok= True)
+        csv_path = os.path.join(save_path, "test_metrics.csv")
+        val_metrics.to_csv(csv_path, index=False, columns=columns)
     except KeyboardInterrupt:
         print("Save CSV File Error!")
 
