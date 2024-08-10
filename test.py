@@ -139,7 +139,7 @@ def main(cfg: DictConfig):
     model.eval()
 
     # Load dataset
-    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(160, 192, 128))
+    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(128, 128, 128))
     test_loader = torch.utils.data.DataLoader(test_loader, 
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=workers, 
