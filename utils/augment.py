@@ -7,6 +7,10 @@ from random import random, uniform
 from monai.transforms.spatial.array import Zoom
 from monai.transforms.intensity.array import RandGaussianNoise, GaussianSharpen, AdjustContrast
 
+import numpy as np
+from monai.transforms import RandAffined, RandAxisFlipd, CropForegroundd
+
+# credit CKD-TransBTS
 class DataAugmenter(nn.Module):
     def __init__(self):
         super(DataAugmenter,self).__init__()
@@ -45,3 +49,26 @@ class DataAugmenter(nn.Module):
                 images[b] = image.unsqueeze(0)
                 lables[b] = lable.unsqueeze(0)
             return images, lables
+        
+class AttnUnetAugmentation(nn.Module):
+    def __init__(self):
+      super(AttnUnetAugmentation, self).__init__()
+      self.axial_prob = uniform(0.1, 0.6)
+      self.affine_prob = uniform(0.1, 0.5)
+      self.crop_prob = uniform(0.1, 0.5)
+      self.axial_flips = RandAxisFlipd(keys=["image", "label"], prob=self.axial_prob)
+      self.affine = RandAffined(
+          keys=["image", "label"],
+          mode=("bilinear", "nearest"),
+          prob=self.affine_prob,
+          shear_range=(-0.1, 0.1, -0.1, 0.1, -0.1, 0.1),
+          padding_mode="border",
+      )
+      self.crop_foreground = CropForegroundd(keys=["image", "label"], prob = self.crop_prob, source_key="image", allow_smaller=False)
+
+    def forward(self, data):
+      with torch.no_grad():
+        data = self.affine(data)
+        data = self.axial_flips(data)
+        data = self.crop_foreground(data)
+        return data

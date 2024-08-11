@@ -42,7 +42,7 @@ from monai.transforms import (
     Activations,
 )
 from functools import partial
-from utils.augment import DataAugmenter
+from utils.augment import DataAugmenter, AttnUnetAugmentation
 
 # Configure logger
 import logging
@@ -185,12 +185,13 @@ def train_epoch(model, loader, optimizer, loss_func):
     epoch: int
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    augmenter = DataAugmenter().to(device)
+    augmenter = AttnUnetAugmentation().to(device)
     model.train() 
     run_loss = AverageMeter()
     for batch_data in loader:
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
-        image, label = augmenter(image, label)
+        augmented_data = augmenter(dict(image=image, label=label))
+        image, label = augmented_data["image"], augmented_data["label"]
         logits = model(image)
         loss = loss_func(logits, label)
         loss.backward()
