@@ -95,18 +95,11 @@ class NeuralNet:
                         bias= False
                         ).to(device),
 
-            "UNet++": BasicUNetPlusPlus(spatial_dims=3, 
-                                        in_channels=4,
-                                        out_channels=3,
-                                        deep_supervision=False,
-                                        features=(16, 16, 32, 64, 128, 16),
-                                        dropout=0.2).to(device),
-
             "AttentionUNet": AttentionUnet(spatial_dims=3, 
                                            in_channels=4, 
                                            out_channels=3, 
                                            channels= (64, 128, 256, 512, 1024), 
-                                           strdies= (2, 2, 2, 2),
+                                           strides = (2, 2, 2, 2),
                                            ).to(device),
 
             "SwinUNetR": SwinUNETR(
