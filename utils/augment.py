@@ -6,9 +6,7 @@ from torch import nn
 from random import random, uniform
 from monai.transforms.spatial.array import Zoom
 from monai.transforms.intensity.array import RandGaussianNoise, GaussianSharpen, AdjustContrast
-
-import numpy as np
-from monai.transforms import RandAffined, RandAxisFlipd, CropForegroundd
+from monai.transforms import RandAffined, RandAxisFlipd
 
 # credit CKD-TransBTS
 class DataAugmenter(nn.Module):
@@ -64,11 +62,9 @@ class AttnUnetAugmentation(nn.Module):
           shear_range=(-0.1, 0.1, -0.1, 0.1, -0.1, 0.1),
           padding_mode="border",
       )
-      self.crop_foreground = CropForegroundd(keys=["image", "label"], prob = self.crop_prob, source_key="image", allow_smaller=False)
 
     def forward(self, data):
       with torch.no_grad():
         data = self.affine(data)
         data = self.axial_flips(data)
-        data = self.crop_foreground(data)
         return data
