@@ -98,7 +98,7 @@ class NeuralNet:
             "AttentionUNet": AttentionUnet(spatial_dims=3, 
                                            in_channels=4, 
                                            out_channels=3, 
-                                           channels= (64, 128, 256, 512, 1024), 
+                                           channels= (8, 16, 32, 64, 128), 
                                            strides = (2, 2, 2, 2),
                                            ).to(device),
 
