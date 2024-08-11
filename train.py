@@ -34,6 +34,7 @@ from torch.optim.lr_scheduler import _LRScheduler
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet
+from research.models.ResUNetpp.model import ResUnetPlusPlus
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
 from monai import transforms
@@ -101,6 +102,9 @@ class NeuralNet:
                                            channels= (8, 16, 32, 64, 128), 
                                            strides = (2, 2, 2, 2),
                                            ).to(device),
+
+            "ResUnetPlusPlus": ResUnetPlusPlus(in_channels=4,
+                                         out_channels=3),
 
             "SwinUNetR": SwinUNETR(
                     img_size=128,
