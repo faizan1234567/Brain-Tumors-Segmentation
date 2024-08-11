@@ -178,14 +178,13 @@ def train_epoch(model, loader, optimizer, loss_func):
     epoch: int
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    augmenter = AttnUnetAugmentation().to(device)
+    augmenter = DataAugmenter().to(device)
     model.train() 
     run_loss = AverageMeter()
     for batch_data in loader:
         torch.cuda.empty_cache()
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
-        augmented_data = augmenter(dict(image=image, label=label))
-        image, label = augmented_data["image"], augmented_data["label"]
+        image, label = augmenter(image, label)
         logits = model(image)
         loss = loss_func(logits, label)
         loss.backward()
