@@ -522,7 +522,7 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.irl_pc
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128)
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
     train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
