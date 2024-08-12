@@ -104,7 +104,7 @@ class NeuralNet:
                                            ).to(device),
 
             "ResUnetPlusPlus": ResUnetPlusPlus(in_channels=4,
-                                         out_channels=3),
+                                         out_channels=3).to(device),
 
             "SwinUNetR": SwinUNETR(
                     img_size=128,
