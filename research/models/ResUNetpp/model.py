@@ -156,19 +156,19 @@ class ResUnetPlusPlus(nn.Module):
     def __init__(self, in_channels=4, out_channels=3):
         super().__init__()
 
-        self.c1 = Stem_Block3D(in_channels, 16, stride=1)
-        self.c2 = ResNet_Block3D(16, 32, stride=2)
-        self.c3 = ResNet_Block3D(32, 64, stride=2)
-        self.c4 = ResNet_Block3D(64, 128, stride=2)
+        self.c1 = Stem_Block3D(in_channels, 8, stride=1)
+        self.c2 = ResNet_Block3D(8, 16, stride=2)
+        self.c3 = ResNet_Block3D(16, 32, stride=2)
+        self.c4 = ResNet_Block3D(32, 64, stride=2)
 
-        self.b1 = ASPP3D(128, 256)
+        self.b1 = ASPP3D(64, 128)
 
-        self.d1 = Decoder_Block3D([64, 256], 128)
-        self.d2 = Decoder_Block3D([32, 128], 64)
-        self.d3 = Decoder_Block3D([16, 64], 32)
+        self.d1 = Decoder_Block3D([32, 128], 64)
+        self.d2 = Decoder_Block3D([16, 64], 32)
+        self.d3 = Decoder_Block3D([8, 32], 16)
 
-        self.aspp = ASPP3D(32, 16)
-        self.output = nn.Conv3d(16, out_channels, kernel_size=1, padding=0)
+        self.aspp = ASPP3D(16, 8)
+        self.output = nn.Conv3d(8, out_channels, kernel_size=1, padding=0)
 
     def forward(self, inputs):
         c1 = self.c1(inputs)
