@@ -1,7 +1,7 @@
 batch_size: 1
 num_workers: 12
 infer_overlap: 0.6
-learning_rate: 0.0003
+learning_rate: 0.0001
 max_epochs: 300
 sw_batch_size: 2
 val_every: 1
@@ -9,7 +9,7 @@ weight_decay: 0.00001
 solver_name: Adam
 pretrained: False
 resume: False
-exp_name: AttentionUnet-runs
+exp_name: ResUnetPlusPlus-runs
 seed: 123
 colab: False
 new_max_epochs: None

@@ -18,6 +18,7 @@ import random
 import sys
 import time
 import argparse
+import gc
 import nibabel as nib
 import tqdm as tqdm
 from utils.meter import AverageMeter
@@ -104,7 +105,7 @@ class NeuralNet:
                                            ).to(device),
 
             "ResUnetPlusPlus": ResUnetPlusPlus(in_channels=4,
-                                         out_channels=3),
+                                         out_channels=3).to(device),
 
             "SwinUNetR": SwinUNETR(
                     img_size=128,
@@ -183,10 +184,12 @@ def train_epoch(model, loader, optimizer, loss_func):
     """
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     augmenter = DataAugmenter().to(device)
+    torch.cuda.empty_cache()
+    gc.collect()
+    # del variables
     model.train() 
     run_loss = AverageMeter()
     for batch_data in loader:
-        torch.cuda.empty_cache()
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
         image, label = augmenter(image, label)
         logits = model(image)

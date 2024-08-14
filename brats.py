@@ -66,8 +66,8 @@ class BraTS(Dataset):
 
         return dict(
             patient_id = patient["id"],
-            image = patient_image,
-            label = patient_label,
+            image = patient_image.to(dtype=torch.float32),
+            label = patient_label.to(dtype=torch.float32),
             nonzero_indexes = ((zmin, zmax), (ymin, ymax), (xmin, xmax)),
             box_slice = crop_list,
             pad_list = pad_list
