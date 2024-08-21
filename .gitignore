@@ -23,3 +23,7 @@ logger.log
 *.log
 *.csv 
 *.pt
+
+# runs
+AttentionUnet-runs/
+ResUnetPlusPlus-runs/
