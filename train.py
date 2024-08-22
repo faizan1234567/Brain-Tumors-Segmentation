@@ -17,7 +17,6 @@ import pandas as pd
 import random
 import sys
 import time
-import argparse
 import gc
 import nibabel as nib
 import tqdm as tqdm
@@ -34,7 +33,6 @@ from torch.optim.lr_scheduler import _LRScheduler
 
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
-from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
@@ -45,6 +43,8 @@ from monai.transforms import (
 )
 from functools import partial
 from utils.augment import DataAugmenter, AttnUnetAugmentation
+from utils.nets import NeuralNet
+from utils.dyn_utils import LossBraTS
 
 # Configure logger
 import logging
@@ -76,51 +76,7 @@ class SegResNetScheduler(_LRScheduler):
         current_epoch = self.last_epoch + 1
         factor = (1 - current_epoch / self.total_epochs) ** 0.9
         return [self.alpha * factor for _ in self.optimizer.param_groups]
-
-class NeuralNet:
-    """pick the model for training"""
-    def __init__(self, model_name: str, device = None):
-        self.model_name = model_name
-        self._all_models = {
-            "SegResNet": SegResNet(spatial_dims=3, 
-                                   init_filters=32, 
-                                   in_channels=4, 
-                                   out_channels=3, 
-                                   dropout_prob=0.2, 
-                                   blocks_down=(1, 2, 2, 4), 
-                                   blocks_up=(1, 1, 1)).to(device),
-
-            "VNet":VNet(spatial_dims=3, 
-                        in_channels=4, 
-                        out_channels=3,
-                        dropout_dim=1,
-                        bias= False
-                        ).to(device),
-
-            "AttentionUNet": AttentionUnet(spatial_dims=3, 
-                                           in_channels=4, 
-                                           out_channels=3, 
-                                           channels= (8, 16, 32, 64, 128), 
-                                           strides = (2, 2, 2, 2),
-                                           ).to(device),
-
-            "ResUnetPlusPlus": ResUnetPlusPlus(in_channels=4,
-                                         out_channels=3).to(device),
-
-            "SwinUNetR": SwinUNETR(
-                    img_size=128,
-                    in_channels=4,
-                    out_channels=3,
-                    feature_size=48,
-                    drop_rate=0.0,
-                    attn_drop_rate=0.0,
-                    dropout_path_rate=0.0,
-                    use_checkpoint=True,
-                            ).to(device)}
-        
-    def select_model(self):
-        return self._all_models[self.model_name]
-    
+   
 class Solver:
     """list of optimizers for training NN"""
     def __init__(self, model: nn.Module, lr: float = 1e-4, weight_decay: float = 1e-5):
@@ -150,6 +106,15 @@ def save_checkpoint(dir_name, state, name="checkpoint"):
     save_path = os.path.join(dir_name, name)
     torch.save(state, f"{save_path}/{name}.pth.tar")
  
+def compute_loss(loss, preds, label):
+        loss = loss(preds[0], label)
+        for i, pred in enumerate(preds[1:]):
+            downsampled_label = nn.functional.interpolate(label, pred.shape[2:])
+            loss += 0.5 ** (i + 1) * loss(pred, downsampled_label)
+        c_norm = 1 / (2 - 2 ** (-len(preds)))
+        return c_norm * loss
+
+
 def create_dirs(dir_name):
     """create experiment directory storing
     checkpoint and best weights"""
@@ -182,6 +147,7 @@ def train_epoch(model, loader, optimizer, loss_func):
     loss_func: monai.losses.dice.DiceLoss
     epoch: int
     """
+    # dyn_loss = LossBraTS(focal=False)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     augmenter = DataAugmenter().to(device)
     torch.cuda.empty_cache()
@@ -193,7 +159,7 @@ def train_epoch(model, loader, optimizer, loss_func):
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
         image, label = augmenter(image, label)
         logits = model(image)
-        loss = loss_func(logits, label)
+        loss = loss_func(logits, label) # only for dynunet, use loss_func for other models
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
@@ -473,7 +439,8 @@ def main(cfg: DictConfig):
     # Post processing 
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
-    
+
+        
     # Define model 
     roi = cfg.model.roi
     models = NeuralNet(cfg.model.model_name, device = device)
