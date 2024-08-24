@@ -36,22 +36,25 @@ class NeuralNet:
 
             "ResUnetPlusPlus": ResUnetPlusPlus(in_channels=4,
                                          out_channels=3).to(self.device),
+                                         
             "UNETR": UNETR(in_channels=self.in_channels, 
                            out_channels=self.out_channels, 
                            img_size=(128,128,128), 
                            proj_type='conv', 
                            norm_name='instance').to(self.device),
 
-            "SwinUNetR": SwinUNETR(
+            "SwinUNETR": SwinUNETR(
                     img_size=128,
-                    in_channels=4,
-                    out_channels=3,
+                    in_channels=self.in_channels,
+                    out_channels=self.out_channels,
                     feature_size=48,
                     drop_rate=0.0,
                     attn_drop_rate=0.0,
                     dropout_path_rate=0.0,
-                    use_checkpoint=True,
-                            ).to(device)}
+                    spatial_dims=3,
+                    use_checkpoint=False,
+                    use_v2=True).to(device)}
+        
         if self.model_name == "DynUNet":
             dyn_model = self.build_dynunet()
             self._all_models["DynUNet"] = dyn_model.to(self.device)
