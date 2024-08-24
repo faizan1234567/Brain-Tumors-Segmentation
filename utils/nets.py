@@ -53,7 +53,7 @@ class NeuralNet:
                     dropout_path_rate=0.0,
                     spatial_dims=3,
                     use_checkpoint=False,
-                    use_v2=True).to(device)}
+                    use_v2=False).to(device)}
         
         if self.model_name == "DynUNet":
             dyn_model = self.build_dynunet()
