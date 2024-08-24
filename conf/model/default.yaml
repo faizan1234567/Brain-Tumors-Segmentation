@@ -1,3 +1,3 @@
 roi: 128
-infer_overlap: 0.5
-model_name: UNETR
+infer_overlap: 0.7
+model_name: SwinUNETR
