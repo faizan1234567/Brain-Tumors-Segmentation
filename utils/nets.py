@@ -47,7 +47,7 @@ class NeuralNet:
                     img_size=128,
                     in_channels=self.in_channels,
                     out_channels=self.out_channels,
-                    feature_size=24,
+                    feature_size=48,
                     drop_rate=0.0,
                     attn_drop_rate=0.0,
                     dropout_path_rate=0.0,
