@@ -12,4 +12,6 @@ resume: False
 exp_name: SwinUNETR-runs
 seed: 123
 colab: False
+irl: False
+sines: True
 new_max_epochs: None

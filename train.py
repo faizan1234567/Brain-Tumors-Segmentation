@@ -485,8 +485,12 @@ def main(cfg: DictConfig):
     # Platform specific 
     if cfg.training.colab:
         dataset_dir = cfg.dataset.colab
-    else:
+    elif cfg.training.irl:
         dataset_dir = cfg.dataset.irl_pc
+    elif cfg.training.sines:
+        dataset_dir = cfg.dataset.sines_pc
+    else:
+        dataset_dir = cfg.dataset.laptop_pc
 
     # Data Loading
     train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
