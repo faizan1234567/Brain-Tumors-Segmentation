@@ -1,5 +1,5 @@
-# avoid pushing some directories like virtual enviroments and other dirs
-# and some private dirs
+# Avoid pushing some directories like virtual enviroments and other dirs
+# And some private dirs
 segment/
 segmentation/
 literature/
@@ -17,13 +17,13 @@ SegResNet-runs/
 logger/
 logger.log
 
-# avoid pushing some common extensions mentioned here...
+# Avoid pushing some common extensions mentioned here...
 *.pth
 *.pdf
 *.log
 *.csv 
 *.pt
 
-# runs
+# Runs
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
