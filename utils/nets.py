@@ -48,9 +48,9 @@ class NeuralNet:
                     in_channels=self.in_channels,
                     out_channels=self.out_channels,
                     feature_size=48,
-                    drop_rate=0.0,
-                    attn_drop_rate=0.0,
-                    dropout_path_rate=0.0,
+                    drop_rate=0.1,
+                    attn_drop_rate=0.2,
+                    dropout_path_rate=0.1,
                     spatial_dims=3,
                     use_checkpoint=False,
                     use_v2=False).to(device)}
