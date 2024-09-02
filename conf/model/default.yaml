@@ -1,3 +1,4 @@
 roi: 128
 infer_overlap: 0.7
 model_name: SwinUNETR
+architecture: swinunet_r
