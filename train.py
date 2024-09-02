@@ -41,6 +41,9 @@ from monai.transforms import (
     AsDiscrete,
     Activations,
 )
+from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
+from research.models.ResUNetpp.model import ResUnetPlusPlus
+
 from functools import partial
 from utils.augment import DataAugmenter, AttnUnetAugmentation
 from utils.nets import NeuralNet
@@ -440,16 +443,64 @@ def main(cfg: DictConfig):
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
 
+    # Select Network architecture for training
+    # SegResNet
+    if cfg.model.architecture == "segres_net":
+        model = SegResNet(spatial_dims=3, 
+                          init_filters=32, 
+                          in_channels=4, 
+                          out_channels=3, 
+                          dropout_prob=0.2, 
+                          blocks_down=(1, 2, 2, 4), 
+                          blocks_up=(1, 1, 1)).to(device),
+    # VNet
+    elif cfg.model.architecture == "v_net":
+        model = VNet(spatial_dims=3, 
+                     in_channels=4, 
+                     out_channels=3,
+                     dropout_dim=1,
+                     bias= False
+                        ).to(device)
+    # Attention UNet
+    elif cfg.model.architecture == "attention_unet":
+        model = AttentionUnet(spatial_dims=3, 
+                              in_channels=4, 
+                              out_channels=3, 
+                              channels= (8, 16, 32, 64, 128), 
+                              strides = (2, 2, 2, 2),
+                                           ).to(device)
+    # ResUNet++
+    elif cfg.model.architecture == "resunet_pp":
+        model = ResUnetPlusPlus(in_channels=4,
+                                out_channels=3).to(device)
+    # UNETR
+    elif cfg.model.architecture == "unet_r":
+       model =  UNETR(in_channels=4, 
+                     out_channels=3, 
+                     img_size=(128,128,128), 
+                     proj_type='conv', 
+                     norm_name='instance').to(device)
+    # SwinUNETR
+    elif cfg.model.architecture == "swinunet_r":
+        model = SwinUNETR(
+                img_size=128,
+                in_channels=4,
+                out_channels=3,
+                feature_size=48,
+                drop_rate=0.1,
+                attn_drop_rate=0.2,
+                dropout_path_rate=0.1,
+                spatial_dims=3,
+                use_checkpoint=False,
+                use_v2=False).to(device)
         
-    # Define model 
+    print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
-    models = NeuralNet(cfg.model.model_name, device = device)
-    model = models.select_model()
-    
-    # Sliding window inference on test data
+
+    # Sliding window inference on evaluation dataset
     model_inferer = partial(
                         sliding_window_inference,
-                        roi_size=[roi] * 3, # may very for other models
+                        roi_size=[roi] * 3, 
                         sw_batch_size=cfg.training.sw_batch_size,
                         predictor=model,
                         overlap=cfg.model.infer_overlap)
