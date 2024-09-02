@@ -1,5 +1,5 @@
 batch_size: 1
-num_workers: 12
+num_workers: 4
 infer_overlap: 0.7
 learning_rate: 0.0008
 max_epochs: 300
@@ -13,5 +13,6 @@ exp_name: SwinUNETR-runs
 seed: 123
 colab: False
 irl: False
-sines: True
+sines: False
+my_pc: True
 new_max_epochs: None

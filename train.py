@@ -44,10 +44,10 @@ from monai.transforms import (
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from research.models.UNet.model import UNet3D
+from research.models.UX_Net.network_backbone import UXNET
 
 from functools import partial
 from utils.augment import DataAugmenter, AttnUnetAugmentation
-from utils.nets import NeuralNet
 from utils.dyn_utils import LossBraTS
 
 # Configure logger
@@ -163,7 +163,7 @@ def train_epoch(model, loader, optimizer, loss_func):
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
         image, label = augmenter(image, label)
         logits = model(image)
-        loss = loss_func(logits, label) # only for dynunet, use loss_func for other models
+        loss = loss_func(logits, label) 
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
@@ -173,7 +173,7 @@ def train_epoch(model, loader, optimizer, loss_func):
 
 # Validate the model
 def val(model, loader, acc_func, model_inferer = None,
-        post_sigmoid = None, post_pred = None):
+        post_sigmoid = None, post_pred = None, post_label=None):
     """
     Validation phase
     use model and validation dataset to validate the model performance on 
@@ -199,6 +199,7 @@ def val(model, loader, acc_func, model_inferer = None,
             masks = decollate_batch(batch_data["label"].to(device)) 
             prediction_lists = decollate_batch(logits)
             predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
+            # masks = [post_label(mask) for mask in masks]
             acc_func.reset()
             acc_func(y_pred = predictions, y = masks)
             acc, not_nans = acc_func.aggregate()
@@ -248,6 +249,7 @@ def trainer(cfg,
             start_epoch = 0,
             post_sigmoid = None,
             post_pred = None,
+            post_label = None,
             val_every = 2):
     """
     train and validate the model
@@ -294,7 +296,8 @@ def trainer(cfg,
                           acc_func = acc_func,
                           model_inferer= model_inferer,
                           post_sigmoid=post_sigmoid,
-                          post_pred=post_pred)
+                          post_pred=post_pred, 
+                          post_label = post_label)
             dice_tc = val_acc[0]
             dice_wt = val_acc[1]
             dice_et = val_acc[2]
@@ -346,6 +349,7 @@ def run(cfg, model,
         model_inferer = None,
         post_sigmoid = None, 
         post_pred = None,
+        post_label = None,
         max_epochs = 100,
         val_every = 2
         ):
@@ -418,6 +422,7 @@ def run(cfg, model,
         post_sigmoid=post_sigmoid,
         val_every=val_every,
         post_pred=post_pred,
+        post_label=post_label
     )
     print()
     return (val_mean_dice_max, 
@@ -440,50 +445,55 @@ def main(cfg: DictConfig):
     # Efficient training
     torch.backends.cudnn.benchmark = True
 
+    # BraTS configs
+    num_classes = 3
+    in_channels = 4
+    spatial_size = 3
+
     # Post processing 
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
 
     # Select Network architecture for training
-    
+
     # SegResNet
     if cfg.model.architecture == "segres_net":
-        model = SegResNet(spatial_dims=3, 
+        model = SegResNet(spatial_dims=spatial_size, 
                           init_filters=32, 
-                          in_channels=4, 
-                          out_channels=3, 
+                          in_channels=in_channels, 
+                          out_channels=num_classes, 
                           dropout_prob=0.2, 
                           blocks_down=(1, 2, 2, 4), 
                           blocks_up=(1, 1, 1)).to(device),
     # UNet
     elif cfg.model.architecture == "unet3d":
-        model = UNet3D(in_channels=4, 
-                       num_classes=3).to(device)
+        model = UNet3D(in_channels=in_channels, 
+                       num_classes=num_classes).to(device)
         
     # VNet
     elif cfg.model.architecture == "v_net":
-        model = VNet(spatial_dims=3, 
-                     in_channels=4, 
-                     out_channels=3,
+        model = VNet(spatial_dims=spatial_size, 
+                     in_channels=in_channels, 
+                     out_channels=num_classes,
                      dropout_dim=1,
                      bias= False
                         ).to(device)
     # Attention UNet
     elif cfg.model.architecture == "attention_unet":
-        model = AttentionUnet(spatial_dims=3, 
-                              in_channels=4, 
-                              out_channels=3, 
+        model = AttentionUnet(spatial_dims=spatial_size, 
+                              in_channels=in_channels, 
+                              out_channels=num_classes, 
                               channels= (8, 16, 32, 64, 128), 
                               strides = (2, 2, 2, 2),
                                            ).to(device)
     # ResUNet++
     elif cfg.model.architecture == "resunet_pp":
-        model = ResUnetPlusPlus(in_channels=4,
-                                out_channels=3).to(device)
+        model = ResUnetPlusPlus(in_channels=in_channels,
+                                out_channels=num_classes).to(device)
     # UNETR
     elif cfg.model.architecture == "unet_r":
-       model =  UNETR(in_channels=4, 
-                     out_channels=3, 
+       model =  UNETR(in_channels=in_channels, 
+                     out_channels=num_classes, 
                      img_size=(128,128,128), 
                      proj_type='conv', 
                      norm_name='instance').to(device)
@@ -491,15 +501,25 @@ def main(cfg: DictConfig):
     elif cfg.model.architecture == "swinunet_r":
         model = SwinUNETR(
                 img_size=128,
-                in_channels=4,
-                out_channels=3,
+                in_channels=in_channels,
+                out_channels=num_classes,
                 feature_size=48,
                 drop_rate=0.1,
                 attn_drop_rate=0.2,
                 dropout_path_rate=0.1,
-                spatial_dims=3,
+                spatial_dims=spatial_size,
                 use_checkpoint=False,
                 use_v2=False).to(device)
+    # UXNet
+    elif cfg.model.architecture == "ux_net":
+        model = UXNET(in_chans= in_channels, 
+                      out_chans= num_classes,
+                      depths=[2, 2, 2, 2],
+                      feat_size=[48, 96, 192, 384],
+                      drop_path_rate=0,
+                      layer_scale_init_value=1e-6, 
+                      spatial_dims=spatial_size).to(device)
+
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
@@ -516,6 +536,7 @@ def main(cfg: DictConfig):
     val_every = cfg.training.val_every
 
     # Loss function (dice loss for semantic segmentation)
+    # loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
     loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
 
     # Dice metric 
@@ -531,7 +552,7 @@ def main(cfg: DictConfig):
     max_epochs = cfg.training.max_epochs
 
     # Learning rate scheduler
-    if cfg.model.architecutre == "segres_net":
+    if cfg.model.architecture == "segres_net":
         scheduler = SegResNetScheduler(optimizer, max_epochs, cfg.training.learning_rate)
     else:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
@@ -547,12 +568,12 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.irl_pc
     elif cfg.training.sines:
         dataset_dir = cfg.dataset.sines_pc
-    else:
+    elif cfg.training.my_pc:
         dataset_dir = cfg.dataset.laptop_pc
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
-    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(64, 64, 64))
+    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(64, 64, 64))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 
@@ -573,7 +594,8 @@ def main(cfg: DictConfig):
         val_loader=val_loader,
         scheduler=scheduler,
         model_inferer=model_inferer,
-        post_sigmoid=post_sigmoid,
+        post_label = None,
+        post_sigmoid = post_sigmoid,
         post_pred=post_pred,
         max_epochs=max_epochs,
         val_every=val_every)

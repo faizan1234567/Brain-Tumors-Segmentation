@@ -1,7 +1,6 @@
 
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
 from research.models.ResUNetpp.model import ResUnetPlusPlus
-from research.models.TransBTS.TransBTS_downsample8x_skipconnection import TransBTS
 
 
 class NeuralNet:
@@ -55,9 +54,7 @@ class NeuralNet:
                     spatial_dims=3,
                     use_checkpoint=False,
                     use_v2=False).to(device), 
-            "TransBTS": TransBTS(dataset="brats",  
-                                 in_channels=self.in_channels, 
-                                 out_channels=self.out_channels).to(device)}
+            
         
         if self.model_name == "DynUNet":
             dyn_model = self.build_dynunet()
