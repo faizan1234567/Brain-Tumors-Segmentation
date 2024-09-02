@@ -43,6 +43,7 @@ from monai.transforms import (
 )
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
 from research.models.ResUNetpp.model import ResUnetPlusPlus
+from research.models.UNet.model import UNet3D
 
 from functools import partial
 from utils.augment import DataAugmenter, AttnUnetAugmentation
@@ -444,6 +445,7 @@ def main(cfg: DictConfig):
     post_sigmoid = Activations(sigmoid= True)
 
     # Select Network architecture for training
+    
     # SegResNet
     if cfg.model.architecture == "segres_net":
         model = SegResNet(spatial_dims=3, 
@@ -453,6 +455,11 @@ def main(cfg: DictConfig):
                           dropout_prob=0.2, 
                           blocks_down=(1, 2, 2, 4), 
                           blocks_up=(1, 1, 1)).to(device),
+    # UNet
+    elif cfg.model.architecture == "unet3d":
+        model = UNet3D(in_channels=4, 
+                       num_classes=3).to(device)
+        
     # VNet
     elif cfg.model.architecture == "v_net":
         model = VNet(spatial_dims=3, 
@@ -524,7 +531,7 @@ def main(cfg: DictConfig):
     max_epochs = cfg.training.max_epochs
 
     # Learning rate scheduler
-    if cfg.model.model_name == "SegResNet":
+    if cfg.model.architecutre == "segres_net":
         scheduler = SegResNetScheduler(optimizer, max_epochs, cfg.training.learning_rate)
     else:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
