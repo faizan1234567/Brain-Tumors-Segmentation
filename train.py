@@ -45,6 +45,7 @@ from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, A
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from research.models.UNet.model import UNet3D
 from research.models.UX_Net.network_backbone import UXNET
+from research.models.nnFormer.nnFormer_tumor import nnFormer
 
 from functools import partial
 from utils.augment import DataAugmenter, AttnUnetAugmentation
@@ -519,6 +520,16 @@ def main(cfg: DictConfig):
                       drop_path_rate=0,
                       layer_scale_init_value=1e-6, 
                       spatial_dims=spatial_size).to(device)
+    
+    # nnFormer
+    elif cfg.model.architecture == "nn_former":
+        model = nnFormer(crop_size= [128, 128, 128], 
+                         embedding_dim=192, 
+                         input_channels=in_channels, 
+                         num_classes=num_classes, 
+                         depths=[2, 2, 2, 2], 
+                         num_heads=[6, 12, 24, 48], 
+                         deep_supervision=True).to(device)
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
