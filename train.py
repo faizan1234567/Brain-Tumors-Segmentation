@@ -510,7 +510,7 @@ def main(cfg: DictConfig):
         model = nnFormer(crop_size=np.array([128, 128, 128]), 
                          embedding_dim=96, 
                          input_channels=in_channels, 
-                         num_classes=num_classes + 1, 
+                         num_classes=num_classes, 
                          depths=[2, 2, 2, 2], 
                          num_heads=[3, 6, 12, 24], 
                          deep_supervision=False,
