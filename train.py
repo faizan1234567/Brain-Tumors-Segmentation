@@ -512,7 +512,7 @@ def main(cfg: DictConfig):
                          input_channels=in_channels, 
                          num_classes=num_classes, 
                          depths=[2, 2, 2, 2], 
-                         num_heads=[6, 12, 24, 48], 
+                         num_heads=[3, 6, 12, 24], 
                          deep_supervision=True).to(device)
 
         
