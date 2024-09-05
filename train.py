@@ -10,12 +10,10 @@ All right reserved.
 =========================================================
 """
 import os
-import copy
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import random
-import sys
 import time
 import gc
 import nibabel as nib
@@ -24,38 +22,34 @@ from utils.meter import AverageMeter
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from brats import get_datasets
 
-import monai
-from monai.data import create_test_image_3d, Dataset, DataLoader, decollate_batch
+from monai.data import  decollate_batch
 import torch
 import torch.nn as nn
 from torch.backends import cudnn
-from torch.optim.lr_scheduler import _LRScheduler
 
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
-from monai import transforms
 from monai.transforms import (
     AsDiscrete,
     Activations,
 )
-from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
+from monai.networks.nets import SwinUNETR, SegResNet, VNet, AttentionUnet, UNETR
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from research.models.UNet.model import UNet3D
 from research.models.UX_Net.network_backbone import UXNET
 from research.models.nnformer.nnFormer_tumor import nnFormer
 
 from functools import partial
-from utils.augment import DataAugmenter, AttnUnetAugmentation
-from utils.dyn_utils import LossBraTS
+from utils.augment import DataAugmenter
+from utils.schedulers import SegResNetScheduler, PolyDecayScheduler
 
 # Configure logger
 import logging
 import hydra
-from omegaconf import OmegaConf, DictConfig
-from tqdm import tqdm
+from omegaconf import DictConfig
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -70,17 +64,6 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-
-class SegResNetScheduler(_LRScheduler):
-    def __init__(self, optimizer, total_epochs, alpha, last_epoch=-1):
-        self.total_epochs = total_epochs
-        self.alpha = alpha
-        super(SegResNetScheduler, self).__init__(optimizer, last_epoch)
-
-    def get_lr(self):
-        current_epoch = self.last_epoch + 1
-        factor = (1 - current_epoch / self.total_epochs) ** 0.9
-        return [self.alpha * factor for _ in self.optimizer.param_groups]
    
 class Solver:
     """list of optimizers for training NN"""
@@ -100,6 +83,7 @@ class Solver:
         }
     def select_solver(self, name):
         return self.all_solvers[name]
+    
 
 def save_best_model(dir_name, model, name="best_model"):
     """save best model weights"""
@@ -562,9 +546,11 @@ def main(cfg: DictConfig):
      # Max epochs
     max_epochs = cfg.training.max_epochs
 
-    # Learning rate scheduler
+    # Learning rate schedulers
     if cfg.model.architecture == "segres_net":
         scheduler = SegResNetScheduler(optimizer, max_epochs, cfg.training.learning_rate)
+    elif cfg.model.architecture == "nn_former":
+        scheduler = PolyDecayScheduler(optimizer, total_epochs=max_epochs, initial_lr=cfg.training.learning_rate)
     else:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
     
