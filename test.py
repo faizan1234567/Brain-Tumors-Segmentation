@@ -19,7 +19,7 @@ from utils.general import load_pretrained_model
 from utils.all_utils import save_seg_csv, cal_confuse, cal_dice
 from brats import get_datasets
 from utils.meter import AverageMeter
-from train import NeuralNet
+
 
 from monai.metrics import DiceMetric
 from monai.metrics.hausdorff_distance import HausdorffDistanceMetric
@@ -30,6 +30,13 @@ from monai.transforms import (
     AsDiscrete,
     Activations,
 )
+
+from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
+from research.models.ResUNetpp.model import ResUnetPlusPlus
+from research.models.UNet.model import UNet3D
+from research.models.UX_Net.network_backbone import UXNET
+from research.models.nnFormer.nnFormer_tumor import nnFormer
+
 from functools import partial
 
 import hydra
@@ -126,8 +133,96 @@ def test(args, data_loader, model):
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
     # Select model
-    models = NeuralNet(cfg.model.model_name)
-    model = models.select_model()
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
+    # Efficient training
+    torch.backends.cudnn.benchmark = True
+
+    # BraTS configs
+    num_classes = 3
+    in_channels = 4
+    spatial_size = 3
+
+    # Select Network architecture for training
+
+    # SegResNet
+    if cfg.model.architecture == "segres_net":
+        model = SegResNet(spatial_dims=spatial_size, 
+                          init_filters=32, 
+                          in_channels=in_channels, 
+                          out_channels=num_classes, 
+                          dropout_prob=0.2, 
+                          blocks_down=(1, 2, 2, 4), 
+                          blocks_up=(1, 1, 1)).to(device),
+    # UNet
+    elif cfg.model.architecture == "unet3d":
+        model = UNet3D(in_channels=in_channels, 
+                       num_classes=num_classes).to(device)
+        
+    # VNet
+    elif cfg.model.architecture == "v_net":
+        model = VNet(spatial_dims=spatial_size, 
+                     in_channels=in_channels, 
+                     out_channels=num_classes,
+                     dropout_dim=1,
+                     bias= False
+                        ).to(device)
+    # Attention UNet
+    elif cfg.model.architecture == "attention_unet":
+        model = AttentionUnet(spatial_dims=spatial_size, 
+                              in_channels=in_channels, 
+                              out_channels=num_classes, 
+                              channels= (8, 16, 32, 64, 128), 
+                              strides = (2, 2, 2, 2),
+                                           ).to(device)
+    # ResUNet++
+    elif cfg.model.architecture == "resunet_pp":
+        model = ResUnetPlusPlus(in_channels=in_channels,
+                                out_channels=num_classes).to(device)
+    # UNETR
+    elif cfg.model.architecture == "unet_r":
+       model =  UNETR(in_channels=in_channels, 
+                     out_channels=num_classes, 
+                     img_size=(128,128,128), 
+                     proj_type='conv', 
+                     norm_name='instance').to(device)
+    # SwinUNETR
+    elif cfg.model.architecture == "swinunet_r":
+        model = SwinUNETR(
+                img_size=128,
+                in_channels=in_channels,
+                out_channels=num_classes,
+                feature_size=48,
+                drop_rate=0.1,
+                attn_drop_rate=0.2,
+                dropout_path_rate=0.1,
+                spatial_dims=spatial_size,
+                use_checkpoint=False,
+                use_v2=False).to(device)
+    # UXNet
+    elif cfg.model.architecture == "ux_net":
+        model = UXNET(in_chans= in_channels, 
+                      out_chans= num_classes,
+                      depths=[2, 2, 2, 2],
+                      feat_size=[48, 96, 192, 384],
+                      drop_path_rate=0,
+                      layer_scale_init_value=1e-6, 
+                      spatial_dims=spatial_size).to(device)
+    
+    # nnFormer
+    elif cfg.model.architecture == "nn_former":
+        model = nnFormer(crop_size= [128, 128, 128], 
+                         embedding_dim=192, 
+                         input_channels=in_channels, 
+                         num_classes=num_classes, 
+                         depths=[2, 2, 2, 2], 
+                         num_heads=[6, 12, 24, 48], 
+                         deep_supervision=True).to(device)
+
+        
+    print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
+ 
     
     # Hyperparameters
     batch_size = cfg.test.batch
