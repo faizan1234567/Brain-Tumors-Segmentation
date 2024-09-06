@@ -35,7 +35,7 @@ from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, A
 from research.models.ResUNetpp.model import ResUnetPlusPlus
 from research.models.UNet.model import UNet3D
 from research.models.UX_Net.network_backbone import UXNET
-from research.models.nnFormer.nnFormer_tumor import nnFormer
+from research.models.nnformer.nnFormer_tumor import nnFormer
 
 from functools import partial
 
