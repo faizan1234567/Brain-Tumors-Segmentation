@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+import torch.nn as nn
 from monai.data import decollate_batch
 from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
@@ -212,13 +213,16 @@ def main(cfg: DictConfig):
     
     # nnFormer
     elif cfg.model.architecture == "nn_former":
-        model = nnFormer(crop_size= [128, 128, 128], 
-                         embedding_dim=192, 
+      model = nnFormer(crop_size=np.array([128, 128, 128]), 
+                         embedding_dim=96, 
                          input_channels=in_channels, 
                          num_classes=num_classes, 
                          depths=[2, 2, 2, 2], 
-                         num_heads=[6, 12, 24, 48], 
-                         deep_supervision=True).to(device)
+                         num_heads=[3, 6, 12, 24], 
+                         deep_supervision=False,
+                         conv_op=nn.Conv3d,
+                         patch_size= [4,4,4], 
+                         window_size=[4,4,8,4]).to(device)
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
