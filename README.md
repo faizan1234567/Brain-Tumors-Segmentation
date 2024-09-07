@@ -95,6 +95,22 @@ python show.py -h
 python show.py --type "get-gif"
 ```
 
+### Supported Models
+The repository supports the following models implemented for brain tumor segmentation, the model have been trained on BraTS 2023 dataset for 300 epochs. 
+
+| Model Name     | Mean Dice Score  | Mean Hausdorff Distance | Mean Sensitivity |
+|----------------|------------------|-------------------------|------------------|
+| SegResNet      | 0.8917           | 8.654                   | 0.9113           |
+| UNet           | 0.5419           | 39.094                  | 0.733            |
+| V-Net          | 0.8456           | 10.894                  | 0.831            |
+| ResUNet++      | 0.7865           | 22.25                   | 0.7877           |
+| AttentionUNet  | 0.7954           | 20.05                   | 0.8576           |
+| UNETR          | 0.873            | 9.923                   | 0.8932           |
+| SwinUNETR      | 0.888            | 9.015                   | 0.9059           |
+| nnFormer       | 0.8127           | 10.068                  | 0.8498           |
+| 3DUXNET        | 0.8785           | 14.263                  | 0.9223           |
+
+
 ### TODO
 - [ ] MLOps tools integration such as Weight & Baises
 - [ ] Multi-GPU training 
