@@ -119,7 +119,7 @@ The repository supports the following models implemented for brain tumor segment
 
 ### Cite
 
-If you find this project useful in your research, please consider cite and star the repository:
+If you find this project useful in your research, please consider cite and **star the repository**:
 
 ```latex
 @misc{brats23-tumor-segmentation,
