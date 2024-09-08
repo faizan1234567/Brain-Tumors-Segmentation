@@ -20,7 +20,7 @@ This repository utilizes the ```BraTS 2021``` and ```BraTS 2023``` datasets to d
 
 <!-- ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif) -->
 
-<img src="https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif" alt="Alt Text" width="850"/>
+<img src="https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif" alt="Alt Text" width="825"/>
 
 
 ### The Dataset 
