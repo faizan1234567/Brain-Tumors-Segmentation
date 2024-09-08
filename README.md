@@ -99,7 +99,7 @@ python show.py --type "get-gif"
 ```
 
 ### Supported Models
-
+Each model has been trained for 300 epochs on NVIDIA RTX-4070 GPU by following details from their papers. Model checkpoints for the models or a particular model will provided on the request. 
 | **Model Name**  | **Mean Dice Score** | **Mean Hausdorff Distance** | **Mean Sensitivity** |
 |-----------------|---------------------|-----------------------------|----------------------|
 | **SegResNet**    | 0.8896              | 8.6502                      | 0.9117               |
