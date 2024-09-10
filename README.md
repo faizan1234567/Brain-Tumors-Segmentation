@@ -101,17 +101,18 @@ python show.py --type "get-gif"
 
 ### Supported Models
 Each model has been trained for 300 epochs on NVIDIA RTX-4070 GPU by following details from their papers. Model checkpoints for the models or a particular model will provided on the request. 
-| **Model Name**  | **Mean Dice Score** | **Mean Hausdorff Distance** | **Mean Sensitivity** |
-|-----------------|---------------------|-----------------------------|----------------------|
-| **SegResNet**    | 0.8896              | 8.6502                      | 0.9117               |
-| **UNet**         | 0.5441              | 39.0898                     | 0.7377               |
-| **V-Net**        | 0.842               | 10.8914                     | 0.8278               |
-| **ResUNet++**    | 0.7839              | 22.2491                     | 0.784                |
-| **AttentionUNet**| 0.7982              | 20.0479                     | 0.857                |
-| **UNETR**        | 0.8705              | 9.9235                      | 0.8902               |
-| **SwinUNETR**    | 0.886               | 9.0157                      | 0.9034               |
-| **nnFormer**     | 0.8117              | 10.0703                     | 0.8528               |
-| **3DUXNET**      | 0.8741              | 14.264                      | 0.9244               |
+| **Model Name**     | **Mean Dice Score** | **Mean Hausdorff Distance** | **Mean Sensitivity** | **Mean Specificity** |
+|--------------------|---------------------|-----------------------------|----------------------|----------------------|
+| **SegResNet**      | 0.8896              | 8.6502                      | 0.9117               | 0.9932               |
+| **UNet**           | 0.5441              | 39.0898                     | 0.7377               | 0.9911               |
+| **V-Net**          | 0.842               | 10.8914                     | 0.8278               | 0.9927               |
+| **ResUNet++**      | 0.7839              | 22.2491                     | 0.784                | 0.9908               |
+| **AttentionUNet**  | 0.7982              | 20.0479                     | 0.857                | 0.9915               |
+| **UNETR**          | 0.8705              | 9.9235                      | 0.8902               | 0.9930               |
+| **SwinUNETR**      | 0.886               | 9.0157                      | 0.9034               | 0.9940               |
+| **nnFormer**       | 0.8117              | 10.0703                     | 0.8528               | 0.9923               |
+| **3DUXNET**        | 0.8741              | 14.264                      | 0.9244               | 0.9945               |
+
 
 
 
