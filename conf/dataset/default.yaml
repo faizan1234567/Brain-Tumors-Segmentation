@@ -2,3 +2,4 @@ irl_pc: /media/faizan/2418a65c-11bc-4f64-bf23-ecd60d93cf53/faizan/Faizan_thesis/
 laptop_pc: "E:/Brats23 Data/Dataset/BraTS23_mapped/dataset"
 colab: "/gdrive/MyDrive/BraTS2023/"
 sines_pc: /drive/faizanai.rrl/datasets
+dataset_folder: # specify your dataset path here
