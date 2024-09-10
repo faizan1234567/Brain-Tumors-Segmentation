@@ -65,8 +65,8 @@ image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 ### Installation
 
 ```
-git clone https://github.com/faizan1234567/BraTS23-Tumors-Segmentation
-cd BraTS23-Tumors-Segmentation
+git clone https://github.com/faizan1234567/Brain-Tumors-Segmentation
+cd Brain-Tumors-Segmentation
 ```
 
 create a virtual environment in Anaconda and activate it.
