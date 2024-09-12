@@ -120,7 +120,9 @@ Each model has been trained for ```300 epochs``` on NVIDIA ```RTX-4070``` GPU by
 - [ ] MLOps tools integration such as Weight & Baises
 - [ ] Multi-GPU training 
 - [x] New Data augmentation options
-- [x] CKD-TransBTS and other SOTA semantic segmentation models to be added
+- [x] Added state-of-the-art options
+- [x] test code updated
+- [ ] visualization code to be updated
 
 ### Cite
 
