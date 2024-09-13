@@ -18,7 +18,6 @@ To enhance diagnostic accuracy and efficiency, deep learning techniques are incr
 
 This repository utilizes the ```BraTS 2021``` and ```BraTS 2023``` datasets to develop and evaluate both new and existing state-of-the-art algorithms for brain tumor segmentation. To facilitate research, we have made the code for training, evaluation, data loading, preprocessing, and model development open source. Researchers can use this template to build their models, enhancing accuracy and explainability.
 
-<!-- ![Alt Text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif) -->
 
 <img src="https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif" alt="Alt Text" width="850"/>
 
