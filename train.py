@@ -534,7 +534,6 @@ def main(cfg: DictConfig):
     val_every = cfg.training.val_every
 
     # Loss function (dice loss for semantic segmentation)
-    # loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
     loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
 
     # Dice metric 
