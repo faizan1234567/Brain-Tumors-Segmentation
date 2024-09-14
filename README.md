@@ -27,7 +27,7 @@ All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [
 
 Annotations consist of GD-enhancing tumor (```ET — label 3```), peritumoral edematous/invaded tissue (```ED — label 2```), and necrotic tumor core (```NCR — label 1```). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351). These subregions can be clustered into three more segmentation-friendly regions which are used to evaluate the segmentation performance, including enhanced tumor (```ET```), tumor core (```TC```) (joining ```ET``` and ```NCR```), and whole tumor (```WT```) (joining ```ED``` to ```TC```).
 
-The dataset contains ```1,251``` patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains ```833```, validation and test sets contains ```209``` patient records each for model evaluation. [1]
+The dataset contains ```1,251``` patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains ```833```, validation and test sets contains ```209``` patient records each for model evaluation. [9]
 
 ```
 └── dataset
