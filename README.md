@@ -62,7 +62,7 @@ The dataset contains ```1,251``` patient cases labeled by expert radiologists. H
 image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 
 ### Installation
-
+Anconda environment recommended.
 ```
 git clone https://github.com/faizan1234567/Brain-Tumors-Segmentation
 cd Brain-Tumors-Segmentation
