@@ -11,7 +11,7 @@
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS_2023_running_instructions.ipynb)
 [![Open in Kaggle](https://img.shields.io/badge/Open%20in-Kaggle-blue.svg)](https://www.kaggle.com/kernels/welcome/)
 [![Open in Gradient](https://assets.paperspace.io/img/gradient-badge.svg)](https://console.paperspace.com/github/faizan1234567/Brats-20-Tumors-segmentation/blob/main/notebooks/BraTS_2023_running_instructions.ipynb)
-## Brain Tumors Segmentation on BraTS23 Dataset
+## Brain Tumors Segmentation
 Brain tumors are among the deadliest diseases worldwide, with gliomas being particularly prevalent and challenging to diagnose. Traditionally, physicians and radiologists rely on MRI and CT scans to identify and assess these tumors. However, this diagnostic process is not only time-consuming but also susceptible to human error, which can delay crucial treatment decisions.
 
 To enhance diagnostic accuracy and efficiency, deep learning techniques are increasingly being integrated into medical imaging. Over the years, deep learning has demonstrated exceptional performance in analyzing complex medical images, providing reliable support to healthcare professionals. By leveraging large datasets, deep learning models can be trained to recognize patterns and anomalies in brain scans with reasonable accuracy, facilitating early detection and treatment of brain tumors.
