@@ -22,7 +22,7 @@ This repository utilizes the ```BraTS 2021``` and ```BraTS 2023``` datasets to d
 <img src="https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/gif.gif" alt="Alt Text" width="850"/>
 
 
-### The Dataset 
+### The BraTS Brain Tumors Dataset 
 All [BraTS23](http://braintumorsegmentation.org/) mpMRI scans are available as [NIfTI](https://radiopaedia.org/articles/nifti-file-format) files and include ```T2 Fluid Attenuated Inversion Recovery (FLAIR)```, ```native (T1)```, ```T2-weighted (T2)```, and post-contrast ```T1-weighted (T1Gd)``` images. These scans were acquired using different clinical protocols and various scanners from multiple institutions.
 
 Annotations consist of GD-enhancing tumor (```ET — label 3```), peritumoral edematous/invaded tissue (```ED — label 2```), and necrotic tumor core (```NCR — label 1```). More details are available [here](https://www.synapse.org/#!Synapse:syn51156910/wiki/622351). These subregions can be clustered into three more segmentation-friendly regions which are used to evaluate the segmentation performance, including enhanced tumor (```ET```), tumor core (```TC```) (joining ```ET``` and ```NCR```), and whole tumor (```WT```) (joining ```ED``` to ```TC```).
