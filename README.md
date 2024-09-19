@@ -61,7 +61,7 @@ The dataset contains ```1,251``` patient cases labeled by expert radiologists. H
 ![alt text](https://github.com/faizan1234567/Brats-20-Tumors-segmentation/blob/main/media/fig_brats21.png)
 image from  [Baid et al.](https://arxiv.org/pdf/2107.02314v1.pdf)
 
-### Installation
+### Installation Guide 
 Anconda environment recommended.
 ```
 git clone https://github.com/faizan1234567/Brain-Tumors-Segmentation
