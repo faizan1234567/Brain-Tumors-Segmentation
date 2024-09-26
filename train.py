@@ -471,7 +471,7 @@ def main(cfg: DictConfig):
                               channels= (8, 16, 32, 64, 128), 
                               strides = (2, 2, 2, 2),
                                            ).to(device)
-    # ResUNet++
+    # ResUNetpp
     elif cfg.model.architecture == "resunet_pp":
         model = ResUnetPlusPlus(in_channels=in_channels,
                                 out_channels=num_classes).to(device)
