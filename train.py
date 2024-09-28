@@ -522,7 +522,7 @@ def main(cfg: DictConfig):
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
 
-    # Sliding window inference on evaluation set
+    # Sliding window inference on evaluation dataset
     model_inferer = partial(
                         sliding_window_inference,
                         roi_size=[roi] * 3, 
