@@ -28,3 +28,4 @@ logger.log
 # Runs
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
+research/models/custom_model/
