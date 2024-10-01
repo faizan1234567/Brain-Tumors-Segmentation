@@ -28,4 +28,5 @@ logger.log
 # Runs
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
+# our custom architecture
 research/models/custom_model/
