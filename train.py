@@ -495,7 +495,7 @@ def main(cfg: DictConfig):
                 spatial_dims=spatial_size,
                 use_checkpoint=False,
                 use_v2=False).to(device)
-    # UXNet
+    # UXNet model
     elif cfg.model.architecture == "ux_net":
         model = UXNET(in_chans= in_channels, 
                       out_chans= num_classes,
