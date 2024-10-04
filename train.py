@@ -463,7 +463,7 @@ def main(cfg: DictConfig):
                      dropout_dim=1,
                      bias= False
                         ).to(device)
-    # Attention UNet
+    # AttentionUNet
     elif cfg.model.architecture == "attention_unet":
         model = AttentionUnet(spatial_dims=spatial_size, 
                               in_channels=in_channels, 
