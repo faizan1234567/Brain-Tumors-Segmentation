@@ -6,7 +6,7 @@ on the BraTS dataset
 
 Author: Muhammad Faizan
 
-All right reserved
+All right reserved.
 =========================================================
 """
 import os
