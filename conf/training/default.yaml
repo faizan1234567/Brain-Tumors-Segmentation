@@ -5,14 +5,14 @@ learning_rate: 0.0001
 max_epochs: 300
 sw_batch_size: 2
 val_every: 1
-weight_decay: 0.00003
+weight_decay: 0.00001
 solver_name: Adam
 pretrained: False
 resume: False
-exp_name: SegResNet_runs
+exp_name: SegConvNext-runs
 seed: 123
 colab: False
 irl: True
 sines: False
-my_pc: True
+my_pc: False
 new_max_epochs: None

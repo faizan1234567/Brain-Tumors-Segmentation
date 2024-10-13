@@ -41,6 +41,7 @@ from research.models.ResUNetpp.model import ResUnetPlusPlus
 from research.models.UNet.model import UNet3D
 from research.models.UX_Net.network_backbone import UXNET
 from research.models.nnformer.nnFormer_tumor import nnFormer
+from research.models.SegConvNeXt.segconvnext import SegConvNeXt
 
 from functools import partial
 from utils.augment import DataAugmenter
@@ -517,6 +518,12 @@ def main(cfg: DictConfig):
                          conv_op=nn.Conv3d,
                          patch_size= [4,4,4], 
                          window_size=[4,4,8,4]).to(device)
+    # SegConvNet
+    elif cfg.model.architecture == "seg_convnext":
+        model = SegConvNeXt(spatial_dims=3, 
+                            in_channels=in_channels, 
+                            init_filters=32, 
+                            out_channels=num_classes).to(device)
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
@@ -571,8 +578,8 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.laptop_pc
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
-    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(160, 192, 128))
+    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(160, 192, 128))
 
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
                                                shuffle=True, num_workers=num_workers, 

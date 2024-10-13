@@ -6,19 +6,27 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
+import os
+from pathlib import Path
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[1]  
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  # add ROOT to PATH
+ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relativ
+
 
 from monai.networks.blocks.segresnet_block import ResBlock, get_conv_layer, get_upsample_layer
 from monai.networks.layers.factories import Dropout
 from monai.networks.layers.utils import get_act_layer, get_norm_layer
 from monai.utils import UpsampleMode
-from utils import conv_layer
-from building_blocks import ConvNextBlock3D
+from SegConvNeXt.utils import conv_layer
+from SegConvNeXt.building_blocks import ConvNextBlock3D
 
-class SegResNetv1(nn.Module):
+class SegConvNeXt(nn.Module):
     """
-    SegResNet based on `3D MRI brain tumor segmentation using autoencoder regularization
-    <https://arxiv.org/pdf/1810.11654.pdf>`_.
-    The module does not include the variational autoencoder (VAE).
+    ConvNext powered variant an encoder and decoder UNet like architecture.
     The model supports 2D or 3D inputs.
 
     Args:
