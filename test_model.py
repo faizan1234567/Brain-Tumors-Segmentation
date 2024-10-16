@@ -10,6 +10,6 @@ input = torch.rand(1, 4, 128, 128, 128).cpu()
 model = SegConvNeXtv1(spatial_dims=3, init_filters=32, in_channels=4, out_channels=3
                   ).cpu()
 
-# output
+# output shape
 out = model(input)
 print(out.shape)
