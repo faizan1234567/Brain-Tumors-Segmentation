@@ -21,6 +21,6 @@ model = model = SwinUNETR(
                 spatial_dims=3,
                 use_checkpoint=False,
                 use_v2=False).cpu()
-# output shape
+# output
 out = model(input)
 print(out.shape)
