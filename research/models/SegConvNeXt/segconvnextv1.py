@@ -16,7 +16,6 @@ from monai.utils import UpsampleMode
 from SegConvNeXt.building_blocks import ConvNextBlock3D
 from SegConvNeXt.utils import conv_layer 
 
-
 class SegConvNeXtv1(nn.Module):
     """
     SegConvNeXt based on ConvNext module, orginally taking advantage of SegResNet
@@ -61,6 +60,7 @@ class SegConvNeXtv1(nn.Module):
         blocks_down: tuple = (1, 2, 2, 4),
         blocks_up: tuple = (1, 1, 1),
         upsample_mode: UpsampleMode | str = UpsampleMode.NONTRAINABLE,
+        use_checkpoint = False,
     ):
         super().__init__()
 
@@ -73,6 +73,7 @@ class SegConvNeXtv1(nn.Module):
         self.blocks_down = blocks_down
         self.blocks_up = blocks_up
         self.dropout_prob = dropout_prob
+        self.use_checkpoint = use_checkpoint
         self.act = act  # input options
         self.act_mod = get_act_layer(act)
         if norm_name:
@@ -101,7 +102,7 @@ class SegConvNeXtv1(nn.Module):
                 else nn.Identity()
             )
             down_layer = nn.Sequential(
-                pre_conv, *[ConvNextBlock3D(dim=layer_in_channels, drop_path=0.05) for _ in range(item)]
+                pre_conv, *[ConvNextBlock3D(dim=layer_in_channels, drop_path=0.05, use_checkpoint=self.use_checkpoint) for _ in range(item)]
             )
             down_layers.append(down_layer)
         return down_layers
@@ -121,7 +122,7 @@ class SegConvNeXtv1(nn.Module):
             up_layers.append(
                 nn.Sequential(
                     *[
-                        ConvNextBlock3D(sample_in_channels //2, drop_path= 0.05)
+                        ConvNextBlock3D(sample_in_channels //2, drop_path= 0.05, use_checkpoint=self.use_checkpoint)
                         for _ in range(blocks_up[i])
                     ]
                 )

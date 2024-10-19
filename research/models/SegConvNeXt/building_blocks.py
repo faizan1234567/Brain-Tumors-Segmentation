@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import Union, Tuple
 from timm.models.layers import trunc_normal_, DropPath
+from torch.utils.checkpoint import checkpoint
 
 
 class LayerNorm(nn.Module):
@@ -33,7 +34,7 @@ class LayerNorm(nn.Module):
 
 class ConvNextBlock2D(nn.Module):
     
-    r""" ConvNeXt Block. There are two equivalent implementations:
+    r""" ConvNeXt Block. There are two equivalpermuteent implementations:
     (1) DwConv -> LayerNorm (channels_first) -> 1x1 Conv -> GELU -> 1x1 Conv; all in (N, C, H, W)
     (2) DwConv -> Permute to (N, H, W, C); LayerNorm (channels_last) -> Linear -> GELU -> Linear; Permute back
     We use (2) as we find it slightly faster in PyTorch
@@ -82,28 +83,38 @@ class ConvNextBlock3D(nn.Module):
         drop_path (float): Stochastic depth rate. Default: 0.0
         layer_scale_init_value (float): Init value for Layer Scale. Default: 1e-6.
     """
-    def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6):
+    def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6, use_checkpoint = False):
         super().__init__()
         self.dwconv = nn.Conv3d(dim, dim, kernel_size=7, padding=3, groups=dim) # depthwise conv
         self.norm = LayerNorm(dim, eps=1e-6)
         self.pwconv1 = nn.Linear(dim, 4 * dim) # pointwise/1x1 convs, implemented with linear layers
         self.act = nn.GELU()
+        self.use_checkpoint = use_checkpoint
         self.pwconv2 = nn.Linear(4 * dim, dim)
         self.gamma = nn.Parameter(layer_scale_init_value * torch.ones((dim)), 
                                     requires_grad=True) if layer_scale_init_value > 0 else None
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
 
-    def forward(self, x):
+    def custom_forward(self, x):
+        """Custom forward function for gradient checkpointing."""
         input = x
         x = self.dwconv(x)
-        x = x.permute(0, 2, 3, 4, 1) # (N, C, H, W, D) -> (N, H, W, D, C)
+        x = x.permute(0, 2, 3, 4, 1)  # (N, C, H, W, D) -> (N, H, W, D, C)
         x = self.norm(x)
         x = self.pwconv1(x)
         x = self.act(x)
         x = self.pwconv2(x)
         if self.gamma is not None:
             x = self.gamma * x
-        x = x.permute(0, 4, 1, 2, 3) # (N, H, W, D, C) -> (N, C, H, W, D)
+        x = x.permute(0, 4, 1, 2, 3)  # (N, H, W, D, C) -> (N, C, H, W, D)
 
         x = input + self.drop_path(x)
         return x
+
+    def forward(self, x):
+        # Use checkpointing for the custom forward function
+        if self.use_checkpoint:
+            return checkpoint.checkpoint(self.custom_forward, x)
+        else:
+            return self.custom_forward(x)
+        
