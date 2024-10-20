@@ -29,6 +29,7 @@ logger.log
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
 # our custom architecture
-research/models/custom_model/
+
+
 research/models/SegConvNeXt/
 research/models/SegDConvNet/
