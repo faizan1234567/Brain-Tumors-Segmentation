@@ -440,7 +440,7 @@ def main(cfg: DictConfig):
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
 
-    # Select Network architecture for training
+    # Model architectures
 
     # SegResNet
     if cfg.model.architecture == "segres_net":
