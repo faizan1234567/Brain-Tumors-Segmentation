@@ -436,7 +436,7 @@ def main(cfg: DictConfig):
     in_channels = 4
     spatial_size = 3
 
-    # Post processing 
+    # Post processing funcs
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
 
