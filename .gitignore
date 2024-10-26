@@ -30,7 +30,7 @@ AttentionUnet-runs/
 ResUnetPlusPlus-runs/
 
 
-# our custom architecture
+# our custom architectures
 research/models/SegConvNeXt/
 research/models/SegDConvNet/
 
