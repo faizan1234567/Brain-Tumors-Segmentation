@@ -525,7 +525,7 @@ def main(cfg: DictConfig):
                          out_channels=num_classes, 
                          dropout_prob=0.2, 
                          blocks_down=(1, 2, 2, 4), 
-                         blocks_up=(1, 1, 1)).to(device),
+                         blocks_up=(1, 1, 1))[0].to(device),
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
