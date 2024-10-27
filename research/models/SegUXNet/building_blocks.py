@@ -103,7 +103,7 @@ class ux_block(nn.Module):
     def forward(self, x):
         # Use checkpointing for the custom forward function
         if self.enable_gc:
-            print("training with graident checkpointing")
+            # print("training with graident checkpointing")
             return checkpoint(self.custom_forward, x)
         else:
             return self.custom_forward(x)
