@@ -33,6 +33,7 @@ if str(ROOT) not in sys.path:
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
 from SegUXNet.building_blocks import SegUXPP
+__all__ = ["SegUXNet"]
 
 class SegUXNet(nn.Module):
     """
