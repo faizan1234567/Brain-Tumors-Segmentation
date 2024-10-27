@@ -79,6 +79,7 @@ class SegUXNet(nn.Module):
         use_conv_final: bool = True,
         blocks_down: tuple = (1, 2, 2, 4),
         blocks_up: tuple = (1, 1, 1),
+        enable_gc: bool = True,
         upsample_mode: UpsampleMode | str = UpsampleMode.NONTRAINABLE,
     ):
         super().__init__()
@@ -93,6 +94,7 @@ class SegUXNet(nn.Module):
         self.blocks_up = blocks_up
         self.dropout_prob = dropout_prob
         self.act = act  # input options
+        self.enable_gc = enable_gc
         self.act_mod = get_act_layer(act)
         if norm_name:
             if norm_name.lower() != "group":
@@ -120,7 +122,7 @@ class SegUXNet(nn.Module):
                 else nn.Identity()
             )
             down_layer = nn.Sequential(
-                pre_conv, *[SegUXPP(in_channels=layer_in_channels, norm=norm, act=self.act) for _ in range(item)]
+                pre_conv, *[SegUXPP(in_channels=layer_in_channels, norm=norm, act=self.act, enable_gc=True) for _ in range(item)]
             )
             down_layers.append(down_layer)
         return down_layers
@@ -140,7 +142,7 @@ class SegUXNet(nn.Module):
             up_layers.append(
                 nn.Sequential(
                     *[
-                        SegUXPP(in_channels=sample_in_channels//2, norm=norm, act=self.act)
+                        SegUXPP(in_channels=sample_in_channels//2, norm=norm, act=self.act, enable_gc = True)
                         for _ in range(blocks_up[i])
                     ]
                 )

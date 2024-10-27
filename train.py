@@ -525,7 +525,8 @@ def main(cfg: DictConfig):
                          out_channels=num_classes, 
                          dropout_prob=0.2, 
                          blocks_down=(1, 2, 2, 4), 
-                         blocks_up=(1, 1, 1)).to(device)
+                         blocks_up=(1, 1, 1), 
+                         enable_gc=True).to(device)
         print(model)
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))

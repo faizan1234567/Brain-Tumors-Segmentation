@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from timm.models.layers import trunc_normal_, DropPath
 from functools import partial
 from monai.networks.blocks.segresnet_block import ResBlock
+from torch.utils.checkpoint import checkpoint
 
 class to_channels_first(nn.Module):
 
@@ -67,20 +68,21 @@ class ux_block(nn.Module):
         layer_scale_init_value (float): Init value for Layer Scale. Default: 1e-6.
     """
 
-    def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6):
+    def __init__(self, dim, drop_path=0., layer_scale_init_value=1e-6, enable_gc=False):
         super().__init__()
         self.dwconv = nn.Conv3d(dim, dim, kernel_size=7, padding=3, groups=dim)
         self.norm = LayerNorm(dim, eps=1e-6)
         # self.pwconv1 = nn.Linear(dim, 4 * dim)
         self.pwconv1 = nn.Conv3d(dim, 4 * dim, kernel_size=1, groups=dim)
         self.act = nn.GELU()
+        self.enable_gc = enable_gc
         # self.pwconv2 = nn.Linear(4 * dim, dim)
         self.pwconv2 = nn.Conv3d(4 * dim, dim, kernel_size=1, groups=dim)
         self.gamma = nn.Parameter(layer_scale_init_value * torch.ones((dim)),
                                   requires_grad=True) if layer_scale_init_value > 0 else None
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
 
-    def forward(self, x):
+    def custom_forward(self, x):
         input = x
         x = self.dwconv(x)
         x = x.permute(0, 2, 3, 4, 1) # (N, C, H, W, D) -> (N, H, W, D, C)
@@ -96,6 +98,14 @@ class ux_block(nn.Module):
         x = x.permute(0, 4, 1, 2, 3)
         x = input + self.drop_path(x)
         return x
+    
+    def forward(self, x):
+        # Use checkpointing for the custom forward function
+        if self.enable_gc:
+            print("training with graident checkpointing")
+            return checkpoint.checkpoint(self.custom_forward, x)
+        else:
+            return self.custom_forward(x)
 
 
 class uxnet_conv(nn.Module):
@@ -174,15 +184,16 @@ class uxnet_conv(nn.Module):
 class SegUXPP(nn.Module):
     """SegUXPP
     A block combining UX and ResBlock"""
-    def __init__(self, in_channels, drop_path = 0., norm = None, res_kernel_size=3, act=None):
+    def __init__(self, in_channels, drop_path = 0., norm = None, res_kernel_size=3, act=None, enable_gc=False):
         super().__init__()
         self.in_channels = in_channels
         self.norm = norm
         self.drop_path = drop_path
         self.kernel_size = res_kernel_size
         self.act = act
+        self.enable_gc = enable_gc
 
-        self.ux_block = ux_block(dim= self.in_channels, drop_path= self.drop_path)
+        self.ux_block = ux_block(dim= self.in_channels, drop_path= self.drop_path, enable_gc = self.enable_gc)
         self.res_block = ResBlock(spatial_dims=3, in_channels=self.in_channels, 
                                   norm=self.norm, kernel_size = self.kernel_size, 
                                   act=self.act)
@@ -194,6 +205,7 @@ class SegUXPP(nn.Module):
         ux plus plus block
         """
         return self.model(x)
+    
 
 
 
