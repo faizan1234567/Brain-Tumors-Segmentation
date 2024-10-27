@@ -8,6 +8,7 @@ import torch.nn.functional as F
 from timm.models.layers import trunc_normal_, DropPath
 from functools import partial
 from monai.networks.blocks.segresnet_block import ResBlock
+
 from torch.utils.checkpoint import checkpoint
 
 class to_channels_first(nn.Module):
@@ -103,7 +104,7 @@ class ux_block(nn.Module):
         # Use checkpointing for the custom forward function
         if self.enable_gc:
             print("training with graident checkpointing")
-            return checkpoint.checkpoint(self.custom_forward, x)
+            return checkpoint(self.custom_forward, x)
         else:
             return self.custom_forward(x)
 
