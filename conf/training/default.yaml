@@ -9,7 +9,7 @@ weight_decay: 0.00001
 solver_name: Adam
 pretrained: False
 resume: False
-exp_name: SegConvNext-runs
+exp_name: SegUXNet-runs
 seed: 123
 colab: False
 irl: True
