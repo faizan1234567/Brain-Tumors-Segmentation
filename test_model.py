@@ -11,9 +11,7 @@ input = torch.rand(1, 4, 128, 128, 128).to(device)
 #                   ).cpu()
 
 
-# ux_blk = ux_block(dim=4, drop_path=0.1)
 
-# res_blk = ResBlock(spatial_dims=3, in_channels=4, kernel_size=3)
 model = SegUXNet(spatial_dims=3, init_filters=32, 
                  in_channels=4, out_channels=3, dropout_prob=0.2, 
                  )
