@@ -12,6 +12,6 @@ from monai.networks.blocks.segresnet_block import ResBlock
 # # )
 # model = SegUXNet(spatial_dims=3, init_filters=32, 
 #                  in_channels=4, out_channels=3, dropout_prob=0.2, 
-                 )
+                 
 # out = model(input)
 # print(out.shape)
