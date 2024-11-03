@@ -33,10 +33,10 @@ from monai.transforms import (
 )
 
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, BasicUNetPlusPlus, AttentionUnet, DynUNet, UNETR
-from research.models.ResUNetpp.model import ResUnetPlusPlus
-from research.models.UNet.model import UNet3D
-from research.models.UX_Net.network_backbone import UXNET
-from research.models.nnformer.nnFormer_tumor import nnFormer
+from networks.models.ResUNetpp.model import ResUnetPlusPlus
+from networks.models.UNet.model import UNet3D
+from networks.models.UX_Net.network_backbone import UXNET
+from networks.models.nnformer.nnFormer_tumor import nnFormer
 
 from functools import partial
 

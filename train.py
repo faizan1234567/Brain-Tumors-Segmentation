@@ -29,7 +29,7 @@ from torch.backends import cudnn
 
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
-from research.models.ResUNetpp.model import ResUnetPlusPlus
+from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from monai.losses import DiceLoss
 from monai.inferers import sliding_window_inference
 from monai.transforms import (
@@ -37,13 +37,15 @@ from monai.transforms import (
     Activations,
 )
 from monai.networks.nets import SwinUNETR, SegResNet, VNet, AttentionUnet, UNETR
-from research.models.ResUNetpp.model import ResUnetPlusPlus
-from research.models.UNet.model import UNet3D
-from research.models.UX_Net.network_backbone import UXNET
-from research.models.nnformer.nnFormer_tumor import nnFormer
-from research.models.SegConvNeXt.segconvnext import SegConvNeXt
-from research.models.SegUXNet.model import SegUXNet
-
+from networks.models.ResUNetpp.model import ResUnetPlusPlus
+from networks.models.UNet.model import UNet3D
+from networks.models.UX_Net.network_backbone import UXNET
+from networks.models.nnformer.nnFormer_tumor import nnFormer
+from networks.models.SegConvNeXt.segconvnext import SegConvNeXt
+try:
+    from thesis.models.SegUXNet.model import SegUXNet
+except ModuleNotFoundError:
+    pass
 from functools import partial
 from utils.augment import DataAugmenter
 from utils.schedulers import SegResNetScheduler, PolyDecayScheduler

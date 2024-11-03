@@ -15,8 +15,8 @@ from monai.networks.blocks.unetr_block import UnetrBasicBlock, UnetrUpBlock
 from typing import Union
 import torch.nn.functional as F
 # from utils.logger import Logger as Log
-from research.models.UX_Net.utils.module_helper import ModuleHelper
-from research.models.UX_Net.uxnet_encoder import uxnet_conv
+from networks.models.UX_Net.utils.module_helper import ModuleHelper
+from networks.models.UX_Net.uxnet_encoder import uxnet_conv
 
 # projection head 
 class ProjectionHead(nn.Module):

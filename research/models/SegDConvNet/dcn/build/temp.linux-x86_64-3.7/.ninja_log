@@ -1,4 +1,0 @@
-# ninja log v5
-0	17238	1728110397027608535	/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/build/temp.linux-x86_64-3.7/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/src/cpu/deform_cpu.o	a0f3872b0fc444e5
-30	44017	1728110423631680469	/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/build/temp.linux-x86_64-3.7/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/src/cuda/deform_conv_cuda.o	26a736e0e26d456f
-54	69215	1728110448975751080	/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/build/temp.linux-x86_64-3.7/drive/faizanai.rrl/faizan/Brain-Tumors-Segmentation/research/models/SegResNet/dcn/src/vision.o	f29f5c0e37e42ed8

@@ -17,6 +17,7 @@ SegResNet-runs/
 SwinUNETR-runs/
 logger/
 logger.log
+test_model.py 
 
 # Avoid pushing some common extensions mentioned here...
 *.pth
@@ -28,9 +29,5 @@ logger.log
 # Runs
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
-
-
-# our custom model architectures
-research/models/SegConvNeXt/
-research/models/SegDConvNet/
-
+research/
+thesis/
