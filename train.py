@@ -529,7 +529,7 @@ def main(cfg: DictConfig):
                          blocks_down=(1, 2, 2, 4), 
                          blocks_up=(1, 1, 1), 
                          enable_gc=True).to(device)
-        print(model)
+        
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
@@ -611,6 +611,6 @@ def main(cfg: DictConfig):
         max_epochs=max_epochs,
         val_every=val_every)
 
-
+# run everything
 if __name__ == "__main__":
     main()
