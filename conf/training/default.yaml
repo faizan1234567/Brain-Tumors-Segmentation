@@ -12,7 +12,7 @@ resume: False
 exp_name: SegUXNet-runs
 seed: 123
 colab: False
-irl: True
+irl: False
 sines: False
-my_pc: False
+my_pc: True
 new_max_epochs: None
