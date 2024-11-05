@@ -51,7 +51,7 @@ def show_result(cfg: DictConfig, args:argparse.Namespace):
                                             shuffle=False, num_workers=8, 
                                             pin_memory=True) 
     
-    # Get a batch
+    # batch of data
     batch = next(iter(data_loader))
     image, label = batch["image"], batch['label']
     logger.info('visualizing an image with label')
