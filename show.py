@@ -44,7 +44,7 @@ def show_result(cfg: DictConfig, args:argparse.Namespace):
     3 - visualize a scan with it's label in a subplot format
     """
    
-    # Load dataset
+    # Load data
     dataset = get_datasets(cfg.dataset.dataset_folder, "test")
     data_loader = torch.utils.data.DataLoader(dataset, 
                                             batch_size=1, 
