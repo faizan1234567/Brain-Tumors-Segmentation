@@ -30,7 +30,7 @@ from torch.backends import cudnn
 from monai.metrics import DiceMetric
 from monai.utils.enums import MetricReduction
 from networks.models.ResUNetpp.model import ResUnetPlusPlus
-from monai.losses import DiceLoss
+from monai.losses import DiceLoss, DiceCELoss
 from monai.inferers import sliding_window_inference
 from monai.transforms import (
     AsDiscrete,
@@ -545,8 +545,11 @@ def main(cfg: DictConfig):
     # Validation frequency 
     val_every = cfg.training.val_every
 
-    # Loss function (dice loss for semantic segmentation)
-    loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
+    # Loss function
+    if cfg.training.loss_type == "dice":
+        loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
+    elif cfg.training.loss_type == "dice_ce":
+        loss_func = DiceCELoss(to_onehot_y=False, sigmoid=True)
 
     # Dice metric 
     acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
