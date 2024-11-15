@@ -35,7 +35,6 @@ thesis/
 # TODO list
 todo.txt
 # testing script custom architectures
-# development of custom model in prog..
 test_custom_models.py
 # experimental loss testing
 test_losses.py
