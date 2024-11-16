@@ -41,7 +41,6 @@ from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
-from networks.models.SegConvNeXt.segconvnext import SegConvNeXt
 from thesis.models.v2.model import SegSCNet
 try:
     from thesis.models.SegUXNet.model import SegUXNet
