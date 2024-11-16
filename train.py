@@ -533,7 +533,7 @@ def main(cfg: DictConfig):
     elif cfg.model.architecture == "seg_scnet":
         model = SegSCNet(in_channels=in_channels, 
                          out_channels=num_classes, 
-                         feature_size=48, 
+                         feature_size=24, 
                          hidden_size=384, 
                          num_heads=4, 
                          dims=[48, 96, 192, 384], 
