@@ -1,3 +1,3 @@
 roi: 128
 infer_overlap: 0.6
-architecture: seg_uxnet
+architecture: seg_scnet

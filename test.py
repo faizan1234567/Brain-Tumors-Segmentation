@@ -37,6 +37,7 @@ from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
+from thesis.models.v2.model import SegSCNet
 
 from functools import partial
 
@@ -223,6 +224,17 @@ def main(cfg: DictConfig):
                          conv_op=nn.Conv3d,
                          patch_size= [4,4,4], 
                          window_size=[4,4,8,4]).to(device)
+    
+    # SegSCNet spatail channel distinct feature learning net
+    elif cfg.model.architecture == "seg_scnet":
+        model = SegSCNet(in_channels=in_channels, 
+                         out_channels=num_classes, 
+                         feature_size=48, 
+                         hidden_size=384, 
+                         num_heads=4, 
+                         dims=[48, 96, 192, 384], 
+                         depths=[3, 3, 3, 3], 
+                         do_ds=False).to(device)
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
