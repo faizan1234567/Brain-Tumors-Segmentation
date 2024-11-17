@@ -627,6 +627,5 @@ def main(cfg: DictConfig):
         max_epochs=max_epochs,
         val_every=val_every)
 
-# run everything
 if __name__ == "__main__":
     main()
