@@ -38,3 +38,5 @@ todo.txt
 test_custom_models.py
 # experimental loss testing
 test_losses.py
+# data visualization notebook
+data_visualization_notebook.ipynb
