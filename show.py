@@ -78,7 +78,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     show_result(args)
     print('Done!!!')
-    
-
-
-

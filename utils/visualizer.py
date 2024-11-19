@@ -16,19 +16,9 @@ import sys
 from IPython.display import Image
 import imageio
 
-try:
-    from DataLoader.dataset import BraTSDataset, get_dataloader
-    from config.configs import Config
-except ModuleNotFoundError:
-    FILE = Path(__file__).resolve()
-    ROOT = FILE.parents[0].parents[0]  #project root directory
-    if str(ROOT) not in sys.path:
-        sys.path.append(str(ROOT))  # add ROOT to PATH
-    # ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
 
-    from DataLoader.dataset import BraTSDataset, get_dataloader
-    from config.configs import Config
-
+# from DataLoader.dataset import BraTSDataset, get_dataloader
+from brats import get_brats_folder, BraTS
 
 def visualize_abnormal_area(image, label):
     """

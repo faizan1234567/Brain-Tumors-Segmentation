@@ -55,9 +55,9 @@ class BraTS(Dataset):
             patient_image[i] = minmax(patient_image[i])
         
         patient_label = patient_label[:, zmin:zmax, ymin:ymax, xmin:xmax]
-        if self.mode == "train" or self.mode == "train_val" :
+        if self.mode == "train" or self.mode == "train_val" or self.mode == "test":
             patient_image, patient_label, pad_list, crop_list = pad_or_crop_image(patient_image, patient_label, target_size=self.target_size)
-        elif self.mode == "test":
+        elif self.mode == "test_pad":
             d, h, w = patient_image.shape[1:]
             pad_d = (128-d) if 128-d > 0 else 0
             pad_h = (128-h) if 128-h > 0 else 0
