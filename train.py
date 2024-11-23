@@ -455,7 +455,7 @@ def main(cfg: DictConfig):
                           dropout_prob=0.2, 
                           blocks_down=(1, 2, 2, 4), 
                           blocks_up=(1, 1, 1)).to(device)
-    # UNet
+    # UNET
     elif cfg.model.architecture == "unet3d":
         model = UNet3D(in_channels=in_channels, 
                        num_classes=num_classes).to(device)
