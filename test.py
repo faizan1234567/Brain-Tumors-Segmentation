@@ -41,6 +41,7 @@ from networks.models.nnformer.nnFormer_tumor import nnFormer
 try:
     from thesis.models.SegUXNet.model import SegUXNet
     from thesis.models.v2.model import SegSCNet
+    from thesis.models.v3.model import SCFENet
 except ModuleNotFoundError:
     print('model not available, please train with other models')
     sys.exit(1)
@@ -241,6 +242,23 @@ def main(cfg: DictConfig):
                          dims=[48, 96, 192, 384], 
                          depths=[3, 3, 3, 3], 
                          do_ds=False).to(device)
+    
+    elif cfg.model.architecture == "scfe_net":
+        model = SCFENet(spatial_dims=spatial_size, 
+                    init_filters=32, 
+                    in_channels=in_channels, 
+                    out_channels=num_classes, 
+                    blocks_down=(1, 2, 2, 4), 
+                    blocks_up= (1, 1, 1), 
+                    gradient_checkpointing=True, 
+                    num_heads=4, 
+                    dropout_prob=0.2,
+                    attn_dropout_rate=0.1, 
+                    do_ds=False,
+                    positional_embedding="perceptron", 
+                    drop_path=True, 
+                    qkv_bias=False,
+                    ).to(device)
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))

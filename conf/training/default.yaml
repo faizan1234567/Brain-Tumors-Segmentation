@@ -5,12 +5,12 @@ learning_rate: 0.0001
 max_epochs: 300
 sw_batch_size: 2
 val_every: 1
-weight_decay: 0.00003
+weight_decay: 0.00001
 solver_name: Adam
-loss_type: dice_ce
+loss_type: dice
 pretrained: False
 resume: False
-exp_name: SegSCnet-runs
+exp_name: scfe_net_runs
 seed: 123
 colab: False
 irl: True
