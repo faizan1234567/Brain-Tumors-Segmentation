@@ -232,7 +232,7 @@ def main(cfg: DictConfig):
                          patch_size= [4,4,4], 
                          window_size=[4,4,8,4]).to(device)
     
-    # SegSCNet spatail channel distinct feature learning net
+    # SegSCNet spatail channel distinct feature learning net (NOT OPENSOURCE)
     elif cfg.model.architecture == "seg_scnet":
         model = SegSCNet(in_channels=in_channels, 
                          out_channels=num_classes, 
@@ -242,7 +242,7 @@ def main(cfg: DictConfig):
                          dims=[48, 96, 192, 384], 
                          depths=[3, 3, 3, 3], 
                          do_ds=False).to(device)
-    
+    # experimental (NOT OPEN SOURCE YET)
     elif cfg.model.architecture == "scfe_net":
         model = SCFENet(spatial_dims=spatial_size, 
                     init_filters=32, 
@@ -258,11 +258,10 @@ def main(cfg: DictConfig):
                     positional_embedding="perceptron", 
                     drop_path=True, 
                     qkv_bias=False,
-                    ).to(device)
+                    ).to(device) 
 
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
- 
     
     # Hyperparameters
     batch_size = cfg.test.batch

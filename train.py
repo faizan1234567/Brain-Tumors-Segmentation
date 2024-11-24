@@ -443,7 +443,7 @@ def main(cfg: DictConfig):
     in_channels = 4
     spatial_size = 3
 
-    # Post processing funcs
+    # Post processing
     post_pred = AsDiscrete(argmax= False, threshold = 0.5)
     post_sigmoid = Activations(sigmoid= True)
 
@@ -544,7 +544,7 @@ def main(cfg: DictConfig):
                          dims=[48, 96, 192, 384], 
                          depths=[3, 3, 3, 3], 
                          do_ds=False).to(device)
-    
+    # Experimental (NOT open source yet)
     elif cfg.model.architecture == "scfe_net":
         model = SCFENet(spatial_dims=spatial_size, 
                     init_filters=32, 
@@ -561,8 +561,6 @@ def main(cfg: DictConfig):
                     drop_path=True, 
                     qkv_bias=False,
                     ).to(device)
-        
-        
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
 
@@ -577,7 +575,7 @@ def main(cfg: DictConfig):
     # Validation frequency 
     val_every = cfg.training.val_every
 
-    # Loss function
+    # Dice or Dice and Cross Entropy loss combined
     if cfg.training.loss_type == "dice":
         loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
     elif cfg.training.loss_type == "dice_ce":
@@ -607,7 +605,7 @@ def main(cfg: DictConfig):
     batch_size = cfg.training.batch_size
     num_workers = cfg.training.num_workers
     
-    # Platform specific 
+    # Set path to dataset (Customize to your case in configs)
     if cfg.training.colab:
         dataset_dir = cfg.dataset.colab
     elif cfg.training.irl:
