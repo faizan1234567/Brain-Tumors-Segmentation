@@ -41,5 +41,7 @@ test_losses.py
 # data visualization
 data_visualization_notebook.ipynb
 plot_utils.py
+# other folds
+*.zip
 thesis.zip
 thesisv1/
