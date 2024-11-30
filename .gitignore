@@ -36,7 +36,7 @@ thesis/
 todo.txt
 # testing script custom architectures
 test_custom_models.py
-# experimental loss testing
+# loss test
 test_losses.py
 data_visualization_notebook.ipynb
 plot_utils.py
