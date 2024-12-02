@@ -32,7 +32,6 @@ ResUnetPlusPlus-runs/
 research/
 thesis/
 
-# TODO list
 todo.txt
 # testing script custom architectures
 test_custom_models.py
