@@ -31,7 +31,7 @@ AttentionUnet-runs/
 ResUnetPlusPlus-runs/
 research/
 thesis/
-
+# to do list
 todo.txt
 # testing script custom architectures
 test_custom_models.py
