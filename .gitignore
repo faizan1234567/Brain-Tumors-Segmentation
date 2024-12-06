@@ -26,7 +26,7 @@ test_model.py
 *.csv 
 *.pt
 
-# Runs
+
 AttentionUnet-runs/
 ResUnetPlusPlus-runs/
 research/
