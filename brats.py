@@ -9,7 +9,7 @@ import torch
 import os
 from torch.utils.data.dataset import Dataset
 from utils.all_utils import pad_or_crop_image, minmax, load_nii, pad_image_and_label, listdir, get_brats_folder
-
+#data
 class BraTS(Dataset):
     def __init__(self, patients_dir, patient_ids, mode, target_size = (128, 128, 128)):
         super(BraTS,self).__init__()
