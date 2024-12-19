@@ -15,14 +15,14 @@ from pathlib import Path
 import sys
 
 
-def get_brats_folder(dataset_folder, mode):
+def get_brats_folder(dataset_folder, mode, version="brats2023"):
     assert mode in ["train","train_val", "test"]
     if mode == "train":
-        return os.path.join(dataset_folder, "brats2023", "train")
+        return os.path.join(dataset_folder, version, "train")
     elif mode == "train_val":
-        return os.path.join(dataset_folder, "brats2023", "val")
+        return os.path.join(dataset_folder, version, "val")
     elif mode == "test" :
-        return os.path.join(dataset_folder, "brats2023", "test")
+        return os.path.join(dataset_folder, version, "test")
 
 def mkdir(folder):
     os.makedirs(folder, exist_ok=True)

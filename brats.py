@@ -9,20 +9,29 @@ import torch
 import os
 from torch.utils.data.dataset import Dataset
 from utils.all_utils import pad_or_crop_image, minmax, load_nii, pad_image_and_label, listdir, get_brats_folder
-#data
+
 class BraTS(Dataset):
-    def __init__(self, patients_dir, patient_ids, mode, target_size = (128, 128, 128)):
+    def __init__(self, patients_dir, patient_ids, mode, target_size = (128, 128, 128), version="brats2023"):
         super(BraTS,self).__init__()
         self.patients_dir = patients_dir
         self.patients_ids = patient_ids
         self.mode = mode
         self.target_size = target_size
         self.datas = []
-        self.pattens =["-t1n","-t1c","-t2w","-t2f"]
-        if mode == "train" or mode == "train_val" or mode == "test" :
+        if version == "brats2023":
+            self.pattens =["-t1n","-t1c","-t2w","-t2f"]
+        elif version == "brats2019" or version == "brats2020":
+            self.pattens =["_t1","_t1ce","_t2","_flair"]
+        if (mode == "train" or mode == "train_val" or mode == "test") and version == "brats2023" :
             self.pattens += ["-seg"]
+        elif (mode == "train" or mode == "train_val" or mode == "test") and (version == "brats2019" or version == "brats2020"):
+            self.pattens += ["_seg"]
+
         for patient_id in patient_ids:
-            paths = [f"{patient_id}{patten}.nii.gz" for patten in self.pattens]
+            if version == "brats2023":
+                paths = [f"{patient_id}{patten}.nii.gz" for patten in self.pattens]
+            elif version == "brats2019" or version == "brats2020":
+                paths = [f"{patient_id}{patten}.nii" for patten in self.pattens]
             patient = dict(
                 id=patient_id, t1=paths[0], t1ce=paths[1],
                 t2=paths[2], flair=paths[3], seg=paths[4] if mode == "train" or mode == "train_val" or mode == "val" or mode == "test" or mode == "visualize" else None
@@ -39,6 +48,7 @@ class BraTS(Dataset):
         patient_image = torch.stack([patient_image[key] for key in patient_image])  
         if self.mode == "train" or self.mode == "train_val" or self.mode == "test":
             # ET=3, ED=2, NCR=1, and background=0
+
             et = patient_label == 3
             tc = torch.logical_or(patient_label == 1, patient_label == 3)
             wt = torch.logical_or(tc, patient_label == 2)
@@ -76,8 +86,8 @@ class BraTS(Dataset):
     def __len__(self):
         return len(self.datas)
 
-def get_datasets(dataset_folder, mode, target_size = (128, 128, 128)):
-    dataset_folder = get_brats_folder(dataset_folder, mode)
+def get_datasets(dataset_folder, mode, target_size = (128, 128, 128), version= "brats2023"):
+    dataset_folder = get_brats_folder(dataset_folder, mode, version= version)
     assert os.path.exists(dataset_folder), "Dataset Folder Does Not Exist1"
     patients_ids = [x for x in listdir(dataset_folder)]
-    return BraTS(dataset_folder, patients_ids, mode, target_size=target_size)
+    return BraTS(dataset_folder, patients_ids, mode, target_size=target_size, version=version)
