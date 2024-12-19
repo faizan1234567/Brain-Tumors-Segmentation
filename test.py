@@ -44,7 +44,7 @@ try:
     from thesis.models.v3.model import SCFENet
 except ModuleNotFoundError:
     print('model not available, please train with other models')
-    sys.exit(1)
+    # sys.exit(1)
 
 from functools import partial
 
@@ -143,7 +143,7 @@ def test(args, data_loader, model):
 def main(cfg: DictConfig):
     # Select model
 
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
     # Efficient training
     torch.backends.cudnn.benchmark = True
@@ -267,13 +267,14 @@ def main(cfg: DictConfig):
     batch_size = cfg.test.batch
     workers = cfg.test.workers
     dataset_folder = cfg.dataset.irl_pc
+    dataset_version = cfg.dataset.version
 
     # Load checkpoints
-    model.load_state_dict(torch.load(cfg.test.weights, weights_only=True))
+    model.load_state_dict(torch.load(cfg.test.weights, weights_only=True, map_location=device))
     model.eval()
 
     # Load dataset
-    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(128, 128, 128))
+    test_loader = get_datasets(dataset_folder=dataset_folder, mode="test", target_size=(128, 128, 128), version=dataset_version)
     test_loader = torch.utils.data.DataLoader(test_loader, 
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=workers, 

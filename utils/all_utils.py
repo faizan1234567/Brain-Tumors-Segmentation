@@ -40,7 +40,7 @@ def save_seg_csv(csv, args):
         columns = ['id', 'et_dice', 'tc_dice', 'wt_dice', 'et_hd', 'tc_hd', 'wt_hd', 'et_sens', 'tc_sens', 'wt_sens', 'et_spec', 'tc_spec', 'wt_spec']
         save_path = os.path.join(args.training.exp_name, "csv")
         os.makedirs(save_path, exist_ok= True)
-        csv_path = os.path.join(save_path, "test_metrics.csv")
+        csv_path = os.path.join(save_path, f"{args.model.architecture}_test_metrics.csv")
         val_metrics.to_csv(csv_path, index=False, columns=columns)
     except KeyboardInterrupt:
         print("Save CSV File Error!")
