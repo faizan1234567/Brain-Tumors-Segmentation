@@ -17,6 +17,7 @@ class BraTS(Dataset):
         self.patients_ids = patient_ids
         self.mode = mode
         self.target_size = target_size
+        self.version = version
         self.datas = []
         if version == "brats2023":
             self.pattens =["-t1n","-t1c","-t2w","-t2f"]
@@ -47,11 +48,17 @@ class BraTS(Dataset):
         patient_label = torch.tensor(load_nii(f"{self.patients_dir}/{patient_id}/{patient['seg']}").astype("int8"))
         patient_image = torch.stack([patient_image[key] for key in patient_image])  
         if self.mode == "train" or self.mode == "train_val" or self.mode == "test":
-            # ET=3, ED=2, NCR=1, and background=0
-
-            et = patient_label == 3
-            tc = torch.logical_or(patient_label == 1, patient_label == 3)
-            wt = torch.logical_or(tc, patient_label == 2)
+            ed_label = 2 # Peritumoral Edema 
+            ncr_label = 1 # NCR or NET (necrotic and non-enhancing tumor core )
+            bg_label = 0  # Background
+            if self.version == "brats2023" or self.version == "brats2024":
+                et_label = 3 #  GD-enhancing tumor
+                et = patient_label == et_label
+            elif self.version == "brats2020" or self.version == "brats2019":
+                et_label = 4 #  GD-enhancing tumor
+                et = patient_label == et_label
+            tc = torch.logical_or(patient_label == ncr_label, patient_label == et_label)
+            wt = torch.logical_or(tc, patient_label == ed_label)
             patient_label = torch.stack([et, tc, wt])
 
         # Removing black area from the edge of the MRI
