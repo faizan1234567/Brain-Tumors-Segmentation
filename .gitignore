@@ -41,3 +41,4 @@ plot_utils.py
 *.zip
 thesis.zip
 thesisv1/
+download_synapse.py
