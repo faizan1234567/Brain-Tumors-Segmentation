@@ -42,4 +42,4 @@ plot_utils.py
 thesis.zip
 thesisv1/
 download_synapse.py
-.synapseCache/
+.synapseCache/ # synapse dataset 
