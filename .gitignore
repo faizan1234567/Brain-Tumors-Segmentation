@@ -44,3 +44,4 @@ thesisv1/
 download_synapse.py
 .synapseCache/ # synapse dataset 
 BTCV/
+RawData/
