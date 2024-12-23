@@ -24,8 +24,9 @@ from torch.utils.data import DataLoader, Dataset
 import os
 import torch
 
-def get_transforms(num_samples = 4):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def get_transforms(num_samples = 4, device = None):
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_transforms = Compose(
     [
         LoadImaged(keys=["image", "label"], ensure_channel_first=True),
@@ -37,7 +38,7 @@ def get_transforms(num_samples = 4):
             b_max=1.0,
             clip=True,
         ),
-        CropForegroundd(keys=["image", "label"], source_key="image"),
+        CropForegroundd(keys=["image", "label"], source_key="image", allow_smaller=False),
         Orientationd(keys=["image", "label"], axcodes="RAS"),
         Spacingd(
             keys=["image", "label"],
@@ -86,7 +87,7 @@ def get_transforms(num_samples = 4):
         [
             LoadImaged(keys=["image", "label"], ensure_channel_first=True),
             ScaleIntensityRanged(keys=["image"], a_min=-175, a_max=250, b_min=0.0, b_max=1.0, clip=True),
-            CropForegroundd(keys=["image", "label"], source_key="image"),
+            CropForegroundd(keys=["image", "label"], source_key="image", allow_smaller=False),
             Orientationd(keys=["image", "label"], axcodes="RAS"),
             Spacingd(
                 keys=["image", "label"],
@@ -99,8 +100,9 @@ def get_transforms(num_samples = 4):
     return (train_transforms, val_transforms)
 
 
-def get_dataset(transforms=None, data_dir = "data/", split_json = "dataset_0.json"):
-    train_transforms, val_transforms = transforms
+def get_dataset(num_samples = 4, device = None, data_dir = "data/", split_json = "dataset_0.json"):
+    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    train_transforms, val_transforms = get_transforms(num_samples=num_samples, device=device)
     datasets = data_dir + split_json
     datalist = load_decathlon_datalist(datasets, True, "training")
     val_files = load_decathlon_datalist(datasets, True, "validation")
@@ -109,22 +111,23 @@ def get_dataset(transforms=None, data_dir = "data/", split_json = "dataset_0.jso
         transform=train_transforms,
         cache_num=24,
         cache_rate=1.0,
-        num_workers=8,
+        num_workers=12,
     )
-    train_loader = DataLoader(train_ds, num_workers=0, batch_size=1, shuffle=True)
-    val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_num=6, cache_rate=1.0, num_workers=4)
-    val_loader = DataLoader(val_ds, num_workers=0, batch_size=1)
+    train_loader = ThreadDataLoader(train_ds, num_workers=0, batch_size=1, shuffle=True)
+    val_ds = CacheDataset(data=val_files, transform=val_transforms, cache_num=6, cache_rate=1.0, num_workers=12)
+    val_loader = ThreadDataLoader(val_ds, num_workers=0, batch_size=1)
+    set_track_meta(False)
+
     return train_loader, val_loader
 
 if __name__ == "__main__":
-    import os
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '0'
-    os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-    transforms = get_transforms(num_samples=4)
-    train_loader, val_loader = get_dataset(transforms=transforms)
+    train_loader, val_loader = get_dataset()
     print(len(train_loader), len(val_loader))
     train_batch = next(iter(train_loader))
     val_batch = next(iter(val_loader))
+    print(type(train_batch), type(val_batch))
+    print(train_batch.keys())
+    print(train_batch.get("image").shape, train_batch.get('label').shape, train_batch.get("foreground_start_coord"))
 
 
 

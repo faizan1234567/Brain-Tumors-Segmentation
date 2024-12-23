@@ -22,6 +22,7 @@ import tqdm as tqdm
 from utils.meter import AverageMeter
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from brats import get_datasets
+from btcv_dataset import get_dataset, get_transforms
 
 from monai.data import  decollate_batch
 import torch
@@ -42,13 +43,13 @@ from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
+from btcv_utils import train
 try:
     from thesis.models.SegUXNet.model import SegUXNet
     from thesis.models.v2.model import SegSCNet
     from thesis.models.v3.model import SCFENet
 except ModuleNotFoundError:
     print('model not available, please train with other models')
-    sys.exit(1)
     
 from functools import partial
 from utils.augment import DataAugmenter
@@ -72,7 +73,17 @@ stream_handler.setFormatter(formatter)
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
-   
+class CIdentity(nn.Module):
+    """identify mapping a list of values """
+    def __init__(self):
+        super().__init__()
+        self.model = nn.Identity()
+    
+    def forward(self, x, y):
+        x = nn.Identity(x)
+        y = nn.Identity(y)
+        return (x, y)
+    
 class Solver:
     """list of optimizers for training NN"""
     def __init__(self, model: nn.Module, lr: float = 1e-4, weight_decay: float = 1e-5):
@@ -131,7 +142,7 @@ def init_random(seed):
     cudnn.deterministic = True
 
 # Train for an epoch
-def train_epoch(model, loader, optimizer, loss_func):
+def train_epoch(model, loader, optimizer, loss_func, augment = True):
     """
     train the model for epoch on MRI image and given ground truth labels
     using set of arguments
@@ -154,7 +165,7 @@ def train_epoch(model, loader, optimizer, loss_func):
     run_loss = AverageMeter()
     for batch_data in loader:
         image, label = batch_data["image"].to(device), batch_data["label"].to(device)
-        image, label = augmenter(image, label)
+        image, label = augmenter(image, label) if augment else (image, label)
         logits = model(image)
         loss = loss_func(logits, label) 
         loss.backward()
@@ -439,13 +450,26 @@ def main(cfg: DictConfig):
     torch.backends.cudnn.benchmark = True
 
     # BraTS configs
-    num_classes = 3
-    in_channels = 4
+    if cfg.dataset.type == "brats":
+        num_classes = 3
+        in_channels = 4
+        crop_size = (128, 128, 128)
+        post_pred = AsDiscrete(argmax=False, threshold=0.5)
+        post_sigmoid = Activations(sigmoid=True)
+        
+    elif cfg.dataset.type == "btcv":
+        num_classes = 14
+        in_channels = 1
+        crop_size = (96, 96, 96)
+        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+
+        max_iterations = 500
+        eval_num = 1
+        scaler = torch.cuda.amp.GradScaler()
+        post_label = AsDiscrete(to_onehot=14)
+        post_pred = AsDiscrete(argmax=True, to_onehot=14)
     spatial_size = 3
 
-    # Post processing
-    post_pred = AsDiscrete(argmax= False, threshold = 0.5)
-    post_sigmoid = Activations(sigmoid= True)
 
     # SegResNet
     if cfg.model.architecture == "segres_net":
@@ -485,13 +509,13 @@ def main(cfg: DictConfig):
     elif cfg.model.architecture == "unet_r":
        model =  UNETR(in_channels=in_channels, 
                      out_channels=num_classes, 
-                     img_size=(128,128,128), 
+                     img_size=crop_size, 
                      proj_type='conv', 
                      norm_name='instance').to(device)
     # SwinUNETR
     elif cfg.model.architecture == "swinunet_r":
         model = SwinUNETR(
-                img_size=128,
+                img_size=crop_size[0],
                 in_channels=in_channels,
                 out_channels=num_classes,
                 feature_size=48,
@@ -513,7 +537,7 @@ def main(cfg: DictConfig):
     
     # nnFormer
     elif cfg.model.architecture == "nn_former":
-        model = nnFormer(crop_size=np.array([128, 128, 128]), 
+        model = nnFormer(crop_size=np.array(crop_size), 
                          embedding_dim=96, 
                          input_channels=in_channels, 
                          num_classes=num_classes, 
@@ -544,6 +568,7 @@ def main(cfg: DictConfig):
                          dims=[48, 96, 192, 384], 
                          depths=[3, 3, 3, 3], 
                          do_ds=False).to(device)
+        
     # Experimental (NOT open source yet)
     elif cfg.model.architecture == "scfe_net":
         model = SCFENet(spatial_dims=spatial_size, 
@@ -576,15 +601,20 @@ def main(cfg: DictConfig):
     val_every = cfg.training.val_every
 
     # Dice or Dice and Cross Entropy loss combined
-    if cfg.training.loss_type == "dice":
+    if cfg.training.loss_type == "dice" and cfg.dataset.type == 'brats':
         loss_func = DiceLoss(to_onehot_y=False, sigmoid=True)
+    elif cfg.training.loss_type == "dice" and cfg.dataset.type == 'btcv':
+        loss_func =  DiceCELoss(to_onehot_y=True, softmax=True)
     elif cfg.training.loss_type == "dice_ce":
         loss_func = DiceCELoss(to_onehot_y=False, sigmoid=True)
 
     # Dice metric 
-    acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
-                                      get_not_nans=True)
-    
+    if cfg.dataset.type == 'brats':
+        acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
+                                        get_not_nans=True)
+    elif cfg.dataset.type == "btcv":
+        acc_func = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
+        
     # Optimizer
     solver = Solver(model=model, lr=cfg.training.learning_rate, 
                        weight_decay=cfg.training.weight_decay)
@@ -616,33 +646,54 @@ def main(cfg: DictConfig):
         dataset_dir = cfg.dataset.laptop_pc
 
     # Data Loading
-    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
-    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
+    if cfg.dataset.type == "brats":
+        train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
+        train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
 
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
-                                               shuffle=True, num_workers=num_workers, 
-                                               drop_last=False, pin_memory=True)
+        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
+                                                shuffle=True, num_workers=num_workers, 
+                                                drop_last=False, pin_memory=True)
+        
+        val_loader = torch.utils.data.DataLoader(train_val_dataset, 
+                                                batch_size=batch_size, 
+                                                shuffle=False, num_workers=num_workers, 
+                                                pin_memory=True)
+        # Start training
+        run(cfg, model=model,
+            loss_func= loss_func,
+            acc_func= acc_func,
+            optimizer= optimizer,
+            train_loader=train_loader,
+            val_loader=val_loader,
+            scheduler=scheduler,
+            model_inferer=model_inferer,
+            post_label = None,
+            post_sigmoid = post_sigmoid,
+            post_pred=post_pred,
+            max_epochs=max_epochs,
+            val_every=val_every)
+        
+    elif cfg.dataset.type == "btcv":
+        train_loader, val_loader = get_dataset(num_samples = 4, 
+                                               device = device, 
+                                               data_dir = "data/", 
+                                               split_json = "dataset_0.json")
+        train(model=model, 
+              loss_function= loss_func, 
+              optimizer= optimizer, 
+              scaler= scaler, 
+              train_loader=train_loader, 
+              val_loader=val_loader, 
+              max_iterations=max_iterations, 
+              eval_num=eval_num, 
+              exp_name=cfg.training.exp_name, 
+              post_label=post_label, 
+              post_pred=post_pred, 
+              dice_metric_per_class= acc_func, 
+              device= device)
+        
+
     
-    val_loader = torch.utils.data.DataLoader(train_val_dataset, 
-                                            batch_size=batch_size, 
-                                            shuffle=False, num_workers=num_workers, 
-                                            pin_memory=True)
-    print('starting training...')
-
-    # Start training
-    run(cfg, model=model,
-        loss_func= loss_func,
-        acc_func= acc_func,
-        optimizer= optimizer,
-        train_loader=train_loader,
-        val_loader=val_loader,
-        scheduler=scheduler,
-        model_inferer=model_inferer,
-        post_label = None,
-        post_sigmoid = post_sigmoid,
-        post_pred=post_pred,
-        max_epochs=max_epochs,
-        val_every=val_every)
 
 if __name__ == "__main__":
     main()

@@ -4,3 +4,4 @@ colab: "/gdrive/MyDrive/BraTS2023/"
 sines_pc: /drive/faizanai.rrl/datasets
 dataset_folder: # specify your dataset path here if any of the above does not relate to you
 version:  brats2023
+type: btcv # brats 
