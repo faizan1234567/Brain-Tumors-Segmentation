@@ -674,6 +674,7 @@ def main(cfg: DictConfig):
             val_every=val_every)
         
     elif cfg.dataset.type == "btcv":
+        # BTCV train loader
         train_loader, val_loader = get_dataset(num_samples = 4, 
                                                device = device, 
                                                data_dir = "data/", 
@@ -692,8 +693,5 @@ def main(cfg: DictConfig):
               dice_metric_per_class= acc_func, 
               device= device)
         
-
-    
-
 if __name__ == "__main__":
     main()
