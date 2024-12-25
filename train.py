@@ -463,7 +463,7 @@ def main(cfg: DictConfig):
         crop_size = (96, 96, 96)
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 
-        max_iterations = 500
+        max_iterations = 1
         eval_num = 1
         scaler = torch.cuda.amp.GradScaler()
         post_label = AsDiscrete(to_onehot=14)
