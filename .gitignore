@@ -15,6 +15,7 @@ test_scripts/
 outputs/
 SegResNet-runs/
 SwinUNETR-runs/
+research-contributions/
 logger/
 logger.log
 test_model.py 
@@ -43,5 +44,4 @@ thesis.zip
 thesisv1/
 download_synapse.py
 .synapseCache/ # synapse dataset 
-BTCV/
 RawData/
