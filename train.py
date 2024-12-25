@@ -674,7 +674,7 @@ def main(cfg: DictConfig):
             val_every=val_every)
         
     elif cfg.dataset.type == "btcv":
-        # BTCV train loader
+        # BTCV dataset
         train_loader, val_loader = get_dataset(num_samples = 4, 
                                                device = device, 
                                                data_dir = "data/", 
