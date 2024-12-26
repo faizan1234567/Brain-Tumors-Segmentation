@@ -22,7 +22,6 @@ import tqdm as tqdm
 from utils.meter import AverageMeter
 from utils.general import save_checkpoint, load_pretrained_model, resume_training
 from brats import get_datasets
-from btcv_dataset import get_dataset, get_transforms
 
 from monai.data import  decollate_batch
 import torch
@@ -43,11 +42,8 @@ from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
-from btcv_utils import train
 try:
     from thesis.models.SegUXNet.model import SegUXNet
-    from thesis.models.v2.model import SegSCNet
-    from thesis.models.v3.model import SCFENet
 except ModuleNotFoundError:
     print('model not available, please train with other models')
     
@@ -203,7 +199,6 @@ def val(model, loader, acc_func, model_inferer = None,
             masks = decollate_batch(batch_data["label"].to(device)) 
             prediction_lists = decollate_batch(logits)
             predictions = [post_pred(post_sigmoid(prediction)) for prediction in prediction_lists]
-            # masks = [post_label(mask) for mask in masks]
             acc_func.reset()
             acc_func(y_pred = predictions, y = masks)
             acc, not_nans = acc_func.aggregate()
@@ -457,17 +452,6 @@ def main(cfg: DictConfig):
         post_pred = AsDiscrete(argmax=False, threshold=0.5)
         post_sigmoid = Activations(sigmoid=True)
         
-    elif cfg.dataset.type == "btcv":
-        num_classes = 14
-        in_channels = 1
-        crop_size = (96, 96, 96)
-        os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-
-        max_iterations = 1
-        eval_num = 1
-        scaler = torch.cuda.amp.GradScaler()
-        post_label = AsDiscrete(to_onehot=14)
-        post_pred = AsDiscrete(argmax=True, to_onehot=14)
     spatial_size = 3
 
 
@@ -558,34 +542,6 @@ def main(cfg: DictConfig):
                          blocks_up=(1, 1, 1), 
                          enable_gc=True).to(device)
         
-    # SegSCNet spatail channel distinct feature learning net (NOT OPEN SOURCE)
-    elif cfg.model.architecture == "seg_scnet":
-        model = SegSCNet(in_channels=in_channels, 
-                         out_channels=num_classes, 
-                         feature_size=24, 
-                         hidden_size=384, 
-                         num_heads=4, 
-                         dims=[48, 96, 192, 384], 
-                         depths=[3, 3, 3, 3], 
-                         do_ds=False).to(device)
-        
-    # Experimental (NOT open source yet)
-    elif cfg.model.architecture == "scfe_net":
-        model = SCFENet(spatial_dims=spatial_size, 
-                    init_filters=32, 
-                    in_channels=in_channels, 
-                    out_channels=num_classes, 
-                    blocks_down=(1, 2, 2, 4), 
-                    blocks_up= (1, 1, 1), 
-                    gradient_checkpointing=True, 
-                    num_heads=4, 
-                    dropout_prob=0.2,
-                    attn_dropout_rate=0.1, 
-                    do_ds=False,
-                    positional_embedding="perceptron", 
-                    drop_path=True, 
-                    qkv_bias=False,
-                    ).to(device)
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
 
@@ -612,9 +568,6 @@ def main(cfg: DictConfig):
     if cfg.dataset.type == 'brats':
         acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
                                         get_not_nans=True)
-    elif cfg.dataset.type == "btcv":
-        acc_func = DiceMetric(include_background=True, reduction="mean", get_not_nans=False)
-        
     # Optimizer
     solver = Solver(model=model, lr=cfg.training.learning_rate, 
                        weight_decay=cfg.training.weight_decay)
@@ -645,53 +598,32 @@ def main(cfg: DictConfig):
     elif cfg.training.my_pc:
         dataset_dir = cfg.dataset.laptop_pc
 
-    # Data Loading
-    if cfg.dataset.type == "brats":
-        train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
-        train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
 
-        train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
-                                                shuffle=True, num_workers=num_workers, 
-                                                drop_last=False, pin_memory=True)
-        
-        val_loader = torch.utils.data.DataLoader(train_val_dataset, 
-                                                batch_size=batch_size, 
-                                                shuffle=False, num_workers=num_workers, 
-                                                pin_memory=True)
-        # Start training
-        run(cfg, model=model,
-            loss_func= loss_func,
-            acc_func= acc_func,
-            optimizer= optimizer,
-            train_loader=train_loader,
-            val_loader=val_loader,
-            scheduler=scheduler,
-            model_inferer=model_inferer,
-            post_label = None,
-            post_sigmoid = post_sigmoid,
-            post_pred=post_pred,
-            max_epochs=max_epochs,
-            val_every=val_every)
-        
-    elif cfg.dataset.type == "btcv":
-        # BTCV dataset
-        train_loader, val_loader = get_dataset(num_samples = 4, 
-                                               device = device, 
-                                               data_dir = "data/", 
-                                               split_json = "dataset_0.json")
-        train(model=model, 
-              loss_function= loss_func, 
-              optimizer= optimizer, 
-              scaler= scaler, 
-              train_loader=train_loader, 
-              val_loader=val_loader, 
-              max_iterations=max_iterations, 
-              eval_num=eval_num, 
-              exp_name=cfg.training.exp_name, 
-              post_label=post_label, 
-              post_pred=post_pred, 
-              dice_metric_per_class= acc_func, 
-              device= device)
+    train_dataset = get_datasets(dataset_dir, "train", target_size=(128, 128, 128))
+    train_val_dataset = get_datasets(dataset_dir, "train_val", target_size=(128, 128, 128))
+
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, 
+                                            shuffle=True, num_workers=num_workers, 
+                                            drop_last=False, pin_memory=True)
+    
+    val_loader = torch.utils.data.DataLoader(train_val_dataset, 
+                                            batch_size=batch_size, 
+                                            shuffle=False, num_workers=num_workers, 
+                                            pin_memory=True)
+    # Start training
+    run(cfg, model=model,
+        loss_func= loss_func,
+        acc_func= acc_func,
+        optimizer= optimizer,
+        train_loader=train_loader,
+        val_loader=val_loader,
+        scheduler=scheduler,
+        model_inferer=model_inferer,
+        post_label = None,
+        post_sigmoid = post_sigmoid,
+        post_pred=post_pred,
+        max_epochs=max_epochs,
+        val_every=val_every)
         
 if __name__ == "__main__":
     main()
