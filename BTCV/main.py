@@ -26,17 +26,31 @@ from utils.data_utils import get_loader
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceCELoss
 from monai.metrics import DiceMetric
+from pathlib import Path
+import os
+import sys
+
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[1]  # root directory
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))  
+ROOT = Path(os.path.relpath(ROOT, Path.cwd())) 
+
+
 from monai.networks.nets import SwinUNETR
+from monai.networks.nets import SegResNet  
+from networks.models.nnformer.nnFormer_seg import nnFormer
+from networks.models.UX_Net.network_backbone import UXNET
 from monai.transforms import Activations, AsDiscrete, Compose
 from monai.utils.enums import MetricReduction
 
-parser = argparse.ArgumentParser(description="Swin UNETR segmentation pipeline")
+parser = argparse.ArgumentParser(description="segmentation pipeline")
 parser.add_argument("--checkpoint", default=None, help="start training from saved checkpoint")
 parser.add_argument("--logdir", default="test", type=str, help="directory to save the tensorboard logs")
 parser.add_argument(
     "--pretrained_dir", default="./pretrained_models/", type=str, help="pretrained checkpoint directory"
 )
-parser.add_argument("--data_dir", default="/dataset/dataset0/", type=str, help="dataset directory")
+parser.add_argument("--data_dir", default="/dataset", type=str, help="dataset directory")
 parser.add_argument("--json_list", default="dataset_0.json", type=str, help="dataset json file")
 parser.add_argument(
     "--pretrained_model_name",
@@ -91,6 +105,7 @@ parser.add_argument("--use_checkpoint", action="store_true", help="use gradient 
 parser.add_argument("--use_ssl_pretrained", action="store_true", help="use self-supervised pretrained weights")
 parser.add_argument("--spatial_dims", default=3, type=int, help="spatial dimension of input data")
 parser.add_argument("--squared_dice", action="store_true", help="use squared Dice")
+parser.add_argument("--model_name", type = str, default="swinunetr", help="name of the model")
 
 
 def main():
@@ -126,16 +141,31 @@ def main_worker(gpu, args):
     inf_size = [args.roi_x, args.roi_y, args.roi_z]
 
     pretrained_dir = args.pretrained_dir
-    model = SwinUNETR(
-        img_size=(args.roi_x, args.roi_y, args.roi_z),
-        in_channels=args.in_channels,
-        out_channels=args.out_channels,
-        feature_size=args.feature_size,
-        drop_rate=0.0,
-        attn_drop_rate=0.0,
-        dropout_path_rate=args.dropout_path_rate,
-        use_checkpoint=args.use_checkpoint,
-    )
+    if args.model_name == "swinunetr":
+        model = SwinUNETR(
+            img_size=(args.roi_x, args.roi_y, args.roi_z),
+            in_channels=args.in_channels,
+            out_channels=args.out_channels,
+            feature_size=args.feature_size,
+            drop_rate=0.0,
+            attn_drop_rate=0.0,
+            dropout_path_rate=args.dropout_path_rate,
+            use_checkpoint=args.use_checkpoint,
+        )
+    elif args.model_name == "uxnet":
+        model = UXNET(
+            in_chans= args.in_channels, 
+            out_chans= args.out_channels, 
+        )
+    elif args.model_name == "segres_net":
+        model = SegResNet(
+            in_channels=args.in_channels, 
+            out_channels= args.out_channels,
+            dropout_prob=0.2)
+    elif args.model_name == "nnformer":
+        model = nnFormer(input_channels= args.in_channels, 
+                         num_classes=args.out_channels, 
+                         deep_supervision=False)
 
     if args.resume_ckpt:
         model_dict = torch.load(os.path.join(pretrained_dir, args.pretrained_model_name))["state_dict"]
