@@ -610,7 +610,7 @@ def main(cfg: DictConfig):
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=num_workers, 
                                             pin_memory=True)
-    # Start training
+    # Training
     run(cfg, model=model,
         loss_func= loss_func,
         acc_func= acc_func,
