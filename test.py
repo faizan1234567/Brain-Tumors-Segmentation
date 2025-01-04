@@ -281,7 +281,6 @@ def main(cfg: DictConfig):
                                             pin_memory=True) 
     
     
-    # Evaluation
     print("start test")
     test(cfg, test_loader, model)
 
