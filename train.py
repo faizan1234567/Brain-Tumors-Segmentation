@@ -553,7 +553,7 @@ def main(cfg: DictConfig):
                         predictor=model,
                         overlap=cfg.model.infer_overlap)
     
-    # Validation frequency.
+    # Validation frequency
     val_every = cfg.training.val_every
 
     # Dice or Dice and Cross Entropy loss combined
