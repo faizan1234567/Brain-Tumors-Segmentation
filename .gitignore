@@ -8,6 +8,7 @@ test image/
 __pycache__/
 .vscode/
 brats23/
+
 data/
 runs/
 configs/
