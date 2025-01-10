@@ -34,7 +34,7 @@ ResUnetPlusPlus-runs/
 research/
 thesis/
 todo.txt
-# testing script custom architectures
+# testing script custom architecture
 test_custom_models.py
 
 # test loss scripts
