@@ -48,5 +48,4 @@ thesisv1/
 download_synapse.py
 .synapseCache/ # synapse dataset 
 RawData/
-
 segres_net_runs/
