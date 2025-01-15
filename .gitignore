@@ -35,7 +35,7 @@ research/
 thesis/
 todo.txt
 
-# testing script custom architecture
+# testing script custom architectures
 test_custom_models.py
 
 # test loss scripts
