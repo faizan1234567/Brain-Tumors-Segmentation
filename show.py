@@ -15,6 +15,7 @@ import numpy as np
 import hydra
 from omegaconf import DictConfig
 import sys
+import nibabel as nib
 
 import torch
 from brats import get_datasets
@@ -33,6 +34,17 @@ stream_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
+
+
+def load_patient_case(path, type = "T1", slice = 75, load_label = True):
+    
+    # load nifti image
+    file = nib.load(path)
+    image = file.get_fdata()
+    print(image.shape)
+
+
+
 
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
@@ -75,6 +87,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=["show-abnormal-image", "get-gif", "show-case"], default="get-gif", 
                         help="visulization options")
+    parser.add_argument("--scan_path", default= "", type = str, 
+                        help = "path to patient MRI scan")
+    parser.add_argument("--modality", default= "T1", type = str, 
+                        help = "type of modality type for analysis and visualization")
+    
     args = parser.parse_args()
-    show_result(args)
+    # show_result(args)
+    load_patient_case(path=args.scan_path, type=args.modality, slice=75, load_label=True)
     print('Done!!!')
