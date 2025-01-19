@@ -16,6 +16,9 @@ import hydra
 from omegaconf import DictConfig
 import sys
 import nibabel as nib
+import os
+from pathlib import Path
+import cv2
 
 import torch
 from brats import get_datasets
@@ -36,15 +39,67 @@ logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
 
-def load_patient_case(path, type = "T1", slice = 75, load_label = True):
-    
+def load_patient_case(path, type = "T1", slice = 75, load_label = True, 
+                      plot = True, crop=False):
+    modalities = ["t1", "t1ce", "flair", "t2", "seg"]
+    if type.lower() not in modalities:
+        raise NotImplementedError("The modality type not supported")
     # load nifti image
-    file = nib.load(path)
+    patient_id = path.split("/")[-1]
+    file_path = Path(path) / f"{patient_id}_{type.lower()}.nii.gz"
+    file = nib.load(file_path)
     image = file.get_fdata()
-    print(image.shape)
+    if load_label:
+        label_path = Path(path) / f"{patient_id}_seg.nii.gz"
+        label = nib.load(label_path)
+        label_image = label.get_fdata()
+        label_slice = label_image[:, :, slice]
+        label_slice = np.rot90(label_slice, k=-1)
 
+    image_slice = image[:, :, slice]
+    image_slice = np.rot90(image_slice, k=-1)
+    if crop:
+        image_slice = image_slice[48:208, 54:184]
+        label_slice = label_slice[48:208, 54:184]
 
+    if plot:
+        images = [image_slice, label_slice]
+        titles = [f"{type}", "ground-truth"]
+        fig, axes = plt.subplots(nrows = 1, ncols =2, figsize = (10, 5))
+        for i in range(len(images)):
+            if i == 0:
+                axes[i].imshow(images[i], cmap= 'gray')
+            else:
+                axes[i].imshow(images[i])
+            axes[i].set_title(titles[i])
+            axes[i].set_axis_off()
+        plt.show()
+    return image_slice, label_slice
 
+def overlay_mask(path, slice=75, type = "T1ce", save_path="media/results", 
+                 img_name="ground_truth"):
+    os.makedirs(save_path, exist_ok=True)
+    image_slice, label_slice = load_patient_case(path=path, type=type, slice=slice, 
+                                                 plot=False, crop=True, load_label=True)
+    label_slice = label_slice.astype(np.int64)
+    image_slice = np.uint8((image_slice - image_slice.min()) / (image_slice.max() - image_slice.min()) * 255)
+    overlay_image = np.stack([image_slice] * 3, axis=-1)
+    original_image = np.copy(overlay_image)
+    
+    overlay_image[label_slice == 1] = [255, 0, 0]  # Red
+    overlay_image[label_slice == 2] = [0, 255, 0]  # Green
+    overlay_image[label_slice == 4] = [0, 0, 255]  # Blue
+    if save_path:
+        file_path = os.path.join(save_path, img_name + ".png")
+        original_img = os.path.join(save_path, f'original_img{slice}_{type}.png')
+        cv2.imwrite(file_path, overlay_image)
+        cv2.imwrite(original_img, original_image)
+
+    # Display the overlay image
+    plt.imshow(overlay_image)
+    plt.title('Overlayed Segmentation Mask on Image Slice')
+    plt.axis('off')
+    plt.show()
 
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
@@ -87,12 +142,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--type", choices=["show-abnormal-image", "get-gif", "show-case"], default="get-gif", 
                         help="visulization options")
-    parser.add_argument("--scan_path", default= "", type = str, 
+    parser.add_argument("--scan_path", default= "media/Brats18_2013_21_1", type = str, 
                         help = "path to patient MRI scan")
-    parser.add_argument("--modality", default= "T1", type = str, 
+    parser.add_argument("--modality", default= "T1ce", type = str, 
                         help = "type of modality type for analysis and visualization")
     
     args = parser.parse_args()
     # show_result(args)
-    load_patient_case(path=args.scan_path, type=args.modality, slice=75, load_label=True)
+    overlay_mask(path=args.scan_path, slice=75, type="T1ce", 
+                 save_path="media/qualitative_results", img_name="ground_truth")
     print('Done!!!')
