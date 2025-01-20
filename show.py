@@ -102,6 +102,28 @@ def overlay_mask(path, slice=75, type = "T1ce", save_path="media/results",
     plt.show()
 
 
+def predict_mask(dataset_folder, 
+                 target_size = (155, 240, 240), 
+                 dataset_version= "brats2023", 
+                 mode = "train"):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    dataset = get_datasets(dataset_folder=dataset_folder, 
+                            mode=mode, target_size=target_size, 
+                            version=dataset_version)
+    loader = torch.utils.data.DataLoader(dataset, 
+                                            batch_size=1, 
+                                            shuffle=False, num_workers=12, 
+                                            pin_memory=True)
+
+    # get a random sample for the train or test data
+    for data in loader:
+        patient_id = data["patient_id"][0]
+        inputs = data["image"]
+        targets = data["label"].to(device)
+        pad_list = data["pad_list"].to(device)
+        inputs = inputs.to(device)
+        
+
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def show_result(cfg: DictConfig, args:argparse.Namespace):
     """
