@@ -18,7 +18,7 @@ from monai.data import decollate_batch
 from monai.handlers.utils import from_engine
 from monai.metrics import DiceMetric
 from utils.general import load_pretrained_model
-from utils.all_utils import save_seg_csv, cal_confuse, cal_dice
+from utils.all_utils import save_seg_csv, cal_confuse, cal_dice, save_test_label
 from brats import get_datasets
 from utils.meter import AverageMeter
 
@@ -105,6 +105,7 @@ def test(args, data_loader, model):
         inputs = data["image"]
         targets = data["label"].cuda()
         pad_list = data["pad_list"]
+        nonzero_indexes = data["nonzero_indexes"]
         inputs = inputs.cuda()
         model.cuda()
         with torch.no_grad():  
@@ -136,7 +137,12 @@ def test(args, data_loader, model):
             et_hd=et_hd, tc_hd=tc_hd, wt_hd=wt_hd,
             et_sens=et_sens, tc_sens=tc_sens, wt_sens=wt_sens,
             et_spec=et_spec, tc_spec=tc_spec, wt_spec=wt_spec))
+        full_predict = np.zeros((155, 240, 240))
+        predict = reconstruct_label(predict)
+        full_predict[slice(*nonzero_indexes[0]), slice(*nonzero_indexes[1]), slice(*nonzero_indexes[2])] = predict
+        save_test_label(args, patient_id, full_predict)
     save_seg_csv(metrics_dict, args)
+    
 
 
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
@@ -279,8 +285,6 @@ def main(cfg: DictConfig):
                                             batch_size=batch_size, 
                                             shuffle=False, num_workers=workers, 
                                             pin_memory=True) 
-    
-    
     print("start test")
     test(cfg, test_loader, model)
 

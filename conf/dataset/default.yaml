@@ -5,3 +5,5 @@ sines_pc: /drive/faizanai.rrl/datasets
 dataset_folder: # specify your dataset path here if any of the above does not relate to you
 version:  brats2023
 type: brats # brats 
+patient_id: "E:/Brats23 Data/Dataset/BraTS23_mapped/dataset/brats2023"
+save_dir: paper_figs/exp1/modalities
