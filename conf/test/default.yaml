@@ -5,4 +5,5 @@ batch: 1
 infer_overlap: 0.6
 workers: 12
 csv_folder: "csv"
+label_folder: 
 

@@ -50,3 +50,8 @@ download_synapse.py
 RawData/
 segres_net_runs/
 paper_figs/
+comparison_plots.py
+ids_for_comparison.txt
+figs/
+overlay_images.py
+# subplot_results.py

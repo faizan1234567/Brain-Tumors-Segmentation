@@ -61,7 +61,7 @@ parser.add_argument("--use_checkpoint", action="store_true", help="use gradient 
 
 def main():
     args = parser.parse_args()
-    args.test_mode = True
+    args.test_mode = False
     output_directory = "./outputs/" + args.exp_name
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
