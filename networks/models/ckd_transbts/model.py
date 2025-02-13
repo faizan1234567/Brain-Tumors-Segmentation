@@ -8,7 +8,7 @@ import torch.nn.functional as F
 from einops import rearrange
 from timm.models.layers import DropPath, trunc_normal_
 
-
+# convnormact
 class ConvNormAct(nn.Module):
 
     def __init__(self, in_ch, out_ch, kernel_size=3, stride=1, padding=1, groups=1, dilation=1, act=True, bias=False):
