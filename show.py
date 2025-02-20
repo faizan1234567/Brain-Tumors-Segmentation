@@ -157,7 +157,7 @@ def save_slice_75_with_modality_name(patient_path, output_dir):
                 slice_data = slice_data.astype(np.uint8)
                 slice_data = slice_data[40:220, 50:190]
         
-                # Save as PNG with the modality name
+                # Save as PNG with the modality names
                 output_path = os.path.join(output_dir, f"{modality_name}_slice_{slice_index}.png")
                 plt.imsave(output_path, slice_data, cmap='gray')
                 print(f"Saved slice 75 of {modality_name} to {output_path}")
