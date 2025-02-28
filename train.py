@@ -584,7 +584,7 @@ def main(cfg: DictConfig):
     else:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epochs)
     
-    # Batch and worker 
+    # Batch and workers
     batch_size = cfg.training.batch_size
     num_workers = cfg.training.num_workers
     
