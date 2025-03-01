@@ -438,7 +438,7 @@ def main(cfg: DictConfig):
     # Initialize random
     init_random(seed=cfg.training.seed)
 
-    # CUDA or CPU
+    # CUDA or CPU (device type)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
     # Efficient training
