@@ -435,7 +435,7 @@ def run(cfg, model,
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
 
-    # Initialize random values
+    # Initialize random
     init_random(seed=cfg.training.seed)
 
     # device: CUDA or CPU 
