@@ -438,10 +438,10 @@ def main(cfg: DictConfig):
     # Initialize random
     init_random(seed=cfg.training.seed)
 
-    # device: CUDA or CPU 
+    # device: CUDA or CPU (hardware accelerator)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
-    # Efficient training
+    # Efficient training on the gpu 
     torch.backends.cudnn.benchmark = True
 
     # BraTS configs
