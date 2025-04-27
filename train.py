@@ -574,7 +574,7 @@ def main(cfg: DictConfig):
                        weight_decay=cfg.training.weight_decay)
     optimizer = solver.select_solver(cfg.training.solver_name)
 
-     # Max epochs
+     # Max epochs (maximum number of epochs for optimizer.)
     max_epochs = cfg.training.max_epochs
 
     # Learning rate schedulers
