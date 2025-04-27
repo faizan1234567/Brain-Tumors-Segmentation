@@ -568,7 +568,7 @@ def main(cfg: DictConfig):
     if cfg.dataset.type == 'brats':
         acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
                                         get_not_nans=True)
-    # Optimizer
+    # Optimizer.
     solver = Solver(model=model, lr=cfg.training.learning_rate, 
                        weight_decay=cfg.training.weight_decay)
     optimizer = solver.select_solver(cfg.training.solver_name)
