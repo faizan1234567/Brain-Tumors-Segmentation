@@ -568,13 +568,12 @@ def main(cfg: DictConfig):
     if cfg.dataset.type == 'brats':
         acc_func =  DiceMetric(include_background=True, reduction=MetricReduction.MEAN_BATCH, 
                                         get_not_nans=True)
-    # Optimizer ( such as Adam, or any other optimizer that can be used for optimizing 
-    # gradeint descent algorithm.
+    # Optimizer 
     solver = Solver(model=model, lr=cfg.training.learning_rate, 
                        weight_decay=cfg.training.weight_decay)
     optimizer = solver.select_solver(cfg.training.solver_name)
 
-     # Max epochs (maximum number of epochs for optimizer.)
+     # Max epochs
     max_epochs = cfg.training.max_epochs
 
     # Learning rate schedulers
