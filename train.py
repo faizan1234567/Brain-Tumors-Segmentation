@@ -624,6 +624,7 @@ def main(cfg: DictConfig):
         post_pred=post_pred,
         max_epochs=max_epochs,
         val_every=val_every)
-        
+
+# main       
 if __name__ == "__main__":
     main()
