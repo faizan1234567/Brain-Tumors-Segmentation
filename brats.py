@@ -48,7 +48,7 @@ class BraTS(Dataset):
         patient_label = torch.tensor(load_nii(f"{self.patients_dir}/{patient_id}/{patient['seg']}").astype("int8"))
         patient_image = torch.stack([patient_image[key] for key in patient_image])  
         if self.mode == "train" or self.mode == "train_val" or self.mode == "test":
-            ed_label = 2 # Peritumoral Edema 
+            ed_label = 2 # Peritumoral Edema.
             ncr_label = 1 # NCR or NET (necrotic and non-enhancing tumor core )
             bg_label = 0  # Background
             if self.version == "brats2023" or self.version == "brats2024":
