@@ -92,7 +92,7 @@ class BraTS(Dataset):
 
     def __len__(self):
         return len(self.datas)
-# dataset
+# dataset.
 def get_datasets(dataset_folder, mode, target_size = (128, 128, 128), version= "brats2023"):
     dataset_folder = get_brats_folder(dataset_folder, mode, version= version)
     assert os.path.exists(dataset_folder), "Dataset Folder Does Not Exist1"
