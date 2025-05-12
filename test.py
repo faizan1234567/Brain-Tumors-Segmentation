@@ -65,7 +65,7 @@ formatter = logging.Formatter(fmt= "%(asctime)s: %(message)s", datefmt= '%Y-%m-%
 file_handler.setFormatter(formatter)
 stream_handler.setFormatter(formatter)
 
-# Stream and file logging
+# Stream and file logging.
 logger.addHandler(file_handler)
 logger.addHandler(stream_handler)
 
