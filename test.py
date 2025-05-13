@@ -86,7 +86,7 @@ def reconstruct_label(image):
     image[(c1 == True)*(c3 == True)] = 4
     return image
 
-# inference code.
+# inference code
 def inference(model, input, batch_size, overlap):
     """inference on input with trained model"""
     def _compute(input):
