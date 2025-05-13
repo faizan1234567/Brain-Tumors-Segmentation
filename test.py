@@ -144,8 +144,6 @@ def test(args, data_loader, model):
         save_test_label(args, patient_id, full_predict)
     save_seg_csv(metrics_dict, args)
     
-
-
 @hydra.main(config_name='configs', config_path= 'conf', version_base=None)
 def main(cfg: DictConfig):
     # Select model
