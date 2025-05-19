@@ -519,7 +519,7 @@ def main(cfg: DictConfig):
                       layer_scale_init_value=1e-6, 
                       spatial_dims=spatial_size).to(device)
     
-    # nnFormer
+    # nnFormer model
     elif cfg.model.architecture == "nn_former":
         model = nnFormer(crop_size=np.array(crop_size), 
                          embedding_dim=96, 
