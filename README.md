@@ -29,7 +29,7 @@ Annotations consist of GD-enhancing tumor (```ET — label 3```), peritumoral ed
 
 The dataset contains ```1,251``` patient cases labeled by expert radiologists. However, cases in the validation and test sets are not annotated. Therefore, the actual training set is divided to training, validation, and test sets. The training set contains ```833```, validation and test sets contains ```209``` patient records each for model evaluation. [9]. 
 
-The complete dataset is available [here](https://www.synapse.org/Synapse:syn51156910/wiki/621282), please create an account and login with your registred account to request data download. Once your request is approved, you will be able to download the dataset file under files tab. 
+The complete dataset is available [here](https://www.synapse.org/Synapse:syn51156910/wiki/621282), please create an account and login with your registred account to request data download. Once your request is approved, you will be able to download the dataset file under files tab. When you downloaded the dataset, you will create the following split based on the training data as it the only set that has annotation files, in BraTS 2023 there 1251 patient records, therefore, you will split it into train, validation, and test sets according to your need as demonstrated below.
 
 ```
 └── dataset
