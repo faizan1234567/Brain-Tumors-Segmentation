@@ -160,7 +160,7 @@ def main(cfg: DictConfig):
 
     # Select Network architecture for training
 
-    # SegResNet
+    # SegResNet.
     if cfg.model.architecture == "segres_net":
         model = SegResNet(spatial_dims=spatial_size, 
                           init_filters=32, 
