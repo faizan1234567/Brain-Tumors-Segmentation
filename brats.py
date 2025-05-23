@@ -2,6 +2,7 @@
 ==========================
 Data loading and processing
 ===========================
+Author: Muhammad Faizan
 
 credit: https://github.com/faizan1234567/CKD-TransBTS/blob/main/BraTS.py
 """
