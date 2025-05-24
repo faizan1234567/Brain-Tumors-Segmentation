@@ -2,8 +2,8 @@
 ==========================
 Data loading and processing
 ===========================
-Author: Muhammad Faizan
 
+Author: Muhammad Faizan
 credit: https://github.com/faizan1234567/CKD-TransBTS/blob/main/BraTS.py
 """
 import torch
