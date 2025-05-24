@@ -43,6 +43,8 @@ from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
 from networks.models.E_CATBraTS.model import E_CATBraTS
+from networks.models.unetr_pp.network_architecture.tumor.unetr_pp_tumor import UNETR_PP
+
 try:
     from thesis.models.SegUXNet.model import SegUXNet
 except ModuleNotFoundError:
@@ -557,6 +559,19 @@ def main(cfg: DictConfig):
                           dropout_path_rate=0.0, 
                           normalize=True,
                           use_checkpoint=True).to(device)
+    # UNETR_PP  
+    elif cfg.model.architecture == "unetr_pp":
+        model = UNETR_PP(in_channels=in_channels, 
+                        out_channels=num_classes, 
+                        feature_size=24, 
+                        hidden_size=256, 
+                        num_heads=4, 
+                        pos_embed="perceptron", 
+                        dims=[32, 64, 128, 256], 
+                        depths=[2, 2, 2, 2], 
+                        dropout_rate=0.0).to(device)
+    else:
+        raise ValueError("Model architecture not supported")
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     roi = cfg.model.roi
