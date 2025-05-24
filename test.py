@@ -38,6 +38,7 @@ from networks.models.ResUNetpp.model import ResUnetPlusPlus
 from networks.models.UNet.model import UNet3D
 from networks.models.UX_Net.network_backbone import UXNET
 from networks.models.nnformer.nnFormer_tumor import nnFormer
+from networks.models.E_CATBraTS.model import E_CATBraTS
 try:
     from thesis.models.SegUXNet.model import SegUXNet
     from thesis.models.v2.model import SegSCNet
@@ -247,6 +248,20 @@ def main(cfg: DictConfig):
                          dims=[48, 96, 192, 384], 
                          depths=[3, 3, 3, 3], 
                          do_ds=False).to(device)
+    elif cfg.model.architecture == "e_catbrats":
+        model = E_CATBraTS(in_channels=in_channels, 
+                          out_channels=num_classes, 
+                          spatial_dims=spatial_size, 
+                          img_size= (128, 128, 128), 
+                          depths=(2,2,2,2), 
+                          num_heads=(3, 6, 12, 24), 
+                          feature_size=24, 
+                          norm_name="instance", 
+                          drop_rate=0.0, 
+                          attn_drop_rate=0.0, 
+                          dropout_path_rate=0.0, 
+                          normalize=True,
+                          use_checkpoint=True).to(device)
     # experimental (NOT OPEN SOURCE YET)
     elif cfg.model.architecture == "scfe_net":
         model = SCFENet(spatial_dims=spatial_size, 
