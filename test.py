@@ -296,7 +296,7 @@ def main(cfg: DictConfig):
         
     print('Chosen Network Architecture: {}'.format(cfg.model.architecture))
     
-    # Hyperparameters values
+    # Hyperparameters values.
     batch_size = cfg.test.batch
     workers = cfg.test.workers
     dataset_folder = cfg.dataset.irl_pc
