@@ -57,7 +57,7 @@ import logging
 import os
 from tqdm import tqdm
 
-# Logger
+# Logger .
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
